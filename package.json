@@ -33,8 +33,8 @@
 		"npm": "1.3.x"
 	},
 	"dependencies": {
-		"fb": "~0.6.2",
-		"express": "~3.4.8",
+		"fb": "~0.7.0",
+		"express": "~3.5.1",
 		"methods": "~0.1.0",
 		"mongoose": "~3.8.8",
 		"consolidate": "~0.10.0",
@@ -46,7 +46,7 @@
 		"passport-http-bearer": "~1.0.1",
 		"underscore": "~1.6.0",
 		"swig": "~1.3.2",
-		"jsonwebtoken": "~0.1.0",
+		"jsonwebtoken": "~0.2.0",
 		"connect-mongo": "~0.4.0",
 		"connect-flash": "~0.1.1",
 		"response-time": "~1.0.0",
