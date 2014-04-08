@@ -11,116 +11,116 @@ Maglev supports MVC patterns and RESTful routes.
 
 ## Install
 
-		$ npm install maglev
+	$ npm install maglev
 
 ## Features
 
-	* Predefined models and controllers (User, Facebook, Location)
-	* Extended routing for REST api based on Express
-	* Token authentication
-	* Session authentication
-	* Facebook canvas application support 
-	* i18n support (in progress)
-	* localisation based on url with canonical (in progress) 
-	* [Swig](http://paularmstrong.github.io/swig/) template system with custom helpers
+ * Predefined models and controllers (User, Facebook, Location)
+ * Extended routing for REST api based on Express
+ * Token authentication
+ * Session authentication
+ * Facebook canvas application support 
+ * i18n support (in progress)
+ * localisation based on url with canonical (in progress) 
+ * [Swig](http://paularmstrong.github.io/swig/) template system with custom helpers
 
 ## Usage
 
-		var Server = require('maglev'),
-				Config = require('maglev/config');
+	var Server = require('maglev'),
+		Config = require('maglev/config');
 
-		var config = {
-			server: {
-				port: 4000
-			},
-			facebook: {
-				clientID: "Facebook App ID",
-				clientSecret: "Facebook App Secret",
-				namespace: 'Facebook App Namespace'
-			}
-		};
+	var config = {
+		server: {
+			port: 4000
+		},
+		facebook: {
+			clientID: "Facebook App ID",
+			clientSecret: "Facebook App Secret",
+			namespace: 'Facebook App Namespace'
+		}
+	};
 
-		var server = new Server(new Config(config));
-		server.start();
+	var server = new Server(new Config(config));
+	server.start();
 
 
 ## Directory Structure
 
-	* *controllers* Contains the controllers that handle requests sent to an application.
-	* *models* Contains the models for accessing and storing data in a database.
-	* *views* Contains the views and layouts that are rendered by an application.
-	* *public* Static files and compiled assets served by the application.
+ * *controllers* Contains the controllers that handle requests sent to an application.
+ * *models* Contains the models for accessing and storing data in a database.
+ * *views* Contains the views and layouts that are rendered by an application.
+ * *public* Static files and compiled assets served by the application.
 
 ## Configuration
 
 Minimal configuration example
 
-		var config = {
-			db: {
-				uri: process.env.NODE_ENV === 'production' ?
-					'mongodb://localhost/myproject' :
-					'mongodb://localhost/myproject-dev'
-			},
+	var config = {
+		db: {
+			uri: process.env.NODE_ENV === 'production' ?
+				'mongodb://localhost/myproject' :
+				'mongodb://localhost/myproject-dev'
+		},
 			
-			server: {
-				//path to root directory of your project
-				root: __dirname__
-			},
+		server: {
+			//path to root directory of your project
+			root: __dirname__
+		},
 
-			token: {
-				secret: 'your secret string for generating of user tokens used for authentication',
-			},
+		token: {
+			secret: 'your secret string for generating of user tokens used for authentication',
+		},
 
-			session: {
-				secret: 'your secret string for generating of user sessions used for authentication',
-			},	
+		session: {
+			secret: 'your secret string for generating of user sessions used for authentication',
+		},	
 
-			facebook: {
-				clientID: "Facebook App ID",
-				clientSecret: "Facebook Secret ID",
-				namespace: 'Facebook Namespace'
-			}
-		};
+		facebook: {
+			clientID: "Facebook App ID",
+			clientSecret: "Facebook Secret ID",
+			namespace: 'Facebook Namespace'
+		}
+	};
 
 ## Models
 Define new model
 
-		var name = exports.name = 'Address';
+	var name = exports.name = 'Address';
 
-		var createSchema = exports.createSchema = function (Schema) {
-			//add properties to schema
-			var schema = new Schema({
-				city: { type: String, required: true },
-				street: { type: String, required: true },
-				state: { type: String, required: true }
-			});
+	var createSchema = exports.createSchema = function (Schema) {
+		//add properties to schema
+		var schema = new Schema({
+			city: { type: String, required: true },
+			street: { type: String, required: true },
+			state: { type: String, required: true }
+		});
 
-			return schema;
-		};
+		return schema;
+	};
 
-		exports.createModel = function(db) {
-			return db.model(name, createSchema(db.mongoose.Schema));   
-		};
+	exports.createModel = function(db) {
+		return db.model(name, createSchema(db.mongoose.Schema));   
+	};
 
 Extend from existing model
 
-		var models = require('maglev/models'),
-			address = require('./address');
+	var models = require('maglev/models'),
+		address = require('./address');
 
-		var name = exports.name = models.user.name;
+	var name = exports.name = models.user.name;
 
-		var createSchema = exports.createSchema = function(Schema) {
-			var schema = models.user.createSchema(Schema);
-			var addressSchema = address.createSchema(Schema);
+	var createSchema = exports.createSchema = function(Schema) {
+		var schema = models.user.createSchema(Schema);
+		var addressSchema = address.createSchema(Schema);
 
-			schema.add({
-				address: addressSchema       
-			});
-		};
+		schema.add({
+			address: addressSchema       
+		});
+	};
 
-		exports.createModel = function (db) {
-			return db.model(name, createSchema(db.mongoose.Schema));   
-		};
+	exports.createModel = function (db) {
+		return db.model(name, createSchema(db.mongoose.Schema));   
+	};
 		
 
 ## Routes
@@ -142,7 +142,7 @@ Extend from existing model
 
 ## There are other configuration parameters
 
-		var config = {
+	var config = {
 
 			db: {
 				uri: null
@@ -225,7 +225,7 @@ Extend from existing model
 		
 ## Credits
 
-	- [Zlatko Fedor](http://github.com/seeden)
+[Zlatko Fedor](http://github.com/seeden)
 
 ## License
 
