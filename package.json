@@ -40,7 +40,7 @@
 		"consolidate": "~0.10.0",
 		"bcrypt": "~0.7.7",
 		"passport": "~0.2.0",
-		"passport-local": "~0.1.6",
+		"passport-local": "~1.0.0",
 		"passport-facebook": "~1.0.2",
 		"passport-facebook-canvas": "~0.0.3",
 		"passport-http-bearer": "~1.0.1",
