@@ -231,4 +231,4 @@ Extend from existing model
 
 [The MIT License](http://opensource.org/licenses/MIT)
 
-Copyright (c) 2014 Zlatko Fedor <[http://www.cherrysro.com/](http://www.cherrysro.com/)>
+Copyright (c) 2014 Zlatko Fedor [http://www.cherrysro.com/](http://www.cherrysro.com/)
