@@ -82,7 +82,65 @@ Minimal configuration example
 			}
 		};
 
-There are other configuration parameters
+## Models
+Define new model
+
+		var name = exports.name = 'Address';
+
+		var createSchema = exports.createSchema = function (Schema) {
+			//add properties to schema
+			var schema = new Schema({
+				city: { type: String, required: true },
+				street: { type: String, required: true },
+				state: { type: String, required: true }
+			});
+
+			return schema;
+		};
+
+		exports.createModel = function(db) {
+			return db.model(name, createSchema(db.mongoose.Schema));   
+		};
+
+Extend from existing model
+
+		var models = require('maglev/models'),
+			address = require('./address');
+
+		var name = exports.name = models.user.name;
+
+		var createSchema = exports.createSchema = function(Schema) {
+			var schema = models.user.createSchema(Schema);
+			var addressSchema = address.createSchema(Schema);
+
+			schema.add({
+				address: addressSchema       
+			});
+		};
+
+		exports.createModel = function (db) {
+			return db.model(name, createSchema(db.mongoose.Schema));   
+		};
+		
+
+## Routes
+
+	var controllers = require('../controllers');
+
+	var	user = controllers.user,
+		token = controllers.maglev.token,
+		message = controllers.message;
+
+
+	module.exports = function(route) {
+		route.api()
+			.get('/messages', token.ensure, message.get)
+			.put('/messages/mark/read/:id', token.ensure, message.markAsRead)
+			.put('/messages/mark/unread/:id', token.ensure, message.markAsUnread);
+	};
+
+
+## There are other configuration parameters
 
 		var config = {
 
@@ -163,64 +221,7 @@ There are other configuration parameters
 				clientSecret: null,
 				namespace: null
 			}
-		};
-
-## Models
-Define new model
-
-		var name = exports.name = 'Address';
-
-		var createSchema = exports.createSchema = function (Schema) {
-			//add properties to schema
-			var schema = new Schema({
-				city: { type: String, required: true },
-				street: { type: String, required: true },
-				state: { type: String, required: true }
-			});
-
-			return schema;
-		};
-
-		exports.createModel = function(db) {
-			return db.model(name, createSchema(db.mongoose.Schema));   
-		};
-
-Extend from existing model
-
-		var models = require('maglev/models'),
-			address = require('./address');
-
-		var name = exports.name = models.user.name;
-
-		var createSchema = exports.createSchema = function(Schema) {
-			var schema = models.user.createSchema(Schema);
-			var addressSchema = address.createSchema(Schema);
-
-			schema.add({
-				address: addressSchema       
-			});
-		};
-
-		exports.createModel = function (db) {
-			return db.model(name, createSchema(db.mongoose.Schema));   
-		};
-		
-
-## Routes
-
-	var controllers = require('../controllers');
-
-	var	user = controllers.user,
-		token = controllers.maglev.token,
-		message = controllers.message;
-
-
-	module.exports = function(route) {
-		route.api()
-			.get('/messages', token.ensure, message.get)
-			.put('/messages/mark/read/:id', token.ensure, message.markAsRead)
-			.put('/messages/mark/unread/:id', token.ensure, message.markAsUnread);
-	};
+		};	
 		
 ## Credits
 
