@@ -1,7 +1,7 @@
 {
 	"name": "maglev",
-	"version": "1.0.2",
-	"description": "Preconfigured simple NodeJS framework",
+	"version": "1.0.3",
+	"description": "Preconfigured NodeJS framework",
 	"author": {
 		"name": "Zlatko Fedor",
 		"email": "zfedor@gmail.com",
@@ -18,7 +18,10 @@
 		"MVC",
 		"mongoose",
 		"swig",
-		"emberjs"
+		"emberjs",
+		"rbac",
+		"i18n",
+		"facebook"
 	],
 	"private": false,
 	"licenses": [
