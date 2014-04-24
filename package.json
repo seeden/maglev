@@ -60,7 +60,7 @@
 		"passport-http-bearer": "~1.0.1",
 		"underscore": "~1.6.0",
 		"swig": "~1.3.2",
-		"jsonwebtoken": "~0.2.0",
+		"jsonwebtoken": "~0.3.0",
 		"connect-mongo": "mrzepinski/connect-mongo#2135988",
 		"connect-flash": "~0.1.1",
 		"response-time": "~1.0.0",
