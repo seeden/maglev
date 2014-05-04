@@ -15,12 +15,13 @@ Maglev supports MVC patterns and RESTful routes.
 
 ## Features
 
- * Predefined models and controllers (User, Facebook, Location)
+ * Predefined models and controllers (User, Provider, Location, Address)
  * Extended routing for REST api based on Express
  * Token authentication
  * Session authentication
  * Facebook canvas application support 
  * i18n support (in progress)
+ * SEO for single page apps
  * localisation based on url with canonical (in progress) 
  * [Swig](http://paularmstrong.github.io/swig/) template system with custom helpers
 
