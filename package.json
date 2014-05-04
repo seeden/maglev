@@ -49,6 +49,7 @@
 		"rbac": "~2.0.15",
 		"web-error": "~1.0.1",
 		"fb": "~0.7.0",
+		"phantomjs": "~1.9.7-5",
 		"methods": "~0.1.0",
 		"mongoose": "~3.8.8",
 		"consolidate": "~0.10.0",
