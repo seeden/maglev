@@ -145,84 +145,111 @@ Extend from existing model
 
 	var config = {
 
-			db: {
-				uri: null
-			},
-			
-			server: {
-				build: 1,
-				root: null,
-				host: '127.0.0.1',
-				port: process.env.PORT || 4000
-			},
+		db: {
+			uri: null,
+			prepare: db.prepare
+		},
 
-			token: {
-				secret: null,
-				expiration: 60*24*14
-			},
+		rbac: {
+			prepare: rbac.prepare,
+			role: {
+				guest: 'guest'
+			}
+		},
+		
+		server: {
+			prepare: express.prepare,
+			build: 1,
+			powered: false,
+			responseTime: true,
+			timeout: 30000,
+			compress: true,
+			root: null,
+			host: process.env.HOST || '127.0.0.1',
+			port: process.env.PORT || 4000
+		},
 
-			session: {
-				secret: null,
-				collection: 'sessions'
-			},
+		token: {
+			secret: null,
+			expiration: 60*24*14
+		},
 
-			view: {
-				engine: 'swig'
-			},
-
-
-			mail: {
-				type: 'SMTP',
-				options: null,
-
-				'default': {
-					from: null
-				},
-
-				token: {
-					secret: null,
-					expiration: 60*24
-				},
-
-				uri: {
-					forgetResponse: '/password/forget/response',
-					changePassword: '/password/change'
-				}
-			},
-
-			api: {
-				path: '/api'
-			},
-
-			locale: {
-				'default': 'en',
-				available: ['en'],
-				inUrl: false
-			},
-
-			country: {
-				'default': null,
-				available: [],
-				inUrl: false
-			},	
-
-			registration: {
-				simple: true
-			},
-
-			//passport sstrategies
+		secure: {
+			prepare: passport.prepare,
 			strategies: [passport.localStrategy, 
 				passport.bearerStrategy, 
 				passport.facebookStrategy, 
 				passport.facebookCanvasStrategy
-			],
+			]
+		},
 
-			facebook: {
-				clientID: null,
-				clientSecret: null,
-				namespace: null
+		session: {
+			maxAge: 60*60*24*2,
+			expires: 60*60*24*2,
+			secret: null,
+			collection: 'sessions'
+		},
+
+		view: {
+			engine: 'swig'
+		},
+
+		mail: {
+			prepare: mail.prepare,
+			type: 'SMTP',
+			options: null,
+
+			'default': {
+				from: null
+			},
+
+			token: {
+				secret: null,
+				expiration: 60*24
+			},
+
+			uri: {
+				forgetResponse: '/password/forget/response',
+				changePassword: '/password/change'
 			}
-		};	
+		},
+
+		route: {
+			prepare: route.prepare,
+			api: {
+				path: '/api'	
+			} 
+		},
+
+		locale: {
+			'default': 'en',
+			available: ['en'],
+			inUrl: false
+		},
+
+		country: {
+			'default': null,
+			available: [],
+			inUrl: false
+		},	
+
+		registration: {
+			simple: true
+		},
+
+		facebook: {
+			clientID: null,
+			clientSecret: null,
+			namespace: null
+		},
+
+		css: {
+			preprocessor: preprocessor.prepare,
+			debug: false,
+			compress: true,
+			sourceMap: true
+		}
+	};	
 		
 ## Credits
 
