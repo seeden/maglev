@@ -43,7 +43,7 @@
 		"body-parser": "~1.2.0",
 		"method-override": "~1.0.0",
 		"connect-timeout": "~1.1.0",
-		"csurf": "~1.1.0",
+		"csurf": "~1.2.0",
 		"morgan": "~1.0.0",
 
 		"rbac": "~2.1.0",
