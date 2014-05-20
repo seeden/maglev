@@ -45,6 +45,7 @@
 		"connect-timeout": "~1.1.0",
 		"csurf": "~1.2.0",
 		"morgan": "~1.1.0",
+		"prettyjson": "~1.0.0",
 
 		"rbac": "~2.1.4",
 		"web-error": "~1.0.1",
