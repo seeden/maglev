@@ -1,6 +1,6 @@
 {
 	"name": "maglev",
-	"version": "1.1.12",
+	"version": "1.1.13",
 	"description": "Preconfigured NodeJS framework",
 	"author": {
 		"name": "Zlatko Fedor",
@@ -35,31 +35,31 @@
 		"node": ">= 0.10.0"
 	},
 	"dependencies": {
-		"express": "~4.4.0",
-		"compression": "~1.0.1",
+		"express": "~4.4.1",
+		"compression": "~1.0.6",
 		"static-favicon": "~1.0.2",
 		"cookie-parser": "~1.1.0",
-		"express-session": "~1.2.0",
+		"express-session": "~1.2.1",
 		"body-parser": "~1.3.0",
-		"method-override": "~2.0.0",
+		"method-override": "~2.0.1",
 		"connect-timeout": "~1.1.0",
 		"csurf": "~1.2.0",
-		"morgan": "~1.1.0",
+		"morgan": "~1.1.1",
 		"prettyjson": "~1.0.0",
 
 		"rbac": "~2.1.4",
-		"web-error": "~1.0.1",
+		"web-error": "~1.0.2",
 		"fb": "~0.7.0",
 		"tv4": "~1.0.18",
 		"phantomjs": "~1.9.7-5",
-		"methods": "~1.0.0",
+		"methods": "~1.0.1",
 		"mongoose": "~3.8.12",
 		"consolidate": "~0.10.0",
-		"bcrypt": "~0.7.7",
+		"bcrypt": "~0.7.8",
 		"async": "~0.9.0",
 		"passport": "~0.2.0",
 		"passport-local": "~1.0.0",
-		"passport-facebook": "~1.0.2",
+		"passport-facebook": "~1.0.3",
 		"passport-facebook-canvas": "~0.0.3",
 		"passport-http-bearer": "~1.0.1",
 		"underscore": "~1.6.0",
@@ -69,7 +69,7 @@
 		"connect-flash": "~0.1.1",
 		"response-time": "~2.0.0",
 		"less-middleware": "~1.0.3",
-		"nodemailer": "~0.6.1",
+		"nodemailer": "~0.6.5",
 		"node.extend": "~1.0.10"
 	}
 }
