@@ -63,6 +63,7 @@
 		"passport-facebook": "~1.0.3",
 		"passport-facebook-canvas": "~0.0.3",
 		"passport-http-bearer": "~1.0.1",
+		"passport-anonymous": "~1.0.1",
 		"underscore": "~1.6.0",
 		"swig": "~1.3.2",
 		"jsonwebtoken": "~0.4.0",
