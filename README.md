@@ -3,6 +3,7 @@
 
 [![Quality](https://codeclimate.com/github/seeden/maglev.png)](https://codeclimate.com/github/seeden/maglev/badges)
 [![Dependencies](https://david-dm.org/seeden/maglev.png)](https://david-dm.org/seeden/maglev)
+[![Gitter chat](https://badges.gitter.im/seeden/maglev.png)](https://gitter.im/seeden/maglev)
 
 
 Maglev is a simple pre configured server based on [Express](http://expressjs.com/) web framework, [Passport](http://passportjs.org/) authentication middleware and [Mongoose](http://mongoosejs.com/) database layer.
