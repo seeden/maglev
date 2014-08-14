@@ -77,6 +77,6 @@
 		"less-middleware": "~1.0.3",
 		"nodemailer": "~1.1.1",
 		"nodemailer-direct-transport": "~1.0.0",
-		"node.extend": "~1.0.10"
+		"node.extend": "~1.1.0"
 	}
 }
