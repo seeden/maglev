@@ -145,29 +145,73 @@ Extend from existing model
 ## There are other configuration parameters
 
 	var config = {
-
 		db: {
-			uri: null,
-			prepare: db.prepare
+			uri: null
 		},
 
 		rbac: {
-			prepare: rbac.prepare,
 			role: {
 				guest: 'guest'
 			}
 		},
+
+		log: {
+			on: process.env.NODE_ENV === 'development',
+			showStackError: true,
+			format: process.env.NODE_ENV === 'development' ? 'dev' : 'combined',
+			options: {
+				immediate: false
+				//stream: process.stdout
+			}
+		},
 		
 		server: {
-			prepare: express.prepare,
 			build: 1,
-			powered: false,
-			responseTime: true,
 			timeout: 30000,
 			compress: true,
 			root: null,
 			host: process.env.HOST || '127.0.0.1',
 			port: process.env.PORT || 4000
+		},
+
+		powered: {
+			enabled: false,
+			value: 'Maglev'
+		},
+
+		responseTime: {
+			enabled: true,
+			digits: 3
+		},
+
+		methodOverride: {
+			//https://github.com/expressjs/method-override
+			enabled: true,
+			getter: 'X-HTTP-Method-Override',
+			options: {}
+		},
+
+		bodyParser: [{
+			parse: 'urlencoded',
+			options: {
+				extended: true
+			}
+		}, {
+			parse: 'json',
+			options: {
+
+			}
+		}, {
+			parse: 'json',
+			options: {
+				type: 'application/vnd.api+json'
+			}
+		}],
+
+		cookieParser: {
+			enabled: true,
+			secret: null,
+			options: {}
 		},
 
 		token: {
@@ -176,18 +220,25 @@ Extend from existing model
 		},
 
 		secure: {
-			prepare: passport.prepare,
 			strategies: [passport.localStrategy, 
 				passport.bearerStrategy, 
 				passport.facebookStrategy, 
-				passport.facebookCanvasStrategy
+				passport.facebookCanvasStrategy,
+				passport.anonymousStrategy
 			]
 		},
 
 		session: {
-			maxAge: 60*60*24*2,
-			expires: 60*60*24*2,
 			secret: null,
+			cookie: {
+				maxAge: 14 *24 * 60 * 60 * 1000 //2 weeks
+			},
+			resave: true,
+			saveUninitialized: true
+		},
+
+		sessionStore: {
+			auto_reconnect: true,
 			collection: 'sessions'
 		},
 
@@ -196,7 +247,6 @@ Extend from existing model
 		},
 
 		mail: {
-			prepare: mail.prepare,
 			type: 'SMTP',
 			options: null,
 
@@ -207,16 +257,10 @@ Extend from existing model
 			token: {
 				secret: null,
 				expiration: 60*24
-			},
-
-			uri: {
-				forgetResponse: '/password/forget/response',
-				changePassword: '/password/change'
 			}
 		},
 
 		route: {
-			prepare: route.prepare,
 			api: {
 				path: '/api'	
 			} 
@@ -249,7 +293,13 @@ Extend from existing model
 			debug: false,
 			compress: true,
 			sourceMap: true
-		}
+		},
+
+		upload: {
+	    	maxFieldsSize: 2000000,
+	    	maxFields: 1000,
+	    	path: null
+	    }
 	};	
 		
 ## Credits
