@@ -1,6 +1,6 @@
 {
 	"name": "maglev",
-	"version": "1.2.7",
+	"version": "1.2.8",
 	"description": "Preconfigured NodeJS framework",
 	"author": {
 		"name": "Zlatko Fedor",
@@ -21,7 +21,8 @@
 		"emberjs",
 		"rbac",
 		"i18n",
-		"facebook"
+		"facebook",
+		"twitter"
 	],
 	"private": false,
 	"licenses": [
@@ -68,6 +69,7 @@
 		"passport": "~0.2.0",
 		"passport-local": "~1.0.0",
 		"passport-facebook": "~1.0.3",
+		"passport-twitter": "~1.0.2",
 		"passport-facebook-canvas": "~0.0.3",
 		"passport-http-bearer": "~1.0.1",
 		"passport-anonymous": "~1.0.1",
