@@ -1,6 +1,6 @@
 {
 	"name": "maglev",
-	"version": "1.4.0",
+	"version": "1.4.1",
 	"description": "Preconfigured NodeJS framework",
 	"author": {
 		"name": "Zlatko Fedor",
@@ -51,7 +51,7 @@
 		"rbac": "~2.1.8",
 		"mongoose-hrbac": "~1.0.1",
 		"web-error": "~2.0.0",
-		"mongoose-permalink": "~1.0.0",
+		"mongoose-permalink": "~1.0.5",
 		"puid": "~1.0.0",
 		"node-uuid": "~1.4.1",
 		"mv": "~2.0.3",
