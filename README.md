@@ -17,20 +17,17 @@ Maglev supports MVC patterns and RESTful routes.
 
 ## Features
 
- * Predefined models and controllers (User, Provider, Location, Address)
+ * Predefined models and controllers (User, Token, Role, Logic...)
  * Extended routing for REST api based on Express
- * Token authentication
- * Session authentication
- * Facebook canvas application support 
- * i18n support (in progress)
- * SEO for single page apps
- * localisation based on url with canonical (in progress) 
+ * Token and session authentication
+ * Role based access system
+ * Ready for single page applications
  * [Swig](http://paularmstrong.github.io/swig/) template system with custom helpers
 
 ## Usage
 
-	var Server = require('maglev'),
-		Config = require('maglev/config');
+	var Server = require('maglev');
+	var Config = require('maglev/config');
 
 	var config = {
 		server: {
@@ -105,38 +102,18 @@ Define new model
 		return db.model(name, createSchema(db.mongoose.Schema));   
 	};
 
-Extend from existing model
-
-	var models = require('maglev/models'),
-		address = require('./address');
-
-	var name = exports.name = models.user.name;
-
-	var createSchema = exports.createSchema = function(Schema) {
-		var schema = models.user.createSchema(Schema);
-		var addressSchema = address.createSchema(Schema);
-
-		schema.add({
-			address: addressSchema       
-		});
-	};
-
-	exports.createModel = function (db) {
-		return db.model(name, createSchema(db.mongoose.Schema));   
-	};
-		
-
 ## Routes
 
 	var controllers = require('../controllers');
 
-	var	user = controllers.user,
-		token = controllers.maglev.token,
-		message = controllers.message;
+	var	user = controllers.user;
+	var token = controllers.maglev.token;
+	var message = controllers.message;
 
 
 	module.exports = function(route) {
-		route.api()
+		route
+			.api()
 			.get('/messages', token.ensure, message.get)
 			.put('/messages/mark/read/:id', token.ensure, message.markAsRead)
 			.put('/messages/mark/unread/:id', token.ensure, message.markAsUnread);
@@ -311,7 +288,7 @@ Extend from existing model
 
 The MIT License (MIT)
 
-Copyright (c) 2014 Zlatko Fedor zlatkofedor@cherrysro.com
+Copyright (c) 2015 Zlatko Fedor zlatkofedor@cherrysro.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
