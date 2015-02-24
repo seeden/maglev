@@ -55,16 +55,16 @@ Maglev supports MVC patterns and RESTful routes.
 
 Minimal configuration example
 
+	var path = require('path');
+	var rootPath = path.normalize(__dirname + '/..');
+
 	var config = {
 		db: {
-			uri: process.env.NODE_ENV === 'production' ?
-				'mongodb://localhost/myproject' :
-				'mongodb://localhost/myproject-dev'
+			uri: 'mongodb://localhost/project-name'
 		},
-			
+		
 		server: {
-			//path to root directory of your project
-			root: __dirname__
+			root: rootPath
 		},
 
 		token: {
@@ -73,22 +73,16 @@ Minimal configuration example
 
 		session: {
 			secret: 'your secret string for generating of user sessions used for authentication',
-		},	
-
-		facebook: {
-			clientID: "Facebook App ID",
-			clientSecret: "Facebook Secret ID",
-			namespace: 'Facebook Namespace'
 		}
 	};
 
 ## Models
 Define new model
 
-	var name = exports.name = 'Address';
+	var mongoose = require('mongoose');
+	var Schema = mongoose.Schema;
 
-	var createSchema = exports.createSchema = function (Schema) {
-		//add properties to schema
+	function createSchema() {
 		var schema = new Schema({
 			city: { type: String, required: true },
 			street: { type: String, required: true },
@@ -96,10 +90,10 @@ Define new model
 		});
 
 		return schema;
-	};
+	}
 
-	exports.createModel = function(db) {
-		return db.model(name, createSchema(db.mongoose.Schema));   
+	module.exports = function (server) {
+		return server.db.model('Address', createSchema());   
 	};
 
 ## Routes
@@ -124,10 +118,12 @@ Define new model
 
 	var config = {
 		db: {
-			uri: null
+			uri: null,
+			prepare: db.prepare
 		},
 
 		rbac: {
+			prepare: rbac.prepare,
 			role: {
 				guest: 'guest'
 			}
@@ -144,6 +140,7 @@ Define new model
 		},
 		
 		server: {
+			prepare: express.prepare,
 			build: 1,
 			timeout: 30000,
 			compress: true,
@@ -159,11 +156,10 @@ Define new model
 
 		responseTime: {
 			enabled: true,
-			digits: 3
+			options: {}
 		},
 
 		methodOverride: {
-			//https://github.com/expressjs/method-override
 			enabled: true,
 			getter: 'X-HTTP-Method-Override',
 			options: {}
@@ -176,9 +172,7 @@ Define new model
 			}
 		}, {
 			parse: 'json',
-			options: {
-
-			}
+			options: {}
 		}, {
 			parse: 'json',
 			options: {
@@ -187,6 +181,7 @@ Define new model
 		}],
 
 		cookieParser: {
+			//https://www.npmjs.org/package/cookie-parser
 			enabled: true,
 			secret: null,
 			options: {}
@@ -198,7 +193,9 @@ Define new model
 		},
 
 		secure: {
-			strategies: [passport.localStrategy, 
+			prepare: passport.prepare,
+			strategies: [
+				passport.localStrategy, 
 				passport.bearerStrategy, 
 				passport.facebookStrategy, 
 				passport.facebookCanvasStrategy,
@@ -216,7 +213,7 @@ Define new model
 		},
 
 		sessionStore: {
-			auto_reconnect: true,
+			autoReconnect: true,
 			collection: 'sessions'
 		},
 
@@ -224,21 +221,8 @@ Define new model
 			engine: 'swig'
 		},
 
-		mail: {
-			type: 'SMTP',
-			options: null,
-
-			'default': {
-				from: null
-			},
-
-			token: {
-				secret: null,
-				expiration: 60*24
-			}
-		},
-
 		route: {
+			prepare: route.prepare,
 			api: {
 				path: '/api'	
 			} 
@@ -277,8 +261,19 @@ Define new model
 	    	maxFieldsSize: 2000000,
 	    	maxFields: 1000,
 	    	path: null
+	    },
+
+	    createPath: [{
+	    	path: '/logs'
+	    }, {
+	    	path: '/public/files'
+	    }],
+
+	    page: {
+	    	error: page.error,
+	    	notFound: page.notFound
 	    }
-	};	
+	};
 		
 ## Credits
 
