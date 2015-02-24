@@ -21,24 +21,14 @@ Maglev supports MVC patterns and RESTful routes.
  * Extended routing for REST api based on Express
  * Token and session authentication
  * Role based access system
- * Ready for single page applications
+ * Ready for single page applications (Ember, Angular and React)
  * [Swig](http://paularmstrong.github.io/swig/) template system with custom helpers
 
 ## Usage
 
 	var Server = require('maglev');
 	var Config = require('maglev/config');
-
-	var config = {
-		server: {
-			port: 4000
-		},
-		facebook: {
-			clientID: "Facebook App ID",
-			clientSecret: "Facebook App Secret",
-			namespace: 'Facebook App Namespace'
-		}
-	};
+	var config = require('./config');
 
 	var server = new Server(new Config(config));
 	server.start();
@@ -99,11 +89,9 @@ Define new model
 ## Routes
 
 	var controllers = require('../controllers');
-
 	var	user = controllers.user;
 	var token = controllers.maglev.token;
 	var message = controllers.message;
-
 
 	module.exports = function(route) {
 		route
