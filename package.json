@@ -1,6 +1,6 @@
 {
 	"name": "maglev",
-	"version": "2.0.7",
+	"version": "2.1.0",
 	"description": "Preconfigured NodeJS framework",
 	"author": {
 		"name": "Zlatko Fedor",
