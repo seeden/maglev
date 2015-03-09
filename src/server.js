@@ -8,8 +8,8 @@ import Secure from './secure';
 import Models from './models';
 import debug from 'debug';
 
-const log = debug('server:log');
-const error = debug('server:error');
+const log = debug('maglev:server:log');
+const error = debug('maglev:server:error');
 
 export default class Server {
 	constructor(options) {

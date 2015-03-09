@@ -1,11 +1,13 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import _ from 'underscore';
-import provider from './provider';
+import * as provider from './provider';
 import permalink from 'mongoose-permalink';
 import mongooseHRBAC from 'mongoose-hrbac';
 import jsonSchemaPlugin from 'mongoose-json-schema';
 import mongoose, { Schema } from 'mongoose';
+
+export const name = 'User';
 
 // max of 5 attempts, resulting in a 2 hour lock
 const SALT_WORK_FACTOR = 10;
@@ -449,7 +451,7 @@ export function createSchema() {
 }
 
 export default function createModel (server) {
-	return server.db.model('User', createSchema());   
+	return server.db.model(name, createSchema());   
 }
 
 

@@ -1,5 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 
+export const name = 'Provider';
+
 /**
  * Generate provider uid name from provider name and user ID
  * @param  {String} name Provider name
@@ -35,5 +37,5 @@ export function createSchema() {
 }
 
 export default function createModel (server) {
-	return server.db.model('Provider', createSchema());   
+	return server.db.model(name, createSchema());   
 }

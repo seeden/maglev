@@ -24,8 +24,8 @@ var Models = _interopRequire(require("./models"));
 
 var debug = _interopRequire(require("debug"));
 
-var log = debug("server:log");
-var error = debug("server:error");
+var log = debug("maglev:server:log");
+var error = debug("maglev:server:error");
 
 var Server = (function () {
 	function Server(options) {

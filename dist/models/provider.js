@@ -17,7 +17,7 @@ var _mongoose = require("mongoose");
 var mongoose = _interopRequire(_mongoose);
 
 var Schema = _mongoose.Schema;
-
+var name = exports.name = "Provider";
 function genNameUID(name, uid) {
 	return name + "_" + uid;
 }
@@ -47,7 +47,7 @@ function createSchema() {
 }
 
 function createModel(server) {
-	return server.db.model("Provider", createSchema());
+	return server.db.model(name, createSchema());
 }
 
 Object.defineProperty(exports, "__esModule", {

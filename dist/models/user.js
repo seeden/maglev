@@ -1,5 +1,7 @@
 "use strict";
 
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
+
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
 /*
@@ -42,7 +44,7 @@ var bcrypt = _interopRequire(require("bcrypt"));
 
 var _ = _interopRequire(require("underscore"));
 
-var provider = _interopRequire(require("./provider"));
+var provider = _interopRequireWildcard(require("./provider"));
 
 var permalink = _interopRequire(require("mongoose-permalink"));
 
@@ -55,6 +57,7 @@ var _mongoose = require("mongoose");
 var mongoose = _interopRequire(_mongoose);
 
 var Schema = _mongoose.Schema;
+var name = exports.name = "User";
 
 // max of 5 attempts, resulting in a 2 hour lock
 var SALT_WORK_FACTOR = 10;
@@ -461,7 +464,7 @@ function createSchema() {
 }
 
 function createModel(server) {
-	return server.db.model("User", createSchema());
+	return server.db.model(name, createSchema());
 }
 
 /*
