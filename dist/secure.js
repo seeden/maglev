@@ -68,7 +68,7 @@ var Secure = (function () {
 				}
 
 				var passport = this.passport;
-				passport.authenticate.apply(passport, args);
+				return passport.authenticate.apply(passport, args);
 			}
 		}
 	});

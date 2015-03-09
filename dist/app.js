@@ -101,6 +101,7 @@ var App = (function () {
 				this._httpServer = http.createServer(this.expressApp).listen(port, host, callback);
 
 				log("App started on port " + port + " and host " + host);
+				return this;
 			}
 		},
 		close: {
@@ -111,6 +112,7 @@ var App = (function () {
 
 				this._httpServer.close(callback);
 				this._httpServer = null;
+				return this;
 			}
 		},
 		_prepareCompression: {

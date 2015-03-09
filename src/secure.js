@@ -46,6 +46,6 @@ export default class Secure {
 
 	authenticate(...args) {
 		var passport = this.passport;
-		passport.authenticate.apply(passport, args);
+		return passport.authenticate.apply(passport, args);
 	}
 }

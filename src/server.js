@@ -62,10 +62,12 @@ export default class Server {
 	listen(callback) {
 		var options = this.options;
 		this.app.listen(options.server.port, options.server.host, callback);
+		return this;
 	}
 
 	close(callback) {
 		this.app.close(callback);
+		return this;
 	}
 
 	_loadModels() {
