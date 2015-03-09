@@ -9,12 +9,16 @@ export default class Models {
 		this._modelModules = {};
 	}
 
-	get isLazy() {
-		return !!this.options.isLazy;
-	}
+	get options() {
+		return this._options;
+	}	
 
 	get server() {
 		return this._server;
+	}
+
+	get isLazy() {
+		return !!this.options.isLazy;
 	}
 
 	model(name) {

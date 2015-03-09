@@ -35,6 +35,21 @@ describe('Run server', function() {
 			});
 	});
 
+	it('should be able to get module', function(done) {
+		var Article = server.models.Article;
+		Article.create({
+			title: 'Book name'
+		}, function(err, article) {
+			if(err) {
+				throw err;
+			}
+
+			article.title.should.equal('Book name');
+
+			done();
+		});
+	});	
+
 	it('should be able to close server', function(done) {
 		server.close(done);
 	});

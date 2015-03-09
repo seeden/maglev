@@ -18,14 +18,19 @@ var Models = (function () {
 	}
 
 	_createClass(Models, {
-		isLazy: {
+		options: {
 			get: function () {
-				return !!this.options.isLazy;
+				return this._options;
 			}
 		},
 		server: {
 			get: function () {
 				return this._server;
+			}
+		},
+		isLazy: {
+			get: function () {
+				return !!this.options.isLazy;
 			}
 		},
 		model: {
