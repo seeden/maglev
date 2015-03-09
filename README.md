@@ -28,10 +28,12 @@ Maglev supports MVC patterns and RESTful routes.
 	var Server = require('maglev');
 
 	var server = new Server({
-		db: mongoose.connect('mongodb://localhost/project-name'),
-		server: {
-			root: __dirname
-		}
+		root: __dirname,
+		db: mongoose.connect('mongodb://localhost/maglev'),
+		session: {
+			secret: '123456789'
+		},
+		favicon: false
 	});
 
 	server.start();
