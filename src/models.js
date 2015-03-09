@@ -10,11 +10,11 @@ export default class Models {
 	}
 
 	get isLazy() {
-		return !!options.isLazy;
+		return !!this.options.isLazy;
 	}
 
 	get server() {
-		return options._server;
+		return this._server;
 	}
 
 	model(name) {

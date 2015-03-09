@@ -20,12 +20,12 @@ var Models = (function () {
 	_createClass(Models, {
 		isLazy: {
 			get: function () {
-				return !!options.isLazy;
+				return !!this.options.isLazy;
 			}
 		},
 		server: {
 			get: function () {
-				return options._server;
+				return this._server;
 			}
 		},
 		model: {
