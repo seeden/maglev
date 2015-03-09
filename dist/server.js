@@ -89,7 +89,7 @@ var Server = (function () {
 		listen: {
 			value: function listen(callback) {
 				var options = this.options;
-				this.app.listen(options.port, options.host, callback);
+				this.app.listen(options.server.port, options.server.host, callback);
 			}
 		},
 		close: {
