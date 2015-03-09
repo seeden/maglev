@@ -60,6 +60,16 @@ var Secure = (function () {
 					passport.use(strategy(options, models));
 				});
 			}
+		},
+		authenticate: {
+			value: function authenticate() {
+				for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+					args[_key] = arguments[_key];
+				}
+
+				var passport = this.passport;
+				passport.authenticate.apply(passport, args);
+			}
 		}
 	});
 

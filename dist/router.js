@@ -73,7 +73,8 @@ methods.forEach(function (method) {
 			args[_key] = arguments[_key];
 		}
 
-		this.expressRouter[method].apply(this.expressRouter, args);
+		var expressRouter = this.expressRouter;
+		expressRouter[method].apply(expressRouter, args);
 		return this;
 	};
 });

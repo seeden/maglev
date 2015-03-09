@@ -43,4 +43,9 @@ export default class Secure {
 			passport.use(strategy(options, models));
 		});
 	}
+
+	authenticate(...args) {
+		var passport = this.passport;
+		passport.authenticate.apply(passport, args);
+	}
 }
