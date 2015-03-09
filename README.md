@@ -17,20 +17,23 @@ Maglev supports MVC patterns and RESTful routes.
 
 ## Features
 
- * Predefined models and controllers (User, Token, Role, Logic...)
+ * Predefined models and controllers (User, Token, Role, Permission, Logic...)
  * Extended routing for REST api based on Express
  * Token and session authentication
  * Role based access system
- * Ready for single page applications (Ember, Angular and React)
  * [Swig](http://paularmstrong.github.io/swig/) template system with custom helpers
 
 ## Usage
-
+	var mongoose = require('mongoose');
 	var Server = require('maglev');
-	var Config = require('maglev/config');
-	var config = require('./config');
 
-	var server = new Server(new Config(config));
+	var server = new Server({
+		db: mongoose.connect('mongodb://localhost/project-name'),
+		server: {
+			root: __dirname
+		}
+	});
+
 	server.start();
 
 
@@ -40,31 +43,6 @@ Maglev supports MVC patterns and RESTful routes.
  * *models* Contains the models for accessing and storing data in a database.
  * *views* Contains the views and layouts that are rendered by an application.
  * *public* Static files and compiled assets served by the application.
-
-## Configuration
-
-Minimal configuration example
-
-	var path = require('path');
-	var rootPath = path.normalize(__dirname + '/..');
-
-	var config = {
-		db: {
-			uri: 'mongodb://localhost/project-name'
-		},
-		
-		server: {
-			root: rootPath
-		},
-
-		token: {
-			secret: 'your secret string for generating of user tokens used for authentication',
-		},
-
-		session: {
-			secret: 'your secret string for generating of user sessions used for authentication',
-		}
-	};
 
 ## Models
 Define new model
@@ -88,10 +66,8 @@ Define new model
 
 ## Routes
 
-	var controllers = require('../controllers');
-	var	user = controllers.user;
-	var token = controllers.maglev.token;
-	var message = controllers.message;
+	var token = require('maglev/dist/controllers/token');
+	var message = require('../controllers/message');
 
 	module.exports = function(route) {
 		route
