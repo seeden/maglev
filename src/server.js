@@ -8,8 +8,7 @@ import Secure from './secure';
 import Models from './models';
 import debug from 'debug';
 
-const log = debug('maglev:server:log');
-const error = debug('maglev:server:error');
+const log = debug('maglev:server');
 
 export default class Server {
 	constructor(options) {
@@ -78,7 +77,7 @@ export default class Server {
 			try {
 				models.register(model);
 			} catch(e) {
-				error('problem with model: '+ modelPath);
+				log('problem with model: '+ modelPath);
 				throw e;
 			}
 		});
@@ -92,7 +91,7 @@ export default class Server {
 			try {
 				route(router);
 			} catch(e) {
-				error('problem with route: ' + routePath);
+				log('problem with route: ' + routePath);
 				throw e;
 			}
 		});

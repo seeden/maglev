@@ -24,8 +24,7 @@ var Models = _interopRequire(require("./models"));
 
 var debug = _interopRequire(require("debug"));
 
-var log = debug("maglev:server:log");
-var error = debug("maglev:server:error");
+var log = debug("maglev:server");
 
 var Server = (function () {
 	function Server(options) {
@@ -107,7 +106,7 @@ var Server = (function () {
 					try {
 						models.register(model);
 					} catch (e) {
-						error("problem with model: " + modelPath);
+						log("problem with model: " + modelPath);
 						throw e;
 					}
 				});
@@ -122,7 +121,7 @@ var Server = (function () {
 					try {
 						route(router);
 					} catch (e) {
-						error("problem with route: " + routePath);
+						log("problem with route: " + routePath);
 						throw e;
 					}
 				});

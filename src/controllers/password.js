@@ -4,13 +4,13 @@ import WebError from 'web-error';
 
 export function tokenToUser(req, res, next) {
 	var User = req.models.User;
-	var config = req.server.config;
+	var options = req.server.options;
 
 	if(!id) {
 		return next(new WebError(400, 'Token is undefined'));
 	}
 
-	jwt.verify(id, config.mail.token.secret, function(err, data) {
+	jwt.verify(id, options.mail.token.secret, function(err, data) {
 		if (err) {
 			return next(err);
 		}
@@ -100,7 +100,7 @@ export function generateForgotToken(user, tokenSecret, expiresInMinutes) {
 function forgot(req, res, next) {
 	var User = req.models.User;
 	var server = req.server;
-	var config = server.config;
+	var options = server.options;
 	var mail = server.mail;
 
 	if(!req.body.username) {
@@ -121,12 +121,12 @@ function forgot(req, res, next) {
 		}
 
 		//generate token
-		var token = generateForgotToken(user, config.mail.token.secret, config.mail.token.expiration);
+		var token = generateForgotToken(user, options.mail.token.secret, options.mail.token.expiration);
 
 		//render mails
 		var data = {
 			user: user,
-			from: config.mail.default.from,
+			from: options.mail.default.from,
 			to: user.email,
 			subject: 'Password Assistance',
 			token: token
@@ -145,7 +145,7 @@ function forgot(req, res, next) {
 			}
 
 			var mailOptions = {
-				from: config.mail.default.from,
+				from: options.mail.default.from,
 				to: user.email,
 				subject: 'Password Assistance',
 				html: result.html,

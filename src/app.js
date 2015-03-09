@@ -24,8 +24,7 @@ import flash from 'connect-flash';
 import * as fileController from './controllers/file';
 import * as pageController from './controllers/page';
 
-const log = debug('maglev:app:log');
-const error = debug('maglev:app:error');
+const log = debug('maglev:app');
 
 export default class App {
 	constructor(server, options) {

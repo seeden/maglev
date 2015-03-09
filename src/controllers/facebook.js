@@ -68,10 +68,10 @@ export function ensureBySignedRequest(req, res, next) {
 	}
 
 	var User = req.models.User;
-	var config = req.server.config;
+	var options = req.server.options;
 
 	var session = req.body.session || false;
-	var signedRequest  = FB.parseSignedRequest(req.body.signed_request, config.facebook.clientSecret);
+	var signedRequest  = FB.parseSignedRequest(req.body.signed_request, options.facebook.clientSecret);
 
 	if(!signedRequest) {
 		return next(new WebError(400, 'Parsing signed request'));
@@ -96,7 +96,7 @@ export function ensureBySignedRequest(req, res, next) {
 			return req.logIn(user, {session: session}, next);
 		}
 
-		if(!config.registration.simple) {
+		if(!options.registration.simple) {
 			return next(new WebError(400, 'User needs to be registered'));
 		}
 
@@ -112,10 +112,10 @@ export function ensureBySignedRequest(req, res, next) {
 
 export function redirectPeopleToCanvas(req, res, next) {
 	var facebookBot = 'facebookexternalhit';
-	var config = req.server.config;
+	var options = req.server.options;
 
 	if(!req.headers['user-agent'] || req.headers['user-agent'].indexOf(facebookBot) === -1) {
-		return res.redirect(302, 'https://apps.facebook.com/' + config.facebook.namespace + '/');
+		return res.redirect(302, 'https://apps.facebook.com/' + options.facebook.namespace + '/');
 	}
 
 	next();

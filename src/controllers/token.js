@@ -2,7 +2,7 @@ import WebError from 'web-error';
 
 export function generateForCurrent(req, res, next) {
 	var user = req.user;
-	var config = req.server.config;
+	var options = req.server.options;
 	var rbac = req.server.rbac;
 
 	if(!user) {
@@ -10,14 +10,14 @@ export function generateForCurrent(req, res, next) {
 	}
 
 	res.jsonp({
-		token: user.generateBearerToken(config.token.secret, config.token.expiration),
+		token: user.generateBearerToken(options.token.secret, options.token.expiration),
 		user: user.toPrivateJSON()
 	});
 }
 
 export function generate(req, res, next) {
 	var User = req.models.User;
-	var config = req.server.config;
+	var options = req.server.options;
 	var rbac = req.server.rbac;
 
 	if(!req.body.username || !req.body.password) {
@@ -34,7 +34,7 @@ export function generate(req, res, next) {
 		}
 
 		res.jsonp({
-			token: user.generateBearerToken(config.token.secret, config.token.expiration),
+			token: user.generateBearerToken(options.token.secret, options.token.expiration),
 			user: user.toPrivateJSON()
 		});
 	});

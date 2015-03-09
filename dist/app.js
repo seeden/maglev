@@ -50,8 +50,7 @@ var fileController = _interopRequireWildcard(require("./controllers/file"));
 
 var pageController = _interopRequireWildcard(require("./controllers/page"));
 
-var log = debug("maglev:app:log");
-var error = debug("maglev:app:error");
+var log = debug("maglev:app");
 
 var App = (function () {
 	function App(server, options) {

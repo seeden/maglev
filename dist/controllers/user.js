@@ -75,7 +75,7 @@ function permalink(req, res, next, permalink) {
 
 function create(req, res, next) {
 	var User = req.models.User;
-	var config = req.server.config;
+	var options = req.server.options;
 
 	exports.createSchema = exports.createSchema || User.getRestJSONSchema();
 	var result = tv4.validateMultiple(req.body, exports.createSchema);
@@ -93,7 +93,7 @@ function create(req, res, next) {
 		}
 
 		res.jsonp({
-			token: user.generateBearerToken(config.token.secret, config.token.expiration),
+			token: user.generateBearerToken(options.token.secret, options.token.expiration),
 			user: user.toPrivateJSON()
 		});
 	});

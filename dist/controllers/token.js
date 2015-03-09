@@ -13,7 +13,7 @@ var WebError = _interopRequire(require("web-error"));
 
 function generateForCurrent(req, res, next) {
 	var user = req.user;
-	var config = req.server.config;
+	var options = req.server.options;
 	var rbac = req.server.rbac;
 
 	if (!user) {
@@ -21,14 +21,14 @@ function generateForCurrent(req, res, next) {
 	}
 
 	res.jsonp({
-		token: user.generateBearerToken(config.token.secret, config.token.expiration),
+		token: user.generateBearerToken(options.token.secret, options.token.expiration),
 		user: user.toPrivateJSON()
 	});
 }
 
 function generate(req, res, next) {
 	var User = req.models.User;
-	var config = req.server.config;
+	var options = req.server.options;
 	var rbac = req.server.rbac;
 
 	if (!req.body.username || !req.body.password) {
@@ -45,7 +45,7 @@ function generate(req, res, next) {
 		}
 
 		res.jsonp({
-			token: user.generateBearerToken(config.token.secret, config.token.expiration),
+			token: user.generateBearerToken(options.token.secret, options.token.expiration),
 			user: user.toPrivateJSON()
 		});
 	});

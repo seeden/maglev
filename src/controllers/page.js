@@ -9,7 +9,7 @@ import prettyjson from 'prettyjson';
  * @param  {Function} next
  */
 export function error (err, req, res, next) {
-	var config = req.server.config;
+	var options = req.server.options;
 
 	var error = {
 		status: err.status || 500,
@@ -20,9 +20,9 @@ export function error (err, req, res, next) {
 	};
 
 	//log errors gte 500
-	if(error.status>=500 && config.log.on && config.log.stream) {
+	if(error.status>=500 && options.log && options.morgan.stream) {
 		var data = prettyjson.render(err);
-		config.log.stream.write(data + "\n");
+		options.morgan.stream.write(data + "\n");
 	}
 
 	res.status(error.status).format({

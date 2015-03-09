@@ -6,12 +6,12 @@ import Download from 'download';
 import tmp from 'temporary';
 
 export function upload(req, res, next) {
-	var config = req.server.config;
+	var options = req.server.options;
 	var files = req.objects.files = [];
 
 	var options = options || {};
-	options.maxFieldsSize = options.maxFieldsSize || config.upload.maxFieldsSize;
-	options.maxFields = options.maxFields || config.upload.maxFields;
+	options.maxFieldsSize = options.maxFieldsSize || options.upload.maxFieldsSize;
+	options.maxFields = options.maxFields || options.upload.maxFields;
 	
 	var form = new multiparty.Form(options);
 
@@ -87,7 +87,7 @@ export function get(req, res, next) {
 }
 
 export function download(req, res, next) {
-	var config = req.server.config;
+	var options = req.server.options;
 	var files = req.objects.files = [];
 
 	if(!req.body.url) {
@@ -95,7 +95,7 @@ export function download(req, res, next) {
 	}
 
 	var options = options || {};
-	options.maxFieldsSize = options.maxFieldsSize || config.upload.maxFieldsSize;
+	options.maxFieldsSize = options.maxFieldsSize || options.upload.maxFieldsSize;
 
 	var download = new Download().get(req.body.url);
 

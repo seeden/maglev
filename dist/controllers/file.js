@@ -21,12 +21,12 @@ var Download = _interopRequire(require("download"));
 var tmp = _interopRequire(require("temporary"));
 
 function upload(req, res, next) {
-	var config = req.server.config;
+	var options = req.server.options;
 	var files = req.objects.files = [];
 
 	var options = options || {};
-	options.maxFieldsSize = options.maxFieldsSize || config.upload.maxFieldsSize;
-	options.maxFields = options.maxFields || config.upload.maxFields;
+	options.maxFieldsSize = options.maxFieldsSize || options.upload.maxFieldsSize;
+	options.maxFields = options.maxFields || options.upload.maxFields;
 
 	var form = new multiparty.Form(options);
 
@@ -102,7 +102,7 @@ function get(req, res, next) {
 }
 
 function download(req, res, next) {
-	var config = req.server.config;
+	var options = req.server.options;
 	var files = req.objects.files = [];
 
 	if (!req.body.url) {
@@ -110,7 +110,7 @@ function download(req, res, next) {
 	}
 
 	var options = options || {};
-	options.maxFieldsSize = options.maxFieldsSize || config.upload.maxFieldsSize;
+	options.maxFieldsSize = options.maxFieldsSize || options.upload.maxFieldsSize;
 
 	var download = new Download().get(req.body.url);
 
