@@ -33,10 +33,9 @@ function error(err, req, res, next) {
 		errors: err.errors || []
 	};
 
-	//log errors gte 500
-	if (error.status >= 500 && options.log && options.morgan.stream) {
+	if (error.status >= 500 && options.log && options.morgan.options.stream) {
 		var data = prettyjson.render(err);
-		options.morgan.stream.write(data + "\n");
+		options.morgan.options.stream.write(data + "\n");
 	}
 
 	res.status(error.status).format({
