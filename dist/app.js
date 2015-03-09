@@ -294,3 +294,55 @@ var App = (function () {
 })();
 
 module.exports = App;
+
+function prepareRequest(req) {
+	req.__defineGetter__("httpHost", function () {
+		var trustProxy = this.app.get("trust proxy");
+		var host = trustProxy && this.get("X-Forwarded-Host");
+		return host || this.get("Host");
+	});
+
+	req.__defineGetter__("port", function () {
+		host = this.httpHost;
+		if (!host) {
+			return;
+		}
+
+		var parts = host.split(":");
+		return parts.length === 2 ? parseInt(parts[1], 10) : 80;
+	});
+
+	req.__defineGetter__("protocolHost", function () {
+		return this.protocol + "://" + this.httpHost;
+	});
+
+	req.isGuest = function () {
+		return typeof this.user === "undefined";
+	};
+
+	req.can = function (action, resource, cb) {
+		var server = this.server;
+		var config = server.config;
+		var rbac = server.rbac;
+
+		//process guest
+		if (this.isGuest()) {
+			rbac.can(config.rbac.role.guest, action, resource, cb);
+		} else {
+			this.user.can(rbac, action, resource, cb);
+		}
+	};
+
+	req.hasRole = function (name, cb) {
+		var server = this.server;
+		var rbac = server.rbac;
+
+		if (this.isGuest()) {
+			return cb(null, false);
+		}
+
+		this.user.hasRole(rbac, name, cb);
+	};
+}
+
+prepareRequest(req);

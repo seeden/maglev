@@ -22,7 +22,7 @@ export default class Server {
 		this._db = options.db;
 
 		this._rbac   = new RBAC(options.rbac.storage);
-		this._router = new Router(options.router);
+		this._router = new Router(options.router); //router is used in app
 		this._models = new Models(this, options.models); //models is used in secure
 		this._secure = new Secure(this);
 		
