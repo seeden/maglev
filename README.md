@@ -23,21 +23,27 @@ Maglev supports MVC patterns and RESTful routes.
  * Role based access system
  * [Swig](http://paularmstrong.github.io/swig/) template system with custom helpers
 
+## Require
+
+Maglev is using two peerDependencies [Mongoose](http://mongoosejs.com/) and [express-session](https://github.com/expressjs/session). Please add it into your package.json if you want to use mongoose.
+
 ## Usage
-	var mongoose = require('mongoose');
-	var Server = require('maglev');
 
-	var server = new Server({
-		root: __dirname,
-		db: mongoose.connect('mongodb://localhost/maglev'),
-		session: {
-			secret: '123456789'
-		},
-		favicon: false
-	});
+```js
+var mongoose = require('mongoose');
+var Server = require('maglev');
 
-	server.start();
+var server = new Server({
+	root: __dirname,
+	db: mongoose.connect('mongodb://localhost/maglev'),
+	session: {
+		secret: '123456789'
+	},
+	favicon: false
+});
 
+server.start();
+```
 
 ## Directory Structure
 
@@ -49,197 +55,187 @@ Maglev supports MVC patterns and RESTful routes.
 ## Models
 Define new model
 
-	var mongoose = require('mongoose');
-	var Schema = mongoose.Schema;
+```js
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
 
-	function createSchema() {
-		var schema = new Schema({
-			city: { type: String, required: true },
-			street: { type: String, required: true },
-			state: { type: String, required: true }
-		});
+function createSchema() {
+	var schema = new Schema({
+		city: { type: String, required: true },
+		street: { type: String, required: true },
+		state: { type: String, required: true }
+	});
 
-		return schema;
-	}
+	return schema;
+}
 
-	module.exports = function (server) {
-		return server.db.model('Address', createSchema());   
-	};
+module.exports = function (server) {
+	return server.db.model('Address', createSchema());   
+};
+```
 
 ## Routes
 
-	var token = require('maglev/dist/controllers/token');
-	var message = require('../controllers/message');
+```js
+var token = require('maglev/dist/controllers/token');
+var message = require('../controllers/message');
 
-	module.exports = function(route) {
-		route
-			.api()
-			.get('/messages', token.ensure, message.get)
-			.put('/messages/mark/read/:id', token.ensure, message.markAsRead)
-			.put('/messages/mark/unread/:id', token.ensure, message.markAsUnread);
-	};
-
+module.exports = function(route) {
+	route
+		.api()
+		.get('/messages', token.ensure, message.get)
+		.put('/messages/mark/read/:id', token.ensure, message.markAsRead)
+		.put('/messages/mark/unread/:id', token.ensure, message.markAsUnread);
+};
+```
 
 ## There are other configuration parameters
 
-	var config = {
-		db: {
-			uri: null,
-			prepare: db.prepare
+```js
+{
+	root: null, 
+
+	rbac: {
+		storage: null,
+		role: {
+			guest: 'guest'
+		}
+	},
+
+	log: true,
+
+	morgan: {
+		format: process.env.NODE_ENV === 'development' ? 'dev' : 'combined',
+		options: {
+			immediate: false
+			//stream: process.stdout
+		}
+	},
+	
+	server: {
+		build: 1,
+		host: process.env.HOST || '127.0.0.1',
+		port: process.env.PORT || 4000
+	},
+
+	request: {
+		timeout: 1000*60*5
+	},
+
+	compression: {},
+
+	powered: {
+		value: 'Maglev'
+	},
+
+	responseTime: {},
+
+	methodOverride: {
+		//https://github.com/expressjs/method-override
+		enabled: true,
+		getter: 'X-HTTP-Method-Override',
+		options: {}
+	},
+
+	bodyParser: [{
+		parse: 'urlencoded',
+		options: {
+			extended: true
+		}
+	}, {
+		parse: 'json',
+		options: {}
+	}, {
+		parse: 'json',
+		options: {
+			type: 'application/vnd.api+json'
+		}
+	}],
+
+	cookieParser: {
+		secret: null,
+		options: {}
+	},
+
+	token: {
+		secret: null,
+		expiration: 60*24*14
+	},
+
+	session: {
+		secret: null,
+		cookie: {
+			maxAge: 14 *24 * 60 * 60 * 1000 //2 weeks
 		},
+		resave: true,
+		saveUninitialized: true
+	},
 
-		rbac: {
-			prepare: rbac.prepare,
-			role: {
-				guest: 'guest'
-			}
-		},
+	view: {
+		engine: 'swig'
+	},
 
-		log: {
-			on: process.env.NODE_ENV === 'development',
-			showStackError: true,
-			format: process.env.NODE_ENV === 'development' ? 'dev' : 'combined',
-			options: {
-				immediate: false
-				//stream: process.stdout
-			}
-		},
-		
-		server: {
-			prepare: express.prepare,
-			build: 1,
-			timeout: 30000,
-			compress: true,
-			root: null,
-			host: process.env.HOST || '127.0.0.1',
-			port: process.env.PORT || 4000
-		},
+	router: {
+		api: {
+			path: '/api'
+		}
+	},
 
-		powered: {
-			enabled: false,
-			value: 'Maglev'
-		},
+	locale: {
+		'default': 'en',
+		available: ['en'],
+		inUrl: false
+	},
 
-		responseTime: {
-			enabled: true,
-			options: {}
-		},
+	country: {
+		'default': null,
+		available: [],
+		inUrl: false
+	},	
 
-		methodOverride: {
-			enabled: true,
-			getter: 'X-HTTP-Method-Override',
-			options: {}
-		},
+	registration: {
+		simple: true
+	},
 
-		bodyParser: [{
-			parse: 'urlencoded',
-			options: {
-				extended: true
-			}
-		}, {
-			parse: 'json',
-			options: {}
-		}, {
-			parse: 'json',
-			options: {
-				type: 'application/vnd.api+json'
-			}
-		}],
+	facebook: {
+		clientID: null,
+		clientSecret: null,
+		namespace: null
+	},
 
-		cookieParser: {
-			//https://www.npmjs.org/package/cookie-parser
-			enabled: true,
-			secret: null,
-			options: {}
-		},
+	upload: {
+    	maxFieldsSize: 2000000,
+    	maxFields: 1000,
+    	path: null
+    },
 
-		token: {
-			secret: null,
-			expiration: 60*24*14
-		},
+    cors: {},
 
-		secure: {
-			prepare: passport.prepare,
-			strategies: [
-				passport.localStrategy, 
-				passport.bearerStrategy, 
-				passport.facebookStrategy, 
-				passport.facebookCanvasStrategy,
-				passport.anonymousStrategy
-			]
-		},
+    page: {
+    	error: null,
+    	notFound: null
+    },
 
-		session: {
-			secret: null,
-			cookie: {
-				maxAge: 14 *24 * 60 * 60 * 1000 //2 weeks
-			},
-			resave: true,
-			saveUninitialized: true
-		},
+    strategies: [],
 
-		sessionStore: {
-			autoReconnect: true,
-			collection: 'sessions'
-		},
+    css: {
+		root: 'public/css',
+		options: {}
+	},
 
-		view: {
-			engine: 'swig'
-		},
+    'static': {
+    	root: 'public',
+    	options: {
+    		index: false
+    	}
+    },
 
-		route: {
-			prepare: route.prepare,
-			api: {
-				path: '/api'	
-			} 
-		},
-
-		locale: {
-			'default': 'en',
-			available: ['en'],
-			inUrl: false
-		},
-
-		country: {
-			'default': null,
-			available: [],
-			inUrl: false
-		},	
-
-		registration: {
-			simple: true
-		},
-
-		facebook: {
-			clientID: null,
-			clientSecret: null,
-			namespace: null
-		},
-
-		css: {
-			preprocessor: preprocessor.prepare,
-			debug: false,
-			compress: true,
-			sourceMap: true
-		},
-
-		upload: {
-	    	maxFieldsSize: 2000000,
-	    	maxFields: 1000,
-	    	path: null
-	    },
-
-	    createPath: [{
-	    	path: '/logs'
-	    }, {
-	    	path: '/public/files'
-	    }],
-
-	    page: {
-	    	error: page.error,
-	    	notFound: page.notFound
-	    }
-	};
+    favicon: {
+    	root: 'public/favicon.ico',
+    	options: {}
+    }
+};
+```
 		
 ## Credits
 
