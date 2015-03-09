@@ -72,7 +72,7 @@ export default class Server {
 	_loadModels() {
 		var server = this;
 		var models = this._models;
-		var path = this.options.server.root + '/models';
+		var path = this.options.root + '/models';
 
 		Server.walk(path, function(model, modelPath) {
 			try {
@@ -86,7 +86,7 @@ export default class Server {
 
 	_loadRoutes() {
 		var router = this.router;
-		var path = this.options.server.root + '/routes';
+		var path = this.options.root + '/routes';
 
 		Server.walk(path, function(route, routePath) {
 			try {
