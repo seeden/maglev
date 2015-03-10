@@ -42,8 +42,6 @@ var req = _interopRequire(require("express/lib/request"));
 
 var consolidate = _interopRequire(require("consolidate"));
 
-var connectMongo = _interopRequire(require("connect-mongo"));
-
 var flash = _interopRequire(require("connect-flash"));
 
 var fileController = _interopRequireWildcard(require("./controllers/file"));

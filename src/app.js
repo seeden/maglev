@@ -17,7 +17,6 @@ import lessMiddleware from 'less-middleware';
 	
 import req from 'express/lib/request';
 import consolidate from 'consolidate';
-import connectMongo from 'connect-mongo';
 import flash from 'connect-flash';
 
 
