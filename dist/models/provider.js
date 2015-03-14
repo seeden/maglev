@@ -1,7 +1,5 @@
 "use strict";
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
-
 /**
  * Generate provider uid name from provider name and user ID
  * @param  {String} name Provider name
@@ -10,19 +8,12 @@ var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["defau
  */
 exports.genNameUID = genNameUID;
 exports.createSchema = createSchema;
-exports["default"] = createModel;
-
-var _mongoose = require("mongoose");
-
-var mongoose = _interopRequire(_mongoose);
-
-var Schema = _mongoose.Schema;
 var name = exports.name = "Provider";
 function genNameUID(name, uid) {
 	return name + "_" + uid;
 }
 
-function createSchema() {
+function createSchema(Schema) {
 	//add properties to schema
 	var schema = new Schema({
 		name: { type: String, required: true },
@@ -44,10 +35,6 @@ function createSchema() {
 	});
 
 	return schema;
-}
-
-function createModel(server) {
-	return server.db.model(name, createSchema());
 }
 
 Object.defineProperty(exports, "__esModule", {

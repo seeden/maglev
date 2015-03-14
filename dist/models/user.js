@@ -36,7 +36,6 @@ function incLoginAttempts(cb) {
  * @return {mongoose.Schema} User Instance of user schema
  */
 exports.createSchema = createSchema;
-exports["default"] = createModel;
 
 var jwt = _interopRequire(require("jsonwebtoken"));
 
@@ -52,11 +51,6 @@ var mongooseHRBAC = _interopRequire(require("mongoose-hrbac"));
 
 var jsonSchemaPlugin = _interopRequire(require("mongoose-json-schema"));
 
-var _mongoose = require("mongoose");
-
-var mongoose = _interopRequire(_mongoose);
-
-var Schema = _mongoose.Schema;
 var name = exports.name = "User";
 
 // max of 5 attempts, resulting in a 2 hour lock
@@ -343,8 +337,8 @@ function setUsername(username, cb) {
 	this.username = username;
 	return this.save(cb);
 }
-function createSchema() {
-	var providerSchema = provider.createSchema();
+function createSchema(Schema) {
+	var providerSchema = provider.createSchema(Schema);
 
 	//add properties to schema
 	var schema = new Schema({
@@ -461,10 +455,6 @@ function createSchema() {
 	schema.methods.getDisplayName = getDisplayName;
 
 	return schema;
-}
-
-function createModel(server) {
-	return server.db.model(name, createSchema());
 }
 
 /*

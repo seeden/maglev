@@ -1,5 +1,3 @@
-import mongoose, { Schema } from 'mongoose';
-
 export const name = 'Provider';
 
 /**
@@ -12,7 +10,7 @@ export function genNameUID(name, uid) {
 	return name + '_' + uid;
 }
 
-export function createSchema() {
+export function createSchema(Schema) {
 	//add properties to schema
 	var schema = new Schema({
 		name 	: { type: String, required: true },
@@ -34,8 +32,4 @@ export function createSchema() {
 	});
 
 	return schema;
-}
-
-export default function createModel (server) {
-	return server.db.model(name, createSchema());   
 }

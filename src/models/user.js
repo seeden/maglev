@@ -5,7 +5,6 @@ import * as provider from './provider';
 import permalink from 'mongoose-permalink';
 import mongooseHRBAC from 'mongoose-hrbac';
 import jsonSchemaPlugin from 'mongoose-json-schema';
-import mongoose, { Schema } from 'mongoose';
 
 export const name = 'User';
 
@@ -329,8 +328,8 @@ function incLoginAttempts(cb) {
  * @param  {mongoose.Schema} Schema
  * @return {mongoose.Schema} User Instance of user schema
  */
-export function createSchema() {
-	var providerSchema = provider.createSchema();
+export function createSchema(Schema) {
+	var providerSchema = provider.createSchema(Schema);
 
 	//add properties to schema
 	var schema = new Schema({
@@ -449,11 +448,6 @@ export function createSchema() {
 
 	return schema;
 }
-
-export default function createModel (server) {
-	return server.db.model(name, createSchema());   
-}
-
 
 
 /*
