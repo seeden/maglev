@@ -219,11 +219,11 @@ export default class App {
 		}
 
 		if(options.css) {
-			app.use(lessMiddleware(options.css.root, options.css.options));	
+			app.use(options.css.path, lessMiddleware(options.css.root, options.css.options));	
 		}
 
 		if(options.static) {
-			app.use(serveStatic(options.static.root, options.static.options));
+			app.use(options.static.path, serveStatic(options.static.root, options.static.options));
 		}
 	}
 

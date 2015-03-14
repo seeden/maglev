@@ -125,11 +125,13 @@ export default {
     strategies: [],
 
     css: {
+    	path: '/public/css',
 		root: 'public/css',
 		options: {}
 	},
 
     'static': {
+    	path: '/public',
     	root: 'public',
     	options: {
     		index: false
