@@ -11,7 +11,7 @@ import debug from 'debug';
 const log = debug('maglev:server');
 
 export default class Server {
-	constructor(options) {
+	constructor(options, callback) {
 		options = extend(true, {}, defaultOptions, options);
 
 		if(!options.db) {
@@ -21,7 +21,7 @@ export default class Server {
 		this._options = options;
 		this._db = options.db;
 
-		this._rbac   = new RBAC(options.rbac.options);
+		this._rbac   = new RBAC(options.rbac.options, callback);
 		this._router = new Router(options.router); //router is used in app
 		this._models = new Models(this, options.models); //models is used in secure
 		this._secure = new Secure(this);
