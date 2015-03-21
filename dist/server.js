@@ -44,11 +44,13 @@ var Server = (function () {
 		callback = callback || function () {};
 
 		this._rbac = new RBAC(options.rbac.options, function (err) {
-			if (err) {
-				return callback(err);
-			}
+			process.nextTick(function () {
+				if (err) {
+					return callback(err);
+				}
 
-			callback(null, _this);
+				callback(null, _this);
+			});
 		});
 
 		this._router = new Router(options.router); //router is used in app

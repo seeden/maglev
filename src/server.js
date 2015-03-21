@@ -24,11 +24,13 @@ export default class Server {
 		callback = callback || function() {};
 
 		this._rbac   = new RBAC(options.rbac.options, err => {
-			if(err) {
-				return callback(err);
-			}
+			process.nextTick(() => {
+				if(err) {
+					return callback(err);
+				}
 
-			callback(null, this);
+				callback(null, this);
+			});
 		});
 
 		this._router = new Router(options.router); //router is used in app
