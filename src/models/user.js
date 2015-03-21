@@ -88,7 +88,7 @@ function generateBearerToken(tokenSecret, expiresInMinutes, scope) {
 	expiresInMinutes = expiresInMinutes || 60*24*14;
 
 	var data = { 
-		user: this._id
+		user: this._id.toString()
 	};
 
 	if(scope.length) {
