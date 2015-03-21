@@ -8,25 +8,36 @@ import WebError from 'web-error';
  * @param  {Number}  status   Status code of redirect action
  * @return {Function}          Middleware function
  */
-export function can(action, resource, redirect, status) {
-	status = status || 302;
+export function can(action, resource, redirect, redirectStatus) {
+	redirectStatus = redirectStatus || 302;
 
 	return function(req, res, next) {
-		req.can(action, resource, function(err, can) {
+		var server = req.server;
+		var options = server.options;
+		var rbac = server.rbac;
+		var user = req.user;
+
+		function callback(err, can) {
 			if(err) {
 				return next(err);
 			}
 
 			if(!can) {
+				if(redirect) {
+					return res.redirect(redirectStatus, redirect);
+				}
+
 				return next(new WebError(401));	
 			}
 
-			if(redirect) {
-				return res.redirect(status, redirect);
-			}
-
 			next();
-		});
+		}
+
+		if(!user) {
+			rbac.can(options.rbac.role.guest, action, resource, callback);
+		} else {
+			user.can(rbac, action, resource, callback);
+		}
 	};
 }
 
@@ -37,21 +48,27 @@ export function can(action, resource, redirect, status) {
  * @param  {Number}  status   Status code of redirect action
  * @return {Function}       Middleware function
  */
-export function hasRole(name, redirect, status) {
-	status = status || 302;
+export function hasRole(name, redirect, redirectStatus) {
+	redirectStatus = redirectStatus || 302;
 
 	return function(req, res, next) {
-		req.hasRole(name, function(err, has) {
+		var server = this.server;
+		var rbac = server.rbac;
+
+		if(!req.user) {
+			return next(new WebError(401));
+		}
+
+		req.user.hasRole(rbac, name, function(err, has) {
 			if(err) {
 				return next(err);
 			}
 
 			if(!has) {
+				if(redirect) {
+					return res.redirect(redirectStatus, redirect);
+				}
 				return next(new WebError(401));	
-			}
-
-			if(redirect) {
-				return res.redirect(status, redirect);
 			}
 
 			next();			
@@ -65,18 +82,18 @@ export function hasRole(name, redirect, status) {
  * @param  {Number}  status   Status code of redirect action
  * @return {Function}	Middleware function
  */
-export function isGuest(redirect, status) {
-	status = status || 302;
+export function isGuest(redirect, redirectStatus) {
+	redirectStatus = redirectStatus || 302;
 
 	return function(req, res, next) {
-		if(req.isGuest() === true) {
-			next();
+		if(!req.user) {
+			return next();
 		}
 
 		if(redirect) {
-			return res.redirect(status, redirect);
+			return res.redirect(redirectStatus, redirect);
 		}
 
-		return next(new Error('You are not a guest'));
+		next(new WebError(401, 'You are not a guest'));
 	};
 }

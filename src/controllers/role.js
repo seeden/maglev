@@ -43,7 +43,7 @@ export function create(req, res, next) {
 
 		return res.jsonp({
 			role: {
-				name: role.getName()	
+				name: role.name	
 			}
 		});
 	});
@@ -62,7 +62,7 @@ export function remove(req, res, next) {
 	var role = req.objects.role;
 
 	//unassign role from all users
-	User.removeRoleFromCollection(role.getName(), function(err) {
+	User.removeRoleFromCollection(role.name, function(err) {
 		if(err) {
 			return next(err);
 		}
@@ -105,7 +105,7 @@ export function get(req, res, next) {
 
 	return res.jsonp({
 		role: {
-			name: role.getName()	
+			name: role.name	
 		}
 	});
 }
@@ -122,7 +122,7 @@ export function grant(req, res, next) {
 
 	var role = req.objects.role;
 
-	rbac.grantByName(role.getName(), req.body.name, function(err, isGranted) {
+	rbac.grantByName(role.name, req.body.name, function(err, isGranted) {
 		if(err) {
 			return next(err);
 		}
@@ -147,7 +147,7 @@ export function revoke(req, res, next) {
 
 	var role = req.objects.role;
 
-	rbac.revokeByName(role.getName(), req.body.name, function(err, isRevoked) {
+	rbac.revokeByName(role.name, req.body.name, function(err, isRevoked) {
 		if(err) {
 			return next(err);
 		}

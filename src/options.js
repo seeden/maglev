@@ -134,7 +134,7 @@ export default {
     	path: '/public',
     	root: 'public',
     	options: {
-    		index: false
+    		index: true
     	}
     },
 

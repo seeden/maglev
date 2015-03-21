@@ -65,9 +65,9 @@ function create(req, res, next) {
 
 		return res.jsonp({
 			permission: {
-				action: permission.getAction(),
-				resource: permission.getResource(),
-				name: permission.getName()
+				action: permission.action,
+				resource: permission.resource,
+				name: permission.name
 			}
 		});
 	});
@@ -83,7 +83,7 @@ function remove(req, res, next) {
 	var permission = req.objects.permission;
 
 	//unassign permission from all users
-	User.removePermissionFromCollection(permission.getName(), function (err) {
+	User.removePermissionFromCollection(permission.name, function (err) {
 		if (err) {
 			return next(err);
 		}
@@ -120,9 +120,9 @@ function get(req, res, next) {
 
 	return res.jsonp({
 		permission: {
-			action: permission.getAction(),
-			resource: permission.getResource(),
-			name: permission.getName()
+			action: permission.action,
+			resource: permission.resource,
+			name: permission.name
 		}
 	});
 }

@@ -313,34 +313,6 @@ function prepareRequest(req) {
 	req.__defineGetter__("protocolHost", function () {
 		return this.protocol + "://" + this.httpHost;
 	});
-
-	req.isGuest = function () {
-		return typeof this.user === "undefined";
-	};
-
-	req.can = function (action, resource, cb) {
-		var server = this.server;
-		var config = server.config;
-		var rbac = server.rbac;
-
-		//process guest
-		if (this.isGuest()) {
-			rbac.can(config.rbac.role.guest, action, resource, cb);
-		} else {
-			this.user.can(rbac, action, resource, cb);
-		}
-	};
-
-	req.hasRole = function (name, cb) {
-		var server = this.server;
-		var rbac = server.rbac;
-
-		if (this.isGuest()) {
-			return cb(null, false);
-		}
-
-		this.user.hasRole(rbac, name, cb);
-	};
 }
 
 prepareRequest(req);

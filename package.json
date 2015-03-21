@@ -1,6 +1,6 @@
 {
 	"name": "maglev",
-	"version": "3.1.1",
+	"version": "3.2.0",
 	"description": "Preconfigured NodeJS framework",
 	"author": {
 		"name": "Zlatko Fedor",
@@ -49,7 +49,7 @@
 		"prettyjson": "~1.1.0",
 
 		"web-error": "~3.0.2",
-		"rbac": "~2.2.3",
+		"rbac": "~3.0.4",
 		"mongoose-hrbac": "~2.0.2",
 		"mongoose-permalink": "~1.0.5",
 		"mongoose-json-schema": "~0.0.6",
@@ -74,7 +74,7 @@
 		"passport-anonymous": "~1.0.1",
 		"underscore": "~1.8.2",
 		"swig": "~1.4.2",
-		"jsonwebtoken": "~4.0.0",
+		"jsonwebtoken": "~4.2.1",
 		"connect-flash": "~0.1.1",
 		"response-time": "~2.3.0",
 		"less-middleware": "~2.0.1",
