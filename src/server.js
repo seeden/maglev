@@ -21,7 +21,16 @@ export default class Server {
 		this._options = options;
 		this._db = options.db;
 
-		this._rbac   = new RBAC(options.rbac.options, callback);
+		callback = callback || function() {};
+
+		this._rbac   = new RBAC(options.rbac.options, err => {
+			if(err) {
+				return callback(err);
+			}
+
+			callback(null, this);
+		});
+
 		this._router = new Router(options.router); //router is used in app
 		this._models = new Models(this, options.models); //models is used in secure
 		this._secure = new Secure(this);
