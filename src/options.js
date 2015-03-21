@@ -2,7 +2,9 @@ export default {
 	root: null, 
 
 	rbac: {
-		storage: null,
+		options: {
+			
+		},
 		role: {
 			guest: 'guest'
 		}
