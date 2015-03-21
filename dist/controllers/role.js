@@ -43,12 +43,12 @@ function role(req, res, next, name) {
 		return next(new WebError(400));
 	}
 
-	rbac.get(name, function (err, role) {
+	rbac.getRole(name, function (err, role) {
 		if (err) {
 			return next(err);
 		}
 
-		if (!role || !rbac.isRole(role)) {
+		if (!role) {
 			return next(new WebError(404));
 		}
 

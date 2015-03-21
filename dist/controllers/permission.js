@@ -33,12 +33,12 @@ function permission(req, res, next, name) {
 		return next(new WebError(400));
 	}
 
-	rbac.get(name, function (err, permission) {
+	rbac.getPermissionByName(name, function (err, permission) {
 		if (err) {
 			return next(err);
 		}
 
-		if (!permission || !rbac.isPermission(permission)) {
+		if (!permission) {
 			return next(new WebError(404));
 		}
 
