@@ -160,9 +160,9 @@ function findByUsername(username, strict, cb) {
 	}
 
 	if (strict) {
-		return this.findOne({ username: username }).exec(cb);
+		return this.findOne({ username: username }, cb);
 	} else {
-		return this.findOne({ $or: [{ username: username }, { email: username }] }).exec(cb);
+		return this.findOne({ $or: [{ username: username }, { email: username }] }, cb);
 	}
 }
 
@@ -182,7 +182,7 @@ function findByTwitterID(uid, cb) {
 function findByProviderUID(providerName, uid, cb) {
 	return this.findOne({
 		"providers.nameUID": provider.genNameUID(providerName, uid)
-	}).exec(cb);
+	}, cb);
 }
 
 /**
