@@ -136,7 +136,7 @@ export default {
     	path: '/public',
     	root: 'public',
     	options: {
-    		index: true
+    		index: ['index.html']
     	}
     },
 
