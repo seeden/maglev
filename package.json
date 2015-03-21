@@ -1,6 +1,6 @@
 {
 	"name": "maglev",
-	"version": "3.2.0",
+	"version": "3.2.1",
 	"description": "Preconfigured NodeJS framework",
 	"author": {
 		"name": "Zlatko Fedor",
@@ -50,7 +50,7 @@
 
 		"web-error": "~3.0.2",
 		"rbac": "~3.0.4",
-		"mongoose-hrbac": "~2.0.2",
+		"mongoose-hrbac": "~3.0.0",
 		"mongoose-permalink": "~1.0.5",
 		"mongoose-json-schema": "~0.0.6",
 		"puid": "~1.0.2",
