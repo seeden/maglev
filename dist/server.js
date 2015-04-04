@@ -126,6 +126,9 @@ var Server = (function () {
 						throw e;
 					}
 				});
+
+				//preload all models
+				models.preload();
 			}
 		},
 		_loadRoutes: {

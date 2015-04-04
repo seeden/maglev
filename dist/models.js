@@ -28,11 +28,6 @@ var Models = (function () {
 				return this._server;
 			}
 		},
-		isLazy: {
-			get: function () {
-				return !!this.options.isLazy;
-			}
-		},
 		model: {
 			value: function model(name) {
 				if (!this._modelModules[name]) {
@@ -61,11 +56,16 @@ var Models = (function () {
 					}
 				});
 
-				if (this.isLazy) {
-					return;
-				}
+				return;
+			}
+		},
+		preload: {
+			value: function preload() {
+				var _this = this;
 
-				return this.model(name);
+				Object.keys(this._models).forEach(function (modelName) {
+					_this.model(modelName);
+				});
 			}
 		}
 	});

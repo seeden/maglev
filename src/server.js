@@ -95,6 +95,9 @@ export default class Server {
 				throw e;
 			}
 		});
+
+		//preload all models
+		models.preload();
 	}
 
 	_loadRoutes() {

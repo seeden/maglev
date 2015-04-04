@@ -17,10 +17,6 @@ export default class Models {
 		return this._server;
 	}
 
-	get isLazy() {
-		return !!this.options.isLazy;
-	}
-
 	model(name) {
 		if(!this._modelModules[name]) {
 			throw new Error('Modul is not registered: ' + name);
@@ -49,10 +45,12 @@ export default class Models {
 			}
 		});
 
-		if(this.isLazy) {
-			return;
-		}
+		return;
+	}
 
-		return this.model(name);
+	preload() {
+		Object.keys(this._models).forEach(modelName => {
+			this.model(modelName);
+		});
 	}
 }
