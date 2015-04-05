@@ -13,8 +13,8 @@ var Models = (function () {
 		this._options = options;
 		this._server = server;
 
-		this._models = {};
-		this._modelModules = {};
+		this._models = new Map();
+		this._modelModules = new Map();
 	}
 
 	_createClass(Models, {
@@ -30,15 +30,17 @@ var Models = (function () {
 		},
 		model: {
 			value: function model(name) {
-				if (!this._modelModules[name]) {
+				if (!this._modelModules.has(name)) {
 					throw new Error("Modul is not registered: " + name);
 				}
 
-				if (!this._models[name]) {
-					this._models[name] = this._modelModules[name](this.server);
+				var modelFactory = this._modelModules.get(name);
+
+				if (!this._models.has(name)) {
+					this._models.add(name, modelFactory(this.server));
 				}
 
-				return this._models[name];
+				return this._models.get(name);
 			}
 		},
 		register: {
@@ -48,7 +50,7 @@ var Models = (function () {
 					throw new Error("Model has no name");
 				}
 
-				this._modelModules[name] = modelModul["default"] ? modelModul["default"] : modelModul;
+				this._modelModules.add(name, modelModul["default"] ? modelModul["default"] : modelModul);
 
 				Object.defineProperty(this, name, {
 					get: function get() {
@@ -63,7 +65,8 @@ var Models = (function () {
 			value: function preload() {
 				var _this = this;
 
-				Object.keys(this._models).forEach(function (modelName) {
+				this._modelModules.forEach(function (factory, modelName) {
+					console.log(modelName);
 					_this.model(modelName);
 				});
 			}
