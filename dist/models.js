@@ -37,7 +37,7 @@ var Models = (function () {
 				var modelFactory = this._modelModules.get(name);
 
 				if (!this._models.has(name)) {
-					this._models.add(name, modelFactory(this.server));
+					this._models.set(name, modelFactory(this.server));
 				}
 
 				return this._models.get(name);
@@ -50,7 +50,7 @@ var Models = (function () {
 					throw new Error("Model has no name");
 				}
 
-				this._modelModules.add(name, modelModul["default"] ? modelModul["default"] : modelModul);
+				this._modelModules.set(name, modelModul["default"] ? modelModul["default"] : modelModul);
 
 				Object.defineProperty(this, name, {
 					get: function get() {

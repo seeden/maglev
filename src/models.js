@@ -25,7 +25,7 @@ export default class Models {
 		var modelFactory = this._modelModules.get(name);
 
 		if(!this._models.has(name)) {
-			this._models.add(name, modelFactory(this.server));
+			this._models.set(name, modelFactory(this.server));
 		}
 
 		return this._models.get(name);
@@ -37,7 +37,7 @@ export default class Models {
 			throw new Error('Model has no name');
 		}
 
-		this._modelModules.add(name,  modelModul.default
+		this._modelModules.set(name,  modelModul.default
 			? modelModul.default
 			: modelModul);
 
