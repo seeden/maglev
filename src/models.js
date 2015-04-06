@@ -52,7 +52,6 @@ export default class Models {
 
 	preload() {
 		this._modelModules.forEach((factory, modelName) => {
-			console.log(modelName);
 			this.model(modelName);
 		});
 	}

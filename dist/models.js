@@ -66,7 +66,6 @@ var Models = (function () {
 				var _this = this;
 
 				this._modelModules.forEach(function (factory, modelName) {
-					console.log(modelName);
 					_this.model(modelName);
 				});
 			}
