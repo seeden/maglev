@@ -32,6 +32,10 @@ var Server = (function () {
 
 		_classCallCheck(this, Server);
 
+		if (!callback) {
+			throw new Error("Please use callback for server");
+		}
+
 		options = extend(true, {}, defaultOptions, options);
 
 		if (!options.db) {
@@ -41,10 +45,20 @@ var Server = (function () {
 		this._options = options;
 		this._db = options.db;
 
-		callback = callback || function () {};
-
 		this._rbac = new RBAC(options.rbac.options, function (err) {
-			process.nextTick(function () {
+			if (err) {
+				return callback(err);
+			}
+
+			_this._router = new Router(options.router); //router is used in app
+			_this._models = new Models(_this, options.models); //models is used in secure
+			_this._secure = new Secure(_this);
+
+			_this._app = new App(_this, options);
+
+			_this._loadRoutes();
+
+			_this._loadModels(function (err) {
 				if (err) {
 					return callback(err);
 				}
@@ -52,15 +66,6 @@ var Server = (function () {
 				callback(null, _this);
 			});
 		});
-
-		this._router = new Router(options.router); //router is used in app
-		this._models = new Models(this, options.models); //models is used in secure
-		this._secure = new Secure(this);
-
-		this._app = new App(this, options);
-
-		this._loadModels();
-		this._loadRoutes();
 	}
 
 	_createClass(Server, {
@@ -113,7 +118,7 @@ var Server = (function () {
 			}
 		},
 		_loadModels: {
-			value: function _loadModels() {
+			value: function _loadModels(callback) {
 				var server = this;
 				var models = this._models;
 				var path = this.options.root + "/models";
@@ -128,7 +133,7 @@ var Server = (function () {
 				});
 
 				//preload all models
-				models.preload();
+				models.preload(callback);
 			}
 		},
 		_loadRoutes: {

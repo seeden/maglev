@@ -12,6 +12,10 @@ const log = debug('maglev:server');
 
 export default class Server {
 	constructor(options, callback) {
+		if(!callback) {
+			throw new Error('Please use callback for server');
+		}
+
 		options = extend(true, {}, defaultOptions, options);
 
 		if(!options.db) {
@@ -21,10 +25,20 @@ export default class Server {
 		this._options = options;
 		this._db = options.db;
 
-		callback = callback || function() {};
-
 		this._rbac   = new RBAC(options.rbac.options, err => {
-			process.nextTick(() => {
+			if(err) {
+				return callback(err);
+			}
+
+			this._router = new Router(options.router); //router is used in app
+			this._models = new Models(this, options.models); //models is used in secure
+			this._secure = new Secure(this);
+			
+			this._app    = new App(this, options);
+
+			this._loadRoutes();
+			
+			this._loadModels(err => {
 				if(err) {
 					return callback(err);
 				}
@@ -32,15 +46,6 @@ export default class Server {
 				callback(null, this);
 			});
 		});
-
-		this._router = new Router(options.router); //router is used in app
-		this._models = new Models(this, options.models); //models is used in secure
-		this._secure = new Secure(this);
-		
-		this._app    = new App(this, options);
-		
-		this._loadModels();
-		this._loadRoutes();
 	}
 
 	get options() {
@@ -82,7 +87,7 @@ export default class Server {
 		return this;
 	}
 
-	_loadModels() {
+	_loadModels(callback) {
 		var server = this;
 		var models = this._models;
 		var path = this.options.root + '/models';
@@ -97,7 +102,7 @@ export default class Server {
 		});
 
 		//preload all models
-		models.preload();
+		models.preload(callback);
 	}
 
 	_loadRoutes() {

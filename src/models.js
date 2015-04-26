@@ -1,3 +1,5 @@
+import { each, memoize } from 'async';
+
 export default class Models {
 	constructor(server, options) {
 		options = options || {};
@@ -6,7 +8,7 @@ export default class Models {
 		this._server = server;
 
 		this._models = new Map();
-		this._modelModules = new Map();
+		this._modelFactories = new Map();
 	}
 
 	get options() {
@@ -17,18 +19,50 @@ export default class Models {
 		return this._server;
 	}
 
-	model(name) {
-		if(!this._modelModules.has(name)) {
+	_createModelFromFactory(name) {
+		if(!this._modelFactories.has(name)) {
 			throw new Error('Modul is not registered: ' + name);
 		}
 
-		var modelFactory = this._modelModules.get(name);
+		const modelFactory = this._modelFactories.get(name);
+		const config = {
+			model: null,		
+			callbacks: []
+		};
 
+		config.model = modelFactory(this.server, function(error) {
+			config.loaded = true;
+			config.error = error;
+
+			config.callbacks.forEach(function(callback) {
+				callback(error, model);
+			});
+
+			config.callbacks = [];
+		});
+
+		this._models.set(name, config);
+	}
+
+	model(name, callback) {
 		if(!this._models.has(name)) {
-			this._models.set(name, modelFactory(this.server));
+			this._createModelFromFactory(name);
 		}
 
-		return this._models.get(name);
+		const config = this._models.get(name);
+
+		if(!callback) {
+			return config.model;
+		}
+
+		//TODO replace it with async.memorize
+		if(config.loaded) {
+			callback(config.error, config.model);
+		} else {
+			config.calbacks.push(callback);
+		}
+
+		return config.model;
 	}
 
 	register(modelModul) {
@@ -37,7 +71,7 @@ export default class Models {
 			throw new Error('Model has no name');
 		}
 
-		this._modelModules.set(name,  modelModul.default
+		this._modelFactories.set(name,  modelModul.default
 			? modelModul.default
 			: modelModul);
 
@@ -46,13 +80,11 @@ export default class Models {
 				return this.model(name);
 			}
 		});
-
-		return;
 	}
 
-	preload() {
-		this._modelModules.forEach((factory, modelName) => {
-			this.model(modelName);
-		});
+	preload(callback) {
+		each(this._modelFactories.keys(), (modelName, callback) => {
+			this.model(modelName, callback);
+		}, callback);
 	}
 }

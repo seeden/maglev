@@ -17,9 +17,13 @@ describe('Run server', function() {
 				post: 4433
 			},
 			favicon: false
-		});
+		}, function(err, server) {
+			if(err) {
+				throw err;
+			}
 
-		server.listen(done);
+			server.listen(done);
+		});	
 	});
 
 	it('should be able to get value from route', function(done) {

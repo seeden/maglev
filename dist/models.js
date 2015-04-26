@@ -4,6 +4,11 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
+var _async = require("async");
+
+var each = _async.each;
+var memoize = _async.memoize;
+
 var Models = (function () {
 	function Models(server, options) {
 		_classCallCheck(this, Models);
@@ -14,7 +19,7 @@ var Models = (function () {
 		this._server = server;
 
 		this._models = new Map();
-		this._modelModules = new Map();
+		this._modelFactories = new Map();
 	}
 
 	_createClass(Models, {
@@ -28,19 +33,52 @@ var Models = (function () {
 				return this._server;
 			}
 		},
-		model: {
-			value: function model(name) {
-				if (!this._modelModules.has(name)) {
+		_createModelFromFactory: {
+			value: function _createModelFromFactory(name) {
+				if (!this._modelFactories.has(name)) {
 					throw new Error("Modul is not registered: " + name);
 				}
 
-				var modelFactory = this._modelModules.get(name);
+				var modelFactory = this._modelFactories.get(name);
+				var config = {
+					model: null,
+					callbacks: []
+				};
 
+				config.model = modelFactory(this.server, function (error) {
+					config.loaded = true;
+					config.error = error;
+
+					config.callbacks.forEach(function (callback) {
+						callback(error, model);
+					});
+
+					config.callbacks = [];
+				});
+
+				this._models.set(name, config);
+			}
+		},
+		model: {
+			value: function model(name, callback) {
 				if (!this._models.has(name)) {
-					this._models.set(name, modelFactory(this.server));
+					this._createModelFromFactory(name);
 				}
 
-				return this._models.get(name);
+				var config = this._models.get(name);
+
+				if (!callback) {
+					return config.model;
+				}
+
+				//TODO replace it with async.memorize
+				if (config.loaded) {
+					callback(config.error, config.model);
+				} else {
+					config.calbacks.push(callback);
+				}
+
+				return config.model;
 			}
 		},
 		register: {
@@ -50,24 +88,22 @@ var Models = (function () {
 					throw new Error("Model has no name");
 				}
 
-				this._modelModules.set(name, modelModul["default"] ? modelModul["default"] : modelModul);
+				this._modelFactories.set(name, modelModul["default"] ? modelModul["default"] : modelModul);
 
 				Object.defineProperty(this, name, {
 					get: function get() {
 						return this.model(name);
 					}
 				});
-
-				return;
 			}
 		},
 		preload: {
-			value: function preload() {
+			value: function preload(callback) {
 				var _this = this;
 
-				this._modelModules.forEach(function (factory, modelName) {
-					_this.model(modelName);
-				});
+				each(this._modelFactories.keys(), function (modelName, callback) {
+					_this.model(modelName, callback);
+				}, callback);
 			}
 		}
 	});

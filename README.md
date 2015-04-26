@@ -13,7 +13,9 @@ Maglev supports MVC patterns and RESTful routes.
 
 ## Install
 
-	$ npm install maglev
+```sh
+npm install maglev
+```
 
 ## Features
 
