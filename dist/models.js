@@ -50,7 +50,7 @@ var Models = (function () {
 					config.error = error;
 
 					config.callbacks.forEach(function (callback) {
-						callback(error, model);
+						callback(error, config.model);
 					});
 
 					config.callbacks = [];
@@ -75,7 +75,7 @@ var Models = (function () {
 				if (config.loaded) {
 					callback(config.error, config.model);
 				} else {
-					config.calbacks.push(callback);
+					config.callbacks.push(callback);
 				}
 
 				return config.model;
@@ -101,7 +101,12 @@ var Models = (function () {
 			value: function preload(callback) {
 				var _this = this;
 
-				each(this._modelFactories.keys(), function (modelName, callback) {
+				var keys = [];
+				this._modelFactories.forEach(function (factory, modelName) {
+					keys.push(modelName);
+				});
+
+				each(keys, function (modelName, callback) {
 					_this.model(modelName, callback);
 				}, callback);
 			}
