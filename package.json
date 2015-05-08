@@ -1,6 +1,6 @@
 {
 	"name": "maglev",
-	"version": "4.0.2",
+	"version": "4.0.3",
 	"description": "Preconfigured NodeJS framework",
 	"author": {
 		"name": "Zlatko Fedor",
@@ -96,6 +96,6 @@
 		"supertest": "~0.15.0"
 	},
 	"peerDependencies": {
-		"express-session": "1.10.x"
+		"express-session": "1.x"
 	}
 }
