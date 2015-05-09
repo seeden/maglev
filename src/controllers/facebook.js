@@ -52,7 +52,7 @@ export function redirectToEnsure(req, res, next) {
  * Channel for facebook API
  */
 export function channel(req, res, next) {
-	var oneYear = 31536000;
+	const oneYear = 31536000;
 	res.set({
 		'Pragma': 'public',
 		'Cache-Control': 'max-age=' + oneYear,
@@ -63,15 +63,15 @@ export function channel(req, res, next) {
 }
 
 export function ensureBySignedRequest(req, res, next) {
-	if(!req.body.signed_request || !req.body.profile) {
+	if(!req.body.signedRequest || !req.body.profile) {
 		return next(new WebError(400));
 	}
 
-	var User = req.models.User;
-	var options = req.server.options;
+	const User = req.models.User;
+	const options = req.server.options;
 
-	var session = req.body.session || false;
-	var signedRequest  = FB.parseSignedRequest(req.body.signed_request, options.facebook.clientSecret);
+	const session = req.body.session || false;
+	const signedRequest  = FB.parseSignedRequest(req.body.signedRequest, options.facebook.clientSecret);
 
 	if(!signedRequest) {
 		return next(new WebError(400, 'Parsing signed request'));
@@ -93,7 +93,7 @@ export function ensureBySignedRequest(req, res, next) {
 		}
 
 		if(user) {
-			return req.logIn(user, {session: session}, next);
+			return req.logIn(user, { session }, next);
 		}
 
 		if(!options.registration.simple) {
@@ -105,14 +105,14 @@ export function ensureBySignedRequest(req, res, next) {
 				return next(err);
 			}
 			
-			req.logIn(user, {session: session}, next);
+			req.logIn(user, { session }, next);
 		});
 	});
 }
 
 export function redirectPeopleToCanvas(req, res, next) {
-	var facebookBot = 'facebookexternalhit';
-	var options = req.server.options;
+	const facebookBot = 'facebookexternalhit';
+	const options = req.server.options;
 
 	if(!req.headers['user-agent'] || req.headers['user-agent'].indexOf(facebookBot) === -1) {
 		return res.redirect(302, 'https://apps.facebook.com/' + options.facebook.namespace + '/');

@@ -71,7 +71,7 @@ function channel(req, res, next) {
 }
 
 function ensureBySignedRequest(req, res, next) {
-	if (!req.body.signed_request || !req.body.profile) {
+	if (!req.body.signedRequest || !req.body.profile) {
 		return next(new WebError(400));
 	}
 
@@ -79,7 +79,7 @@ function ensureBySignedRequest(req, res, next) {
 	var options = req.server.options;
 
 	var session = req.body.session || false;
-	var signedRequest = FB.parseSignedRequest(req.body.signed_request, options.facebook.clientSecret);
+	var signedRequest = FB.parseSignedRequest(req.body.signedRequest, options.facebook.clientSecret);
 
 	if (!signedRequest) {
 		return next(new WebError(400, "Parsing signed request"));
