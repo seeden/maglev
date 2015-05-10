@@ -5,6 +5,7 @@ import * as provider from './provider';
 import permalink from 'mongoose-permalink';
 import mongooseHRBAC from 'mongoose-hrbac';
 import jsonSchemaPlugin from 'mongoose-json-schema';
+import { waterfall } from 'async';
 
 export const name = 'User';
 
@@ -33,7 +34,11 @@ function getDisplayName() {
  * @param  {Function} cb      Callback with created user
  */
 function createByFacebook(profile, cb) {
-	var data = {
+	if(!profile.id) {
+		return cb(new Error('Profile id is undefined'));
+	}
+
+	const data = {
 		username: profile.username || null,
 		firstName: profile.first_name,
 		lastName: profile.last_name,
@@ -47,7 +52,28 @@ function createByFacebook(profile, cb) {
 		}]
 	};
 
-	return this.create(data, cb);
+	waterfall([
+		callback => {
+			if(!profile.email) {
+				return callback(null);
+			}
+
+			this.findOne({ 
+				email: profile.email 
+			}, function(err, user) {
+				if(err) {
+					return callback(err);
+				}
+
+				if(user) {
+					return callback(new Error('User with this email already exists'));
+				}
+
+				callback(null);
+			});
+		}, 
+		callback => this.create(data, callback)
+	], cb);
 }
 
 /**
@@ -116,7 +142,7 @@ function findByUsername(username, strict, cb) {
 	}
 
 	if(strict) {
-		return this.findOne({username: username}, cb);
+		return this.findOne({ username }, cb);
 	} else {
 		return this.findOne({ $or: [
 			{ username: username },

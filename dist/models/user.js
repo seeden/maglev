@@ -51,6 +51,8 @@ var mongooseHRBAC = _interopRequire(require("mongoose-hrbac"));
 
 var jsonSchemaPlugin = _interopRequire(require("mongoose-json-schema"));
 
+var waterfall = require("async").waterfall;
+
 var name = exports.name = "User";
 
 // max of 5 attempts, resulting in a 2 hour lock
@@ -78,6 +80,12 @@ function getDisplayName() {
  * @param  {Function} cb      Callback with created user
  */
 function createByFacebook(profile, cb) {
+	var _this = this;
+
+	if (!profile.id) {
+		return cb(new Error("Profile id is undefined"));
+	}
+
 	var data = {
 		username: profile.username || null,
 		firstName: profile.first_name,
@@ -92,7 +100,27 @@ function createByFacebook(profile, cb) {
 		}]
 	};
 
-	return this.create(data, cb);
+	waterfall([function (callback) {
+		if (!profile.email) {
+			return callback(null);
+		}
+
+		_this.findOne({
+			email: profile.email
+		}, function (err, user) {
+			if (err) {
+				return callback(err);
+			}
+
+			if (user) {
+				return callback(new Error("User with this email already exists"));
+			}
+
+			callback(null);
+		});
+	}, function (callback) {
+		return _this.create(data, callback);
+	}], cb);
 }
 
 /**
