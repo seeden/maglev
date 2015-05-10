@@ -79,7 +79,7 @@ function ensureBySignedRequest(req, res, next) {
 	var options = req.server.options;
 
 	var session = req.body.session || false;
-	var signedRequest = FB.parseSignedRequest(req.body.signedRequest, options.facebook.clientSecret);
+	var signedRequest = FB.parseSignedRequest(req.body.signedRequest, options.facebook.appSecret);
 
 	if (!signedRequest) {
 		return next(new WebError(400, "Parsing signed request"));

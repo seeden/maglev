@@ -97,8 +97,8 @@ function bearer(options, models) {
 
 function facebook(options, models) {
 	return new FacebookStrategy({
-		clientID: options.facebook.clientID,
-		clientSecret: options.facebook.clientSecret
+		clientID: options.facebook.appID,
+		clientSecret: options.facebook.appSecret
 	}, function (accessToken, refreshToken, profile, done) {
 		var User = models.User;
 
@@ -106,8 +106,8 @@ function facebook(options, models) {
 			return done(new Error("Profile ID is null"));
 		}
 
-		if (!options.facebook.clientID || !options.facebook.clientSecret) {
-			return done(new Error("Missing Facebook clientID or clientSecret"));
+		if (!options.facebook.appID || !options.facebook.appSecret) {
+			return done(new Error("Missing Facebook appID or appSecret"));
 		}
 
 		User.findByFacebookID(profile.id, function (err, user) {
@@ -163,8 +163,8 @@ function twitter(options, models) {
 
 function facebookCanvas(options, models) {
 	return new FacebookCanvasStrategy({
-		clientID: options.facebook.clientID,
-		clientSecret: options.facebook.clientSecret
+		clientID: options.facebook.appID,
+		clientSecret: options.facebook.appSecret
 	}, function (accessToken, refreshToken, profile, done) {
 		var User = models.User;
 
@@ -172,8 +172,8 @@ function facebookCanvas(options, models) {
 			return done(new Error("Profile ID is null"));
 		}
 
-		if (!options.facebook.clientID || !options.facebook.clientSecret) {
-			return done(new Error("Missing Facebook clientID or clientSecret"));
+		if (!options.facebook.appID || !options.facebook.appSecret) {
+			return done(new Error("Missing Facebook appID or appSecret"));
 		}
 
 		User.findByFacebookID(profile.id, function (err, user) {

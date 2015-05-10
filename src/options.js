@@ -106,8 +106,8 @@ export default {
 	},
 
 	facebook: {
-		clientID: null,
-		clientSecret: null,
+		appID: null,
+		appSecret: null,
 		namespace: null
 	},
 

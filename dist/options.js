@@ -106,8 +106,8 @@ module.exports = {
 	},
 
 	facebook: {
-		clientID: null,
-		clientSecret: null,
+		appID: null,
+		appSecret: null,
 		namespace: null
 	},
 
