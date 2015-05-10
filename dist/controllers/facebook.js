@@ -77,6 +77,7 @@ function ensureBySignedRequest(req, res, next) {
 
 	var User = req.models.User;
 	var options = req.server.options;
+	var profile = req.body.profile;
 
 	var session = req.body.session || false;
 	var signedRequest = FB.parseSignedRequest(req.body.signedRequest, options.facebook.appSecret);
@@ -108,7 +109,11 @@ function ensureBySignedRequest(req, res, next) {
 			return next(new WebError(400, "User needs to be registered"));
 		}
 
-		User.createByFacebook(req.body.profile, function (err, user) {
+		if (profile.id != signedRequest.user_id) {
+			return next(new WebError(400, "Profile.id is different from signedRequest.user_id"));
+		}
+
+		User.createByFacebook(profile, function (err, user) {
 			if (err) {
 				return next(err);
 			}
