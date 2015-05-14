@@ -1,5 +1,3 @@
-console.log(1234564);
-
 export default function(route) {
 	route
 		.api()

@@ -269,6 +269,8 @@ function addProvider(name, uid, data, cb) {
 }
 
 function removeProvider(name, uid, cb) {
+	var _this = this;
+
 	if (!name || !uid) {
 		return cb(new Error("Provider name or uid is undefined"));
 	}
@@ -276,15 +278,14 @@ function removeProvider(name, uid, cb) {
 	var removed = false;
 	var nameUID = provider.genNameUID(name, uid);
 
-	for (var i = 0; i < this.providers.length; i++) {
-		var providerData = this.providers[i];
-
-		if (providerData.nameUID === nameUID) {
-			this.providers.splice(i, 1);
-			removed = true;
-			break;
+	this.providers.forEach(function (provider, index) {
+		if (provider.nameUID !== nameUID) {
+			return;
 		}
-	}
+
+		_this.providers.splice(index, 1);
+		removed = true;
+	});
 
 	if (!removed) {
 		return cb(new Error("This provider is not associated to this user"));
@@ -294,34 +295,29 @@ function removeProvider(name, uid, cb) {
 }
 
 function getProvider(providerName, providerUID) {
-	for (var i = 0; i < this.providers.length; i++) {
-		var provider = this.providers[i];
-
-		if (provider.name === providerName) {
-			if (providerUID && provider.uid !== providerUID) {
-				continue;
-			}
-
-			return provider;
+	var providers = this.providers.filter(function (provider) {
+		if (provider.name !== providerName) {
+			return false;
 		}
-	}
 
-	return null;
+		if (providerUID && provider.uid !== providerUID) {
+			return false;
+		}
+
+		return true;
+	});
+
+	return providers.length ? providers[0] : null;
 }
 
 function hasProvider(providerName, providerUID) {
-	return this.getProvider(providerName, providerUID) !== null;
+	return !!this.getProvider(providerName, providerUID);
 }
 
 function getProvidersNameUIDs() {
-	var providers = [];
-
-	for (var i = 0; i < this.providers.length; i++) {
-		var provider = this.providers[i];
-		providers.push(provider.nameUID);
-	}
-
-	return providers;
+	return this.providers.map(function (provider) {
+		return provider.nameUID;
+	});
 }
 
 /**
