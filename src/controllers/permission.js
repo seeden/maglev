@@ -78,7 +78,7 @@ export function remove(req, res, next) {
 				return next(new WebError(400));
 			}
 
-			return res.status(204).jsonp({});
+			return res.status(204).end();
 		});
 	});
 }
@@ -91,7 +91,7 @@ export function exists(req, res, next) {
 		return next(new WebError(404));
 	}
 
-	return res.status(204).jsonp({});
+	return res.status(204).end();
 };
 
 /**

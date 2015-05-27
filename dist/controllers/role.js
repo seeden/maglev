@@ -106,7 +106,7 @@ function remove(req, res, next) {
 				return next(new WebError(400));
 			}
 
-			return res.status(204).jsonp({});
+			return res.status(204).end();
 		});
 	});
 }
@@ -116,7 +116,7 @@ function exists(req, res, next) {
 		return next(new WebError(404));
 	}
 
-	return res.status(204).jsonp({});
+	return res.status(204).end();
 }
 
 function get(req, res, next) {
@@ -151,7 +151,7 @@ function grant(req, res, next) {
 			return next(new WebError(400));
 		}
 
-		return res.status(204).jsonp({});
+		return res.status(204).end();
 	});
 }
 
@@ -173,7 +173,7 @@ function revoke(req, res, next) {
 			return next(new WebError(400));
 		}
 
-		return res.status(204).jsonp({});
+		return res.status(204).end();
 	});
 }
 

@@ -60,7 +60,7 @@ export function addPermission(req, res, next) {
 			return next(err);
 		}
 
-		res.status(204).jsonp({});
+		res.status(204).end();
 	});
 }
 
@@ -81,7 +81,7 @@ export function removePermission(req, res, next) {
 			return next(err);
 		}
 
-		res.status(204).jsonp({});
+		res.status(204).end();
 	});
 }
 
@@ -125,7 +125,7 @@ export function setRole(req, res, next) {
 			return next(err);
 		}
 
-		res.status(204).jsonp({});
+		res.status(204).end();
 	});
 }
 
@@ -140,6 +140,6 @@ export function removeRole(req, res, next) {
 			return next(err);
 		}
 
-		res.status(204).jsonp({});
+		res.status(204).end();
 	});
 }

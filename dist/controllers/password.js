@@ -65,7 +65,7 @@ function change(req, res, next) {
 				return next(err);
 			}
 
-			return res.status(204).jsonp({});
+			return res.status(204).end();
 		});
 	} else {
 		if (!req.body.password_old) {
@@ -86,7 +86,7 @@ function change(req, res, next) {
 					return next(err);
 				}
 
-				return res.status(204).jsonp({});
+				return res.status(204).end();
 			});
 		});
 	}
@@ -166,7 +166,7 @@ function forgot(req, res, next) {
 					return next(new Error(err));
 				}
 
-				return res.status(204).jsonp({});
+				return res.status(204).end();
 			});
 		});
 	});

@@ -98,7 +98,7 @@ export function remove(req, res, next) {
 			return next(err);
 		}
 
-		res.status(204).jsonp({});
+		res.status(204).end();
 	});
 }
 
