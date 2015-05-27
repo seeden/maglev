@@ -1,36 +1,25 @@
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
-
+Object.defineProperty(exports, '__esModule', {
+	value: true
+});
 exports.permission = permission;
-
-/**
- * Create new permission
- */
 exports.create = create;
-
-/**
- * Remove existing permission
- */
 exports.remove = remove;
-
-/**
- * Return true if poermission exists
- */
 exports.exists = exists;
-
-/**
- * Get permission details
- */
 exports.get = get;
 
-var WebError = _interopRequire(require("web-error"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _webError = require('web-error');
+
+var _webError2 = _interopRequireDefault(_webError);
 
 function permission(req, res, next, name) {
 	var rbac = req.server.rbac;
 
 	if (!name) {
-		return next(new WebError(400));
+		return next(new _webError2['default'](400));
 	}
 
 	rbac.getPermissionByName(name, function (err, permission) {
@@ -39,7 +28,7 @@ function permission(req, res, next, name) {
 		}
 
 		if (!permission) {
-			return next(new WebError(404));
+			return next(new _webError2['default'](404));
 		}
 
 		req.objects.permission = permission;
@@ -47,11 +36,15 @@ function permission(req, res, next, name) {
 	});
 }
 
+/**
+ * Create new permission
+ */
+
 function create(req, res, next) {
 	var rbac = req.server.rbac;
 
 	if (!req.body.action || !req.body.resource) {
-		return next(new WebError(400, "Permission action or resource is undefined"));
+		return next(new _webError2['default'](400, 'Permission action or resource is undefined'));
 	}
 
 	rbac.createPermission(req.body.action, req.body.resource, function (err, permission) {
@@ -60,7 +53,7 @@ function create(req, res, next) {
 		}
 
 		if (!permission) {
-			return next(new WebError(400));
+			return next(new _webError2['default'](400));
 		}
 
 		return res.jsonp({
@@ -73,11 +66,15 @@ function create(req, res, next) {
 	});
 }
 
+/**
+ * Remove existing permission
+ */
+
 function remove(req, res, next) {
 	var User = req.models.User;
 
 	if (!req.objects.permission) {
-		return next(new WebError(404));
+		return next(new _webError2['default'](404));
 	}
 
 	var permission = req.objects.permission;
@@ -94,7 +91,7 @@ function remove(req, res, next) {
 			}
 
 			if (!isDeleted) {
-				return next(new WebError(400));
+				return next(new _webError2['default'](400));
 			}
 
 			return res.status(204).end();
@@ -102,18 +99,27 @@ function remove(req, res, next) {
 	});
 }
 
+/**
+ * Return true if poermission exists
+ */
+
 function exists(req, res, next) {
 	if (!req.objects.permission) {
-		return next(new WebError(404));
+		return next(new _webError2['default'](404));
 	}
 
 	return res.status(204).end();
 }
 
 ;
+
+/**
+ * Get permission details
+ */
+
 function get(req, res, next) {
 	if (!req.objects.permission) {
-		return next(new WebError(404));
+		return next(new _webError2['default'](404));
 	}
 
 	var permission = req.objects.permission;
@@ -126,7 +132,3 @@ function get(req, res, next) {
 		}
 	});
 }
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});

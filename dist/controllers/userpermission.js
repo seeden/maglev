@@ -1,5 +1,8 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
 exports.getScope = getScope;
 exports.can = can;
 exports.addPermission = addPermission;
@@ -153,7 +156,3 @@ function removeRole(req, res, next) {
 		res.status(204).end();
 	});
 }
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});

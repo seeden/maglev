@@ -1,6 +1,6 @@
 {
 	"name": "maglev",
-	"version": "4.1.6",
+	"version": "4.1.7",
 	"description": "Preconfigured NodeJS framework",
 	"author": {
 		"name": "Zlatko Fedor",
@@ -21,19 +21,18 @@
 		"rbac"
 	],
 	"private": false,
-	"licenses": [
-		{
-			"type": "MIT",
-			"url": "http://www.opensource.org/licenses/MIT"
-		}
-	],
+	"licenses": [{
+		"type": "MIT",
+		"url": "http://www.opensource.org/licenses/MIT"
+	}],
 	"main": "dist/server.js",
 	"engines": {
 		"node": ">= 0.10.0"
 	},
 	"scripts": {
-		"test"  : "babel-node ./node_modules/gulp/bin/gulp.js test",
-		"build" : "node ./node_modules/gulp/bin/gulp.js build"
+		"prepublish" : "npm run build",
+		"build"      : "node ./node_modules/gulp/bin/gulp.js build",
+		"test"       : "babel-node ./node_modules/gulp/bin/gulp.js test"
 	},
 	"dependencies": {
 		"express": "~4.12.4",
@@ -86,14 +85,14 @@
 	},
 	"devDependencies": {
 		"gulp": "~3.8.11",
-		"gulp-mocha": "~2.0.0",
-		"gulp-babel": "~4.0.0",
+		"gulp-mocha": "~2.1.0",
+		"gulp-babel": "~5.1.0",
 		"gulp-util": "~3.0.4",
-		"should": "~5.0.1",
-		"babel": "~4.6.1",
-		"mongoose": "~3.8.24",
-		"connect-mongo": "~0.7.0",
-		"supertest": "~0.15.0"
+		"should": "~6.0.3",
+		"babel": "~5.4.7",
+		"mongoose": "~4.0.3",
+		"connect-mongo": "~0.8.1",
+		"supertest": "~1.0.1"
 	},
 	"peerDependencies": {
 		"express-session": "1.x"

@@ -1,24 +1,37 @@
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
-
+Object.defineProperty(exports, '__esModule', {
+	value: true
+});
 exports.upload = upload;
 exports.clear = clear;
 exports.clearAfterError = clearAfterError;
 exports.get = get;
 exports.download = download;
 
-var multiparty = _interopRequire(require("multiparty"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var fs = _interopRequire(require("fs"));
+var _multiparty = require('multiparty');
 
-var map = require("async").map;
+var _multiparty2 = _interopRequireDefault(_multiparty);
 
-var WebError = _interopRequire(require("web-error"));
+var _fs = require('fs');
 
-var Download = _interopRequire(require("download"));
+var _fs2 = _interopRequireDefault(_fs);
 
-var tmp = _interopRequire(require("temporary"));
+var _async = require('async');
+
+var _webError = require('web-error');
+
+var _webError2 = _interopRequireDefault(_webError);
+
+var _download = require('download');
+
+var _download2 = _interopRequireDefault(_download);
+
+var _temporary = require('temporary');
+
+var _temporary2 = _interopRequireDefault(_temporary);
 
 function upload(req, res, next) {
 	var options = req.server.options;
@@ -28,21 +41,21 @@ function upload(req, res, next) {
 	options.maxFieldsSize = options.maxFieldsSize || options.upload.maxFieldsSize;
 	options.maxFields = options.maxFields || options.upload.maxFields;
 
-	var form = new multiparty.Form(options);
+	var form = new _multiparty2['default'].Form(options);
 
-	form.on("error", function (err) {
+	form.on('error', function (err) {
 		next(err);
 	});
 
-	form.on("field", function (field, value) {
+	form.on('field', function (field, value) {
 		req.body[field] = value;
 	});
 
-	form.on("file", function (name, file) {
+	form.on('file', function (name, file) {
 		files.push(file);
 	});
 
-	form.on("close", function () {
+	form.on('close', function () {
 		next();
 	});
 
@@ -72,9 +85,9 @@ function clearAfterError(err, req, res, next) {
 }
 
 function deleteFiles(files, callback) {
-	map(files, function (file, cb) {
-		fs.unlink(file.path, function (err) {
-			if (err && err.message.indexOf("ENOENT") === -1) {
+	(0, _async.map)(files, function (file, cb) {
+		_fs2['default'].unlink(file.path, function (err) {
+			if (err && err.message.indexOf('ENOENT') === -1) {
 				return cb(err);
 			};
 
@@ -93,7 +106,7 @@ function get(req, res, next) {
 	var file = req.objects.file;
 
 	if (!file) {
-		return next(new WebError(404));
+		return next(new _webError2['default'](404));
 	}
 
 	res.jsonp({
@@ -106,13 +119,13 @@ function download(req, res, next) {
 	var files = req.objects.files = [];
 
 	if (!req.body.url) {
-		return next(new WebError(401));
+		return next(new _webError2['default'](401));
 	}
 
 	var options = options || {};
 	options.maxFieldsSize = options.maxFieldsSize || options.upload.maxFieldsSize;
 
-	var download = new Download().get(req.body.url);
+	var download = new _download2['default']().get(req.body.url);
 
 	download.run(function (err, downloadedFiles) {
 		if (err) {
@@ -120,13 +133,13 @@ function download(req, res, next) {
 		}
 
 		if (!downloadedFiles.length) {
-			return next(new WebError(401));
+			return next(new _webError2['default'](401));
 		}
 
-		var tmpFile = new tmp.File();
+		var tmpFile = new _temporary2['default'].File();
 
 		var file = {
-			fieldName: "file",
+			fieldName: 'file',
 			originalFilename: downloadedFiles[0].path,
 			path: tmpFile.path,
 			size: downloadedFiles[0].contents.length
@@ -253,7 +266,3 @@ exports.storeFirstImage = function(options) {
 		});
 	}
 };*/
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});

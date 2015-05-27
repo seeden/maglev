@@ -1,29 +1,32 @@
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
-
+Object.defineProperty(exports, '__esModule', {
+	value: true
+});
 exports.isOwner = isOwner;
 exports.user = user;
 exports.permalink = permalink;
-
-/**
- * Create user by simple registraion
- */
 exports.create = create;
 exports.remove = remove;
 exports.current = current;
 
-var WebError = _interopRequire(require("web-error"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var tv4 = _interopRequire(require("tv4"));
+var _webError = require('web-error');
+
+var _webError2 = _interopRequireDefault(_webError);
+
+var _tv4 = require('tv4');
+
+var _tv42 = _interopRequireDefault(_tv4);
 
 function isOwner(req, res, next) {
 	if (!req.user || !req.objects.user) {
-		return next(new WebError(401));
+		return next(new _webError2['default'](401));
 	}
 
 	if (!req.user.isMe(req.objects.user)) {
-		return next(new WebError(401));
+		return next(new _webError2['default'](401));
 	}
 
 	next();
@@ -33,7 +36,7 @@ function user(req, res, next, id) {
 	var User = req.models.User;
 
 	if (!id) {
-		return next(new WebError(400));
+		return next(new _webError2['default'](400));
 	}
 
 	User.findById(id, function (err, user) {
@@ -42,7 +45,7 @@ function user(req, res, next, id) {
 		}
 
 		if (!user) {
-			return next(new WebError(404));
+			return next(new _webError2['default'](404));
 		}
 
 		req.objects.user = user;
@@ -54,7 +57,7 @@ function permalink(req, res, next, permalink) {
 	var User = req.models.User;
 
 	if (!permalink) {
-		return next(new WebError(400));
+		return next(new _webError2['default'](400));
 	}
 
 	User.findOne({
@@ -65,7 +68,7 @@ function permalink(req, res, next, permalink) {
 		}
 
 		if (!user) {
-			return next(new WebError(404));
+			return next(new _webError2['default'](404));
 		}
 
 		req.objects.user = user;
@@ -73,14 +76,18 @@ function permalink(req, res, next, permalink) {
 	});
 }
 
+/**
+ * Create user by simple registraion
+ */
+
 function create(req, res, next) {
 	var User = req.models.User;
 	var options = req.server.options;
 
 	exports.createSchema = exports.createSchema || User.getRestJSONSchema();
-	var result = tv4.validateMultiple(req.body, exports.createSchema);
+	var result = _tv42['default'].validateMultiple(req.body, exports.createSchema);
 	if (!result.valid) {
-		return next(new WebError(400, "Validation errors", result.errors));
+		return next(new _webError2['default'](400, 'Validation errors', result.errors));
 	}
 
 	User.create(req.body, function (err, user) {
@@ -89,7 +96,7 @@ function create(req, res, next) {
 		}
 
 		if (!user) {
-			return next(new Error("User is undefined"));
+			return next(new Error('User is undefined'));
 		}
 
 		res.jsonp({
@@ -103,7 +110,7 @@ function remove(req, res, next) {
 	var user = req.objects.user;
 
 	if (!user) {
-		return next(new WebError(404));
+		return next(new _webError2['default'](404));
 	}
 
 	user.remove(function (err) {
@@ -119,14 +126,10 @@ function current(req, res, next) {
 	var user = req.user;
 
 	if (!user) {
-		return next(new WebError(404));
+		return next(new _webError2['default'](404));
 	}
 
 	res.jsonp({
 		user: user.toPrivateJSON()
 	});
 }
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});

@@ -1,5 +1,8 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
 exports.or = or;
 exports.and = and;
 exports.cond = cond;
@@ -39,7 +42,3 @@ function cond(cond, fnOK, fnElse) {
 		});
 	};
 }
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});

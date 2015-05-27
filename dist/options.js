@@ -1,19 +1,22 @@
-"use strict";
+'use strict';
 
-module.exports = {
+Object.defineProperty(exports, '__esModule', {
+	value: true
+});
+exports['default'] = {
 	root: null,
 
 	rbac: {
 		options: {},
 		role: {
-			guest: "guest"
+			guest: 'guest'
 		}
 	},
 
 	log: true,
 
 	morgan: {
-		format: process.env.NODE_ENV === "development" ? "dev" : "combined",
+		format: process.env.NODE_ENV === 'development' ? 'dev' : 'combined',
 		options: {
 			immediate: false
 			//stream: process.stdout
@@ -22,7 +25,7 @@ module.exports = {
 
 	server: {
 		build: 1,
-		host: process.env.HOST || "127.0.0.1",
+		host: process.env.HOST || '127.0.0.1',
 		port: process.env.PORT || 4000
 	},
 
@@ -33,7 +36,7 @@ module.exports = {
 	compression: {},
 
 	powered: {
-		value: "Maglev"
+		value: 'Maglev'
 	},
 
 	responseTime: {},
@@ -41,22 +44,22 @@ module.exports = {
 	methodOverride: {
 		//https://github.com/expressjs/method-override
 		enabled: true,
-		getter: "X-HTTP-Method-Override",
+		getter: 'X-HTTP-Method-Override',
 		options: {}
 	},
 
 	bodyParser: [{
-		parse: "urlencoded",
+		parse: 'urlencoded',
 		options: {
 			extended: true
 		}
 	}, {
-		parse: "json",
+		parse: 'json',
 		options: {}
 	}, {
-		parse: "json",
+		parse: 'json',
 		options: {
-			type: "application/vnd.api+json"
+			type: 'application/vnd.api+json'
 		}
 	}],
 
@@ -80,23 +83,23 @@ module.exports = {
 	},
 
 	view: {
-		engine: "swig"
+		engine: 'swig'
 	},
 
 	router: {
 		api: {
-			path: "/api"
+			path: '/api'
 		}
 	},
 
 	locale: {
-		"default": "en",
-		available: ["en"],
+		'default': 'en',
+		available: ['en'],
 		inUrl: false
 	},
 
 	country: {
-		"default": null,
+		'default': null,
 		available: [],
 		inUrl: false
 	},
@@ -127,21 +130,22 @@ module.exports = {
 	strategies: [],
 
 	css: {
-		path: "/public/css",
-		root: "public/css",
+		path: '/public/css',
+		root: 'public/css',
 		options: {}
 	},
 
-	"static": {
-		path: "/public",
-		root: "public",
+	'static': {
+		path: '/public',
+		root: 'public',
 		options: {
-			index: ["index.html"]
+			index: ['index.html']
 		}
 	},
 
 	favicon: {
-		root: "public/favicon.ico",
+		root: 'public/favicon.ico',
 		options: {}
 	}
 };
+module.exports = exports['default'];

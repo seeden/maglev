@@ -1,54 +1,98 @@
-"use strict";
+'use strict';
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
+Object.defineProperty(exports, '__esModule', {
+	value: true
+});
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var express = _interopRequire(require("express"));
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-var debug = _interopRequire(require("debug"));
+var _express = require('express');
 
-var http = _interopRequire(require("http"));
+var _express2 = _interopRequireDefault(_express);
 
-var compression = _interopRequire(require("compression"));
+var _debug = require('debug');
 
-var serveFavicon = _interopRequire(require("serve-favicon"));
+var _debug2 = _interopRequireDefault(_debug);
 
-var serveStatic = _interopRequire(require("serve-static"));
+var _http = require('http');
 
-var cookieParser = _interopRequire(require("cookie-parser"));
+var _http2 = _interopRequireDefault(_http);
 
-var session = _interopRequire(require("express-session"));
+var _compression = require('compression');
 
-var bodyParser = _interopRequire(require("body-parser"));
+var _compression2 = _interopRequireDefault(_compression);
 
-var methodOverride = _interopRequire(require("method-override"));
+var _serveFavicon = require('serve-favicon');
 
-var responseTime = _interopRequire(require("response-time"));
+var _serveFavicon2 = _interopRequireDefault(_serveFavicon);
 
-var timeout = _interopRequire(require("connect-timeout"));
+var _serveStatic = require('serve-static');
 
-var morgan = _interopRequire(require("morgan"));
+var _serveStatic2 = _interopRequireDefault(_serveStatic);
 
-var cors = _interopRequire(require("cors"));
+var _cookieParser = require('cookie-parser');
 
-var lessMiddleware = _interopRequire(require("less-middleware"));
+var _cookieParser2 = _interopRequireDefault(_cookieParser);
 
-var req = _interopRequire(require("express/lib/request"));
+var _expressSession = require('express-session');
 
-var consolidate = _interopRequire(require("consolidate"));
+var _expressSession2 = _interopRequireDefault(_expressSession);
 
-var flash = _interopRequire(require("connect-flash"));
+var _bodyParser = require('body-parser');
 
-var fileController = _interopRequireWildcard(require("./controllers/file"));
+var _bodyParser2 = _interopRequireDefault(_bodyParser);
 
-var pageController = _interopRequireWildcard(require("./controllers/page"));
+var _methodOverride = require('method-override');
 
-var log = debug("maglev:app");
+var _methodOverride2 = _interopRequireDefault(_methodOverride);
+
+var _responseTime = require('response-time');
+
+var _responseTime2 = _interopRequireDefault(_responseTime);
+
+var _connectTimeout = require('connect-timeout');
+
+var _connectTimeout2 = _interopRequireDefault(_connectTimeout);
+
+var _morgan = require('morgan');
+
+var _morgan2 = _interopRequireDefault(_morgan);
+
+var _cors = require('cors');
+
+var _cors2 = _interopRequireDefault(_cors);
+
+var _lessMiddleware = require('less-middleware');
+
+var _lessMiddleware2 = _interopRequireDefault(_lessMiddleware);
+
+var _expressLibRequest = require('express/lib/request');
+
+var _expressLibRequest2 = _interopRequireDefault(_expressLibRequest);
+
+var _consolidate = require('consolidate');
+
+var _consolidate2 = _interopRequireDefault(_consolidate);
+
+var _connectFlash = require('connect-flash');
+
+var _connectFlash2 = _interopRequireDefault(_connectFlash);
+
+var _controllersFile = require('./controllers/file');
+
+var fileController = _interopRequireWildcard(_controllersFile);
+
+var _controllersPage = require('./controllers/page');
+
+var pageController = _interopRequireWildcard(_controllersPage);
+
+var log = (0, _debug2['default'])('maglev:app');
 
 var App = (function () {
 	function App(server, options) {
@@ -58,7 +102,7 @@ var App = (function () {
 
 		this._server = server;
 		this._options = options;
-		this._expressApp = express();
+		this._expressApp = (0, _express2['default'])();
 		this._httpServer = null;
 
 		this._prepareCompression();
@@ -72,247 +116,247 @@ var App = (function () {
 		this._prepareRouter();
 	}
 
-	_createClass(App, {
-		options: {
-			get: function () {
-				return this._options;
+	_createClass(App, [{
+		key: 'options',
+		get: function () {
+			return this._options;
+		}
+	}, {
+		key: 'server',
+		get: function () {
+			return this._server;
+		}
+	}, {
+		key: 'expressApp',
+		get: function () {
+			return this._expressApp;
+		}
+	}, {
+		key: 'listen',
+		value: function listen(port, host, callback) {
+			callback = callback || function () {};
+
+			if (this._httpServer) {
+				return callback(new Error('You need to close first'));
 			}
-		},
-		server: {
-			get: function () {
-				return this._server;
+
+			this._httpServer = _http2['default'].createServer(this.expressApp).listen(port, host, callback);
+
+			log('App started on port ' + port + ' and host ' + host);
+			return this;
+		}
+	}, {
+		key: 'close',
+		value: function close(callback) {
+			if (!this._httpServer) {
+				return callback(new Error('You need to listen first'));
 			}
-		},
-		expressApp: {
-			get: function () {
-				return this._expressApp;
+
+			this._httpServer.close(callback);
+			this._httpServer = null;
+			return this;
+		}
+	}, {
+		key: '_prepareCompression',
+		value: function _prepareCompression() {
+			var app = this.expressApp;
+			var options = this.options;
+
+			if (!options.compression) {
+				return;
 			}
-		},
-		listen: {
-			value: function listen(port, host, callback) {
-				callback = callback || function () {};
 
-				if (this._httpServer) {
-					return callback(new Error("You need to close first"));
-				}
+			app.use((0, _compression2['default'])(options.compression));
+		}
+	}, {
+		key: '_prepareLog',
+		value: function _prepareLog(server) {
+			var app = this.expressApp;
+			var options = this.options;
 
-				this._httpServer = http.createServer(this.expressApp).listen(port, host, callback);
-
-				log("App started on port " + port + " and host " + host);
-				return this;
+			if (!options.log) {
+				return;
 			}
-		},
-		close: {
-			value: function close(callback) {
-				if (!this._httpServer) {
-					return callback(new Error("You need to listen first"));
-				}
 
-				this._httpServer.close(callback);
-				this._httpServer = null;
-				return this;
+			app.set('showStackError', true);
+
+			if (!options.morgan) {
+				return;
 			}
-		},
-		_prepareCompression: {
-			value: function _prepareCompression() {
-				var app = this.expressApp;
-				var options = this.options;
+			app.use((0, _morgan2['default'])(options.morgan.format, options.morgan.options));
+		}
+	}, {
+		key: '_prepareEngine',
+		value: function _prepareEngine() {
+			var app = this.expressApp;
+			var options = this.options;
 
-				if (!options.compression) {
-					return;
-				}
+			app.locals.pretty = true;
+			app.locals.cache = 'memory';
+			app.enable('jsonp callback');
 
-				app.use(compression(options.compression));
+			app.engine('html', _consolidate2['default'][options.view.engine]);
+
+			app.set('view engine', 'html');
+			app.set('views', options.root + '/views');
+		}
+	}, {
+		key: '_prepareHtml',
+		value: function _prepareHtml() {
+			var app = this.expressApp;
+			var options = this.options;
+
+			if (!options.powered) {
+				app.disable('x-powered-by');
 			}
-		},
-		_prepareLog: {
-			value: function _prepareLog(server) {
-				var app = this.expressApp;
-				var options = this.options;
 
-				if (!options.log) {
-					return;
-				}
-
-				app.set("showStackError", true);
-
-				if (!options.morgan) {
-					return;
-				}
-				app.use(morgan(options.morgan.format, options.morgan.options));
+			if (options.responseTime) {
+				app.use((0, _responseTime2['default'])(options.responseTime));
 			}
-		},
-		_prepareEngine: {
-			value: function _prepareEngine() {
-				var app = this.expressApp;
-				var options = this.options;
 
-				app.locals.pretty = true;
-				app.locals.cache = "memory";
-				app.enable("jsonp callback");
-
-				app.engine("html", consolidate[options.view.engine]);
-
-				app.set("view engine", "html");
-				app.set("views", options.root + "/views");
+			if (options.cors) {
+				app.use((0, _cors2['default'])(options.cors));
 			}
-		},
-		_prepareHtml: {
-			value: function _prepareHtml() {
-				var app = this.expressApp;
-				var options = this.options;
 
-				if (!options.powered) {
-					app.disable("x-powered-by");
-				}
+			if (options.request.timeout) {
+				app.use((0, _connectTimeout2['default'])(options.request.timeout));
+			}
 
-				if (options.responseTime) {
-					app.use(responseTime(options.responseTime));
-				}
+			if (options.cookieParser) {
+				app.use((0, _cookieParser2['default'])(options.cookieParser.secret, options.cookieParser.options));
+			}
 
-				if (options.cors) {
-					app.use(cors(options.cors));
-				}
-
-				if (options.request.timeout) {
-					app.use(timeout(options.request.timeout));
-				}
-
-				if (options.cookieParser) {
-					app.use(cookieParser(options.cookieParser.secret, options.cookieParser.options));
-				}
-
-				if (options.bodyParser) {
-					for (var i = 0; i < options.bodyParser.length; i++) {
-						var bp = options.bodyParser[i];
-						app.use(bodyParser[bp.parse](bp.options));
-					}
-				}
-
-				if (options.methodOverride) {
-					app.use(methodOverride(options.methodOverride.getter, options.methodOverride.options));
+			if (options.bodyParser) {
+				for (var i = 0; i < options.bodyParser.length; i++) {
+					var bp = options.bodyParser[i];
+					app.use(_bodyParser2['default'][bp.parse](bp.options));
 				}
 			}
-		},
-		_prepareVars: {
-			value: function _prepareVars() {
-				var app = this.expressApp;
-				var server = this.server;
-				var options = this.options;
 
-				//add access to req from template
-				app.use(function (req, res, next) {
-					res.locals._req = req;
-					res.locals._production = process.env.NODE_ENV === "production";
-					res.locals._build = options.server.build;
-
-					next();
-				});
-
-				//add access to req from template
-				app.use(function (req, res, next) {
-					req.objects = {};
-					req.server = server;
-					req.models = server.models;
-
-					next();
-				});
-			}
-		},
-		_prepareSession: {
-			value: function _prepareSession() {
-				var app = this.expressApp;
-				var options = this.options;
-
-				if (!options.session) {
-					return;
-				}
-
-				app.use(session(options.session));
-			}
-		},
-		_prepareSecure: {
-			value: function _prepareSecure() {
-				var app = this.expressApp;
-				var server = this.server;
-				var options = this.options;
-
-				app.use(server.secure.passport.initialize());
-
-				if (!options.session) {
-					return;
-				}
-
-				app.use(server.secure.passport.session());
-			}
-		},
-		_prepareStatic: {
-			value: function _prepareStatic() {
-				var app = this.expressApp;
-				var options = this.options;
-
-				if (options.flash) {
-					app.use(flash());
-				}
-
-				if (options.favicon) {
-					app.use(serveFavicon(options.favicon.root, options.favicon.options));
-				}
-
-				if (options.css) {
-					app.use(options.css.path, lessMiddleware(options.css.root, options.css.options));
-				}
-
-				if (options["static"]) {
-					app.use(options["static"].path, serveStatic(options["static"].root, options["static"].options));
-				}
-			}
-		},
-		_prepareRouter: {
-			value: function _prepareRouter() {
-				var app = this.expressApp;
-				var options = this.options;
-				var server = this.server;
-
-				//use server router
-				app.use(server.router.expressRouter);
-
-				//delete uploaded files
-				app.use(fileController.clearAfterError); //error must be first
-				app.use(fileController.clear);
-
-				//at the end add 500 and 404
-				app.use(options.page.notFound || pageController.notFound);
-				app.use(options.page.error || pageController.error);
+			if (options.methodOverride) {
+				app.use((0, _methodOverride2['default'])(options.methodOverride.getter, options.methodOverride.options));
 			}
 		}
-	});
+	}, {
+		key: '_prepareVars',
+		value: function _prepareVars() {
+			var app = this.expressApp;
+			var server = this.server;
+			var options = this.options;
+
+			//add access to req from template
+			app.use(function (req, res, next) {
+				res.locals._req = req;
+				res.locals._production = process.env.NODE_ENV === 'production';
+				res.locals._build = options.server.build;
+
+				next();
+			});
+
+			//add access to req from template
+			app.use(function (req, res, next) {
+				req.objects = {};
+				req.server = server;
+				req.models = server.models;
+
+				next();
+			});
+		}
+	}, {
+		key: '_prepareSession',
+		value: function _prepareSession() {
+			var app = this.expressApp;
+			var options = this.options;
+
+			if (!options.session) {
+				return;
+			}
+
+			app.use((0, _expressSession2['default'])(options.session));
+		}
+	}, {
+		key: '_prepareSecure',
+		value: function _prepareSecure() {
+			var app = this.expressApp;
+			var server = this.server;
+			var options = this.options;
+
+			app.use(server.secure.passport.initialize());
+
+			if (!options.session) {
+				return;
+			}
+
+			app.use(server.secure.passport.session());
+		}
+	}, {
+		key: '_prepareStatic',
+		value: function _prepareStatic() {
+			var app = this.expressApp;
+			var options = this.options;
+
+			if (options.flash) {
+				app.use((0, _connectFlash2['default'])());
+			}
+
+			if (options.favicon) {
+				app.use((0, _serveFavicon2['default'])(options.favicon.root, options.favicon.options));
+			}
+
+			if (options.css) {
+				app.use(options.css.path, (0, _lessMiddleware2['default'])(options.css.root, options.css.options));
+			}
+
+			if (options['static']) {
+				app.use(options['static'].path, (0, _serveStatic2['default'])(options['static'].root, options['static'].options));
+			}
+		}
+	}, {
+		key: '_prepareRouter',
+		value: function _prepareRouter() {
+			var app = this.expressApp;
+			var options = this.options;
+			var server = this.server;
+
+			//use server router
+			app.use(server.router.expressRouter);
+
+			//delete uploaded files
+			app.use(fileController.clearAfterError); //error must be first
+			app.use(fileController.clear);
+
+			//at the end add 500 and 404
+			app.use(options.page.notFound || pageController.notFound);
+			app.use(options.page.error || pageController.error);
+		}
+	}]);
 
 	return App;
 })();
 
-module.exports = App;
+exports['default'] = App;
 
 function prepareRequest(req) {
-	req.__defineGetter__("httpHost", function () {
-		var trustProxy = this.app.get("trust proxy");
-		var host = trustProxy && this.get("X-Forwarded-Host");
-		return host || this.get("Host");
+	req.__defineGetter__('httpHost', function () {
+		var trustProxy = this.app.get('trust proxy');
+		var host = trustProxy && this.get('X-Forwarded-Host');
+		return host || this.get('Host');
 	});
 
-	req.__defineGetter__("port", function () {
+	req.__defineGetter__('port', function () {
 		host = this.httpHost;
 		if (!host) {
 			return;
 		}
 
-		var parts = host.split(":");
+		var parts = host.split(':');
 		return parts.length === 2 ? parseInt(parts[1], 10) : 80;
 	});
 
-	req.__defineGetter__("protocolHost", function () {
-		return this.protocol + "://" + this.httpHost;
+	req.__defineGetter__('protocolHost', function () {
+		return this.protocol + '://' + this.httpHost;
 	});
 }
 
-prepareRequest(req);
+prepareRequest(_expressLibRequest2['default']);
+module.exports = exports['default'];

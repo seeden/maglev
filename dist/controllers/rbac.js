@@ -1,6 +1,17 @@
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+Object.defineProperty(exports, '__esModule', {
+	value: true
+});
+exports.can = can;
+exports.hasRole = hasRole;
+exports.isGuest = isGuest;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _webError = require('web-error');
+
+var _webError2 = _interopRequireDefault(_webError);
 
 /**
  * Return middleware function for permission check
@@ -10,26 +21,6 @@ var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["defau
  * @param  {Number}  status   Status code of redirect action
  * @return {Function}          Middleware function
  */
-exports.can = can;
-
-/**
- * Return middleware function for permission check
- * @param  {String}  name   Name of role
- * @param  {String}  redirect Url where is user redirected when he has no permissions
- * @param  {Number}  status   Status code of redirect action
- * @return {Function}       Middleware function
- */
-exports.hasRole = hasRole;
-
-/**
- * Allow only guest user show content
- * @param  {String}  redirect Url where is user redirected when he has no permissions
- * @param  {Number}  status   Status code of redirect action
- * @return {Function}	Middleware function
- */
-exports.isGuest = isGuest;
-
-var WebError = _interopRequire(require("web-error"));
 
 function can(action, resource, redirect, redirectStatus) {
 	redirectStatus = redirectStatus || 302;
@@ -50,7 +41,7 @@ function can(action, resource, redirect, redirectStatus) {
 					return res.redirect(redirectStatus, redirect);
 				}
 
-				return next(new WebError(401));
+				return next(new _webError2['default'](401));
 			}
 
 			next();
@@ -64,6 +55,14 @@ function can(action, resource, redirect, redirectStatus) {
 	};
 }
 
+/**
+ * Return middleware function for permission check
+ * @param  {String}  name   Name of role
+ * @param  {String}  redirect Url where is user redirected when he has no permissions
+ * @param  {Number}  status   Status code of redirect action
+ * @return {Function}       Middleware function
+ */
+
 function hasRole(name, redirect, redirectStatus) {
 	redirectStatus = redirectStatus || 302;
 
@@ -72,7 +71,7 @@ function hasRole(name, redirect, redirectStatus) {
 		var rbac = server.rbac;
 
 		if (!req.user) {
-			return next(new WebError(401));
+			return next(new _webError2['default'](401));
 		}
 
 		req.user.hasRole(rbac, name, function (err, has) {
@@ -84,13 +83,20 @@ function hasRole(name, redirect, redirectStatus) {
 				if (redirect) {
 					return res.redirect(redirectStatus, redirect);
 				}
-				return next(new WebError(401));
+				return next(new _webError2['default'](401));
 			}
 
 			next();
 		});
 	};
 }
+
+/**
+ * Allow only guest user show content
+ * @param  {String}  redirect Url where is user redirected when he has no permissions
+ * @param  {Number}  status   Status code of redirect action
+ * @return {Function}	Middleware function
+ */
 
 function isGuest(redirect, redirectStatus) {
 	redirectStatus = redirectStatus || 302;
@@ -104,10 +110,6 @@ function isGuest(redirect, redirectStatus) {
 			return res.redirect(redirectStatus, redirect);
 		}
 
-		next(new WebError(401, "You are not a guest"));
+		next(new _webError2['default'](401, 'You are not a guest'));
 	};
 }
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});

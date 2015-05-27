@@ -1,16 +1,22 @@
-"use strict";
+'use strict';
 
+Object.defineProperty(exports, '__esModule', {
+	value: true
+});
+exports.genNameUID = genNameUID;
+exports.createSchema = createSchema;
+var name = 'Provider';
+
+exports.name = name;
 /**
  * Generate provider uid name from provider name and user ID
  * @param  {String} name Provider name
  * @param  {String} uid  User ID
  * @return {String}      Provider UID
  */
-exports.genNameUID = genNameUID;
-exports.createSchema = createSchema;
-var name = exports.name = "Provider";
+
 function genNameUID(name, uid) {
-	return name + "_" + uid;
+	return name + '_' + uid;
 }
 
 function createSchema(Schema) {
@@ -23,11 +29,11 @@ function createSchema(Schema) {
 	});
 
 	//add preprocess validation
-	schema.pre("save", function (next) {
+	schema.pre('save', function (next) {
 		var user = this;
 
 		// only hash the password if it has been modified (or is new)
-		if (this.isModified("name") || this.isModified("uid") || !this.nameUID) {
+		if (this.isModified('name') || this.isModified('uid') || !this.nameUID) {
 			this.nameUID = genNameUID(this.name, this.uid);
 		}
 
@@ -36,7 +42,3 @@ function createSchema(Schema) {
 
 	return schema;
 }
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});

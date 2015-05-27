@@ -1,60 +1,47 @@
-"use strict";
+'use strict';
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { "default": obj }; };
-
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
-
-/*
-function incLoginAttempts(cb) {
-    // if we have a previous lock that has expired, restart at 1
-    if (this.lockUntil && this.lockUntil < Date.now()) {
-        return this.update({
-            $set: { loginAttempts: 1 },
-            $unset: { lockUntil: 1 }
-        }, cb);
-    }
-    // otherwise we're incrementing
-    var updates = { 
-    	$inc: { 
-    		loginAttempts: 1 
-    	} 
-    };
-
-    // lock the account if we've reached max attempts and it's not locked already
-    if (this.loginAttempts + 1 >= MAX_LOGIN_ATTEMPTS && !this.isLocked) {
-        updates.$set = { 
-        	lockUntil: Date.now() + LOCK_TIME 
-        };
-    }
-
-    return this.update(updates, cb);
-}*/
-
-/**
- * Create schema for model
- * @param  {mongoose.Schema} Schema
- * @return {mongoose.Schema} User Instance of user schema
- */
+Object.defineProperty(exports, '__esModule', {
+	value: true
+});
 exports.createSchema = createSchema;
 
-var jwt = _interopRequire(require("jsonwebtoken"));
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
 
-var bcrypt = _interopRequire(require("bcrypt"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var _ = _interopRequire(require("underscore"));
+var _jsonwebtoken = require('jsonwebtoken');
 
-var provider = _interopRequireWildcard(require("./provider"));
+var _jsonwebtoken2 = _interopRequireDefault(_jsonwebtoken);
 
-var permalink = _interopRequire(require("mongoose-permalink"));
+var _bcrypt = require('bcrypt');
 
-var mongooseHRBAC = _interopRequire(require("mongoose-hrbac"));
+var _bcrypt2 = _interopRequireDefault(_bcrypt);
 
-var jsonSchemaPlugin = _interopRequire(require("mongoose-json-schema"));
+var _underscore = require('underscore');
 
-var waterfall = require("async").waterfall;
+var _underscore2 = _interopRequireDefault(_underscore);
 
-var name = exports.name = "User";
+var _provider = require('./provider');
 
+var provider = _interopRequireWildcard(_provider);
+
+var _mongoosePermalink = require('mongoose-permalink');
+
+var _mongoosePermalink2 = _interopRequireDefault(_mongoosePermalink);
+
+var _mongooseHrbac = require('mongoose-hrbac');
+
+var _mongooseHrbac2 = _interopRequireDefault(_mongooseHrbac);
+
+var _mongooseJsonSchema = require('mongoose-json-schema');
+
+var _mongooseJsonSchema2 = _interopRequireDefault(_mongooseJsonSchema);
+
+var _async = require('async');
+
+var name = 'User';
+
+exports.name = name;
 // max of 5 attempts, resulting in a 2 hour lock
 var SALT_WORK_FACTOR = 10;
 var MAX_LOGIN_ATTEMPTS = 5;
@@ -83,7 +70,7 @@ function createByFacebook(profile, cb) {
 	var _this = this;
 
 	if (!profile.id) {
-		return cb(new Error("Profile id is undefined"));
+		return cb(new Error('Profile id is undefined'));
 	}
 
 	var data = {
@@ -93,14 +80,14 @@ function createByFacebook(profile, cb) {
 		name: profile.name,
 		email: profile.email,
 		providers: [{
-			name: "facebook",
+			name: 'facebook',
 			uid: profile.id,
-			nameUID: provider.genNameUID("facebook", profile.id),
+			nameUID: provider.genNameUID('facebook', profile.id),
 			data: profile
 		}]
 	};
 
-	waterfall([function (callback) {
+	(0, _async.waterfall)([function (callback) {
 		if (!profile.email) {
 			return callback(null);
 		}
@@ -113,7 +100,7 @@ function createByFacebook(profile, cb) {
 			}
 
 			if (user) {
-				return callback(new Error("User with this email already exists"));
+				return callback(new Error('User with this email already exists'));
 			}
 
 			callback(null);
@@ -133,9 +120,9 @@ function createByTwitter(profile, cb) {
 		username: profile.username || null,
 		name: profile.displayName,
 		providers: [{
-			name: "twitter",
+			name: 'twitter',
 			uid: profile.id,
-			nameUID: provider.genNameUID("twitter", profile.id),
+			nameUID: provider.genNameUID('twitter', profile.id),
 			data: profile
 		}]
 	};
@@ -152,7 +139,7 @@ function createByTwitter(profile, cb) {
  */
 function generateBearerToken(tokenSecret, expiresInMinutes, scope) {
 	if (!tokenSecret) {
-		throw new Error("Token secret is undefined");
+		throw new Error('Token secret is undefined');
 	}
 
 	scope = scope || [];
@@ -167,12 +154,12 @@ function generateBearerToken(tokenSecret, expiresInMinutes, scope) {
 		data.scope = scope;
 	}
 
-	var token = jwt.sign(data, tokenSecret, {
+	var token = _jsonwebtoken2['default'].sign(data, tokenSecret, {
 		expiresInMinutes: expiresInMinutes
 	});
 
 	return {
-		type: "Bearer",
+		type: 'Bearer',
 		value: token
 	};
 }
@@ -182,7 +169,7 @@ function isMe(user) {
 }
 
 function findByUsername(username, strict, cb) {
-	if (typeof strict === "function") {
+	if (typeof strict === 'function') {
 		cb = strict;
 		strict = true;
 	}
@@ -200,16 +187,16 @@ function findByUsername(username, strict, cb) {
  * @param  {Function} cb
  */
 function findByFacebookID(uid, cb) {
-	return this.findByProviderUID("facebook", uid, cb);
+	return this.findByProviderUID('facebook', uid, cb);
 }
 
 function findByTwitterID(uid, cb) {
-	return this.findByProviderUID("twitter", uid, cb);
+	return this.findByProviderUID('twitter', uid, cb);
 }
 
 function findByProviderUID(providerName, uid, cb) {
 	return this.findOne({
-		"providers.nameUID": provider.genNameUID(providerName, uid)
+		'providers.nameUID': provider.genNameUID(providerName, uid)
 	}, cb);
 }
 
@@ -220,7 +207,7 @@ function findByProviderUID(providerName, uid, cb) {
  * @param  {Function} cb
  */
 function findByUsernamePassword(username, password, strict, cb) {
-	if (typeof strict === "function") {
+	if (typeof strict === 'function') {
 		cb = strict;
 		strict = true;
 	}
@@ -250,11 +237,11 @@ function findByUsernamePassword(username, password, strict, cb) {
 
 function addProvider(name, uid, data, cb) {
 	if (!name || !uid) {
-		return cb(new Error("Provider name or uid is undefined"));
+		return cb(new Error('Provider name or uid is undefined'));
 	}
 
 	if (this.hasProvider(name, uid) !== false) {
-		return cb(new Error("This provider is already associated to this user"));
+		return cb(new Error('This provider is already associated to this user'));
 	}
 
 	var providerData = {
@@ -269,10 +256,10 @@ function addProvider(name, uid, data, cb) {
 }
 
 function removeProvider(name, uid, cb) {
-	var _this = this;
+	var _this2 = this;
 
 	if (!name || !uid) {
-		return cb(new Error("Provider name or uid is undefined"));
+		return cb(new Error('Provider name or uid is undefined'));
 	}
 
 	var removed = false;
@@ -283,12 +270,12 @@ function removeProvider(name, uid, cb) {
 			return;
 		}
 
-		_this.providers.splice(index, 1);
+		_this2.providers.splice(index, 1);
 		removed = true;
 	});
 
 	if (!removed) {
-		return cb(new Error("This provider is not associated to this user"));
+		return cb(new Error('This provider is not associated to this user'));
 	}
 
 	return this.save(cb);
@@ -326,7 +313,7 @@ function getProvidersNameUIDs() {
  * @param  {Function} cb                
  */
 function comparePassword(candidatePassword, cb) {
-	bcrypt.compare(candidatePassword, this.password, function (err, isMatch) {
+	_bcrypt2['default'].compare(candidatePassword, this.password, function (err, isMatch) {
 		if (err) {
 			return cb(err);
 		}
@@ -361,6 +348,39 @@ function setUsername(username, cb) {
 	this.username = username;
 	return this.save(cb);
 }
+
+/*
+function incLoginAttempts(cb) {
+    // if we have a previous lock that has expired, restart at 1
+    if (this.lockUntil && this.lockUntil < Date.now()) {
+        return this.update({
+            $set: { loginAttempts: 1 },
+            $unset: { lockUntil: 1 }
+        }, cb);
+    }
+    // otherwise we're incrementing
+    var updates = { 
+    	$inc: { 
+    		loginAttempts: 1 
+    	} 
+    };
+
+    // lock the account if we've reached max attempts and it's not locked already
+    if (this.loginAttempts + 1 >= MAX_LOGIN_ATTEMPTS && !this.isLocked) {
+        updates.$set = { 
+        	lockUntil: Date.now() + LOCK_TIME 
+        };
+    }
+
+    return this.update(updates, cb);
+}*/
+
+/**
+ * Create schema for model
+ * @param  {mongoose.Schema} Schema
+ * @return {mongoose.Schema} User Instance of user schema
+ */
+
 function createSchema(Schema) {
 	var providerSchema = provider.createSchema(Schema);
 
@@ -375,28 +395,28 @@ function createSchema(Schema) {
 
 		password: { type: String },
 
-		loginAttempts: { type: Number, required: true, "default": 0 },
+		loginAttempts: { type: Number, required: true, 'default': 0 },
 		lockUntil: { type: Number },
 
 		providers: [providerSchema]
 	});
 
 	//add indexes
-	schema.index({ "providers.name": 1, "providers.id": 1 });
-	schema.index({ "providers.nameUID": 1 }, { unique: true, sparse: true });
+	schema.index({ 'providers.name': 1, 'providers.id': 1 });
+	schema.index({ 'providers.nameUID': 1 }, { unique: true, sparse: true });
 
-	schema.virtual("isLocked").get(function () {
+	schema.virtual('isLocked').get(function () {
 		// check for a future lockUntil timestamp
 		return !!(this.lockUntil && this.lockUntil > Date.now());
 	});
 
-	schema.pre("validate", function (next) {
+	schema.pre('validate', function (next) {
 		var user = this;
 
 		//update name
-		if ((user.isModified("firstName") || user.isModified("lastName")) && !user.isModified("name")) {
+		if ((user.isModified('firstName') || user.isModified('lastName')) && !user.isModified('name')) {
 			if (user.firstName && user.lastName) {
-				user.name = user.firstName + " " + user.lastName;
+				user.name = user.firstName + ' ' + user.lastName;
 			} else {
 				user.name = user.firstName || user.lastName;
 			}
@@ -406,16 +426,16 @@ function createSchema(Schema) {
 	});
 
 	//add preprocess validation
-	schema.pre("save", function (next) {
+	schema.pre('save', function (next) {
 		var user = this;
 
 		// only hash the password if it has been modified (or is new)
-		if (!user.isModified("password")) {
+		if (!user.isModified('password')) {
 			return next();
 		}
 
 		// hash the password using our new salt
-		bcrypt.hash(user.password, SALT_WORK_FACTOR, function (err, hash) {
+		_bcrypt2['default'].hash(user.password, SALT_WORK_FACTOR, function (err, hash) {
 			if (err) {
 				return next(err);
 			}
@@ -427,17 +447,17 @@ function createSchema(Schema) {
 	});
 
 	//add RBAC permissions
-	schema.plugin(mongooseHRBAC, {});
+	schema.plugin(_mongooseHrbac2['default'], {});
 
 	//add permalink
-	schema.plugin(permalink, {
-		sources: ["name", "firstName", "lastName", "username"],
+	schema.plugin(_mongoosePermalink2['default'], {
+		sources: ['name', 'firstName', 'lastName', 'username'],
 		pathOptions: {
 			restExclude: true
 		}
 	});
 
-	schema.plugin(jsonSchemaPlugin, {});
+	schema.plugin(_mongooseJsonSchema2['default'], {});
 
 	schema.methods.generateBearerToken = generateBearerToken;
 
@@ -530,7 +550,3 @@ UserSchema.statics.getAuthenticated = function(username, password, cb) {
     });
 };
 */
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});

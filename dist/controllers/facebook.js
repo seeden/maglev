@@ -1,38 +1,35 @@
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
-
+Object.defineProperty(exports, '__esModule', {
+	value: true
+});
 exports.ensure = ensure;
 exports.ensureCallback = ensureCallback;
 exports.ensureCanvas = ensureCanvas;
-
-/**
- * Redirect unauthorized facebook canvas application to the facebook ensure page
- * @param  {Request} req
- * @param  {Response} res
- */
 exports.redirectToEnsure = redirectToEnsure;
-
-/**
- * Channel for facebook API
- */
 exports.channel = channel;
 exports.ensureBySignedRequest = ensureBySignedRequest;
 exports.redirectPeopleToCanvas = redirectPeopleToCanvas;
 
-var FB = _interopRequire(require("fb"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var WebError = _interopRequire(require("web-error"));
+var _fb = require('fb');
 
-var fbScope = ["email", "publish_actions"];
-var fbSuccessRedirect = "/";
-var fbFailureRedirect = "/?fb_error=signin";
-var fbAuthUrl = "/auth/facebook";
-var fbCallbackUrl = "/auth/facebook/callback";
-var fbCanvasRedirectUrl = "/auth/facebook/autologin";
+var _fb2 = _interopRequireDefault(_fb);
+
+var _webError = require('web-error');
+
+var _webError2 = _interopRequireDefault(_webError);
+
+var fbScope = ['email', 'publish_actions'];
+var fbSuccessRedirect = '/';
+var fbFailureRedirect = '/?fb_error=signin';
+var fbAuthUrl = '/auth/facebook';
+var fbCallbackUrl = '/auth/facebook/callback';
+var fbCanvasRedirectUrl = '/auth/facebook/autologin';
 
 function ensure(req, res, next) {
-	req.server.secure.authenticate("facebook", {
+	req.server.secure.authenticate('facebook', {
 		scope: fbScope,
 		failureRedirect: fbFailureRedirect,
 		callbackURL: req.protocolHost + fbCallbackUrl
@@ -40,14 +37,14 @@ function ensure(req, res, next) {
 }
 
 function ensureCallback(req, res, next) {
-	req.server.secure.authenticate("facebook", {
+	req.server.secure.authenticate('facebook', {
 		successRedirect: fbSuccessRedirect,
 		failureRedirect: fbFailureRedirect,
 		callbackURL: req.protocolHost + fbCallbackUrl })(req, res, next);
 }
 
 function ensureCanvas(req, res, next) {
-	req.server.secure.authenticate("facebook-canvas", {
+	req.server.secure.authenticate('facebook-canvas', {
 		scope: fbScope,
 		successRedirect: fbSuccessRedirect,
 		failureRedirect: fbCanvasRedirectUrl,
@@ -55,24 +52,34 @@ function ensureCanvas(req, res, next) {
 	})(req, res, next);
 }
 
+/**
+ * Redirect unauthorized facebook canvas application to the facebook ensure page
+ * @param  {Request} req
+ * @param  {Response} res
+ */
+
 function redirectToEnsure(req, res, next) {
-	res.send("<!DOCTYPE html>" + "<body>" + "<script type=\"text/javascript\">" + "top.location.href = \"" + fbAuthUrl + "\";" + "</script>" + "</body>" + "</html>");
+	res.send('<!DOCTYPE html>' + '<body>' + '<script type="text/javascript">' + 'top.location.href = "' + fbAuthUrl + '";' + '</script>' + '</body>' + '</html>');
 }
+
+/**
+ * Channel for facebook API
+ */
 
 function channel(req, res, next) {
 	var oneYear = 31536000;
 	res.set({
-		Pragma: "public",
-		"Cache-Control": "max-age=" + oneYear,
-		Expires: new Date(Date.now() + oneYear * 1000).toUTCString()
+		'Pragma': 'public',
+		'Cache-Control': 'max-age=' + oneYear,
+		'Expires': new Date(Date.now() + oneYear * 1000).toUTCString()
 	});
 
-	res.send("<script src=\"//connect.facebook.net/en_US/all.js\"></script>");
+	res.send('<script src="//connect.facebook.net/en_US/all.js"></script>');
 }
 
 function ensureBySignedRequest(req, res, next) {
 	if (!req.body.signedRequest || !req.body.profile) {
-		return next(new WebError(400));
+		return next(new _webError2['default'](400));
 	}
 
 	var User = req.models.User;
@@ -80,14 +87,14 @@ function ensureBySignedRequest(req, res, next) {
 	var profile = req.body.profile;
 
 	var session = req.body.session || false;
-	var signedRequest = FB.parseSignedRequest(req.body.signedRequest, options.facebook.appSecret);
+	var signedRequest = _fb2['default'].parseSignedRequest(req.body.signedRequest, options.facebook.appSecret);
 
 	if (!signedRequest) {
-		return next(new WebError(400, "Parsing signed request"));
+		return next(new _webError2['default'](400, 'Parsing signed request'));
 	}
 
 	if (!signedRequest.user_id) {
-		return next(new WebError(400, "User ID is missing"));
+		return next(new _webError2['default'](400, 'User ID is missing'));
 	}
 
 	//if user is authentificated and ids is same
@@ -106,11 +113,11 @@ function ensureBySignedRequest(req, res, next) {
 		}
 
 		if (!options.registration.simple) {
-			return next(new WebError(400, "User needs to be registered"));
+			return next(new _webError2['default'](400, 'User needs to be registered'));
 		}
 
 		if (profile.id != signedRequest.user_id) {
-			return next(new WebError(400, "Profile.id is different from signedRequest.user_id"));
+			return next(new _webError2['default'](400, 'Profile.id is different from signedRequest.user_id'));
 		}
 
 		User.createByFacebook(profile, function (err, user) {
@@ -124,16 +131,12 @@ function ensureBySignedRequest(req, res, next) {
 }
 
 function redirectPeopleToCanvas(req, res, next) {
-	var facebookBot = "facebookexternalhit";
+	var facebookBot = 'facebookexternalhit';
 	var options = req.server.options;
 
-	if (!req.headers["user-agent"] || req.headers["user-agent"].indexOf(facebookBot) === -1) {
-		return res.redirect(302, "https://apps.facebook.com/" + options.facebook.namespace + "/");
+	if (!req.headers['user-agent'] || req.headers['user-agent'].indexOf(facebookBot) === -1) {
+		return res.redirect(302, 'https://apps.facebook.com/' + options.facebook.namespace + '/');
 	}
 
 	next();
 }
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});

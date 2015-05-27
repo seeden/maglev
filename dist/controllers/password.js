@@ -1,36 +1,41 @@
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
-
+Object.defineProperty(exports, '__esModule', {
+	value: true
+});
 exports.tokenToUser = tokenToUser;
-
-/**
- * Change user password
- */
 exports.change = change;
 exports.generateForgotToken = generateForgotToken;
 
-var jwt = _interopRequire(require("jsonwebtoken"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var async = _interopRequire(require("async"));
+var _jsonwebtoken = require('jsonwebtoken');
 
-var WebError = _interopRequire(require("web-error"));
+var _jsonwebtoken2 = _interopRequireDefault(_jsonwebtoken);
+
+var _async = require('async');
+
+var _async2 = _interopRequireDefault(_async);
+
+var _webError = require('web-error');
+
+var _webError2 = _interopRequireDefault(_webError);
 
 function tokenToUser(req, res, next) {
 	var User = req.models.User;
 	var options = req.server.options;
 
 	if (!id) {
-		return next(new WebError(400, "Token is undefined"));
+		return next(new _webError2['default'](400, 'Token is undefined'));
 	}
 
-	jwt.verify(id, options.mail.token.secret, function (err, data) {
+	_jsonwebtoken2['default'].verify(id, options.mail.token.secret, function (err, data) {
 		if (err) {
 			return next(err);
 		}
 
 		if (!data.user) {
-			return next(new WebError(400, "Unknown user"));
+			return next(new _webError2['default'](400, 'Unknown user'));
 		}
 
 		User.findById(id, function (err, user) {
@@ -39,7 +44,7 @@ function tokenToUser(req, res, next) {
 			}
 
 			if (!user) {
-				return next(new WebError(404));
+				return next(new _webError2['default'](404));
 			}
 
 			req.objects.user = user;
@@ -48,15 +53,19 @@ function tokenToUser(req, res, next) {
 	});
 }
 
+/**
+ * Change user password
+ */
+
 function change(req, res, next) {
 	var user = req.objects.user;
 
 	if (!user) {
-		return next(new WebError(404));
+		return next(new _webError2['default'](404));
 	}
 
 	if (!req.body.password) {
-		return next(new WebError(400, "Parameter password is missing"));
+		return next(new _webError2['default'](400, 'Parameter password is missing'));
 	}
 
 	if (!user.hasPassword()) {
@@ -69,7 +78,7 @@ function change(req, res, next) {
 		});
 	} else {
 		if (!req.body.password_old) {
-			return next(new WebError(400, "Parameter password_old is missing"));
+			return next(new _webError2['default'](400, 'Parameter password_old is missing'));
 		}
 
 		user.comparePassword(req.body.password_old, function (err, isMatch) {
@@ -78,7 +87,7 @@ function change(req, res, next) {
 			}
 
 			if (!isMatch) {
-				return next(new WebError(400, "Password is not match with actual password"));
+				return next(new _webError2['default'](400, 'Password is not match with actual password'));
 			}
 
 			user.setPassword(req.body.password, function (err) {
@@ -94,7 +103,7 @@ function change(req, res, next) {
 
 function generateForgotToken(user, tokenSecret, expiresInMinutes) {
 	if (!tokenSecret) {
-		throw new Error("Token secret is undefined");
+		throw new Error('Token secret is undefined');
 	}
 
 	expiresInMinutes = expiresInMinutes || 60 * 24;
@@ -103,7 +112,7 @@ function generateForgotToken(user, tokenSecret, expiresInMinutes) {
 		user: user._id
 	};
 
-	return jwt.sign(data, tokenSecret, { expiresInMinutes: expiresInMinutes });
+	return _jsonwebtoken2['default'].sign(data, tokenSecret, { expiresInMinutes: expiresInMinutes });
 }
 
 function forgot(req, res, next) {
@@ -113,7 +122,7 @@ function forgot(req, res, next) {
 	var mail = server.mail;
 
 	if (!req.body.username) {
-		return next(new WebError(400, "Parameter username is missing"));
+		return next(new _webError2['default'](400, 'Parameter username is missing'));
 	}
 
 	User.findByUsername(req.body.username, false, function (err, user) {
@@ -122,11 +131,11 @@ function forgot(req, res, next) {
 		}
 
 		if (!user) {
-			return next(new WebError(404));
+			return next(new _webError2['default'](404));
 		}
 
 		if (!user.hasEmail()) {
-			return next(new WebError(401, "User has no email"));
+			return next(new _webError2['default'](401, 'User has no email'));
 		}
 
 		//generate token
@@ -135,18 +144,18 @@ function forgot(req, res, next) {
 		//render mails
 		var data = {
 			user: user,
-			from: options.mail["default"].from,
+			from: options.mail['default'].from,
 			to: user.email,
-			subject: "Password Assistance",
+			subject: 'Password Assistance',
 			token: token
 		};
 
-		async.series({
+		_async2['default'].series({
 			html: function html(callback) {
-				res.render("mail/forgot", data, callback);
+				res.render('mail/forgot', data, callback);
 			},
 			text: function text(callback) {
-				res.render("mail/forgot_plain", data, callback);
+				res.render('mail/forgot_plain', data, callback);
 			}
 		}, function (err, result) {
 			if (err) {
@@ -154,9 +163,9 @@ function forgot(req, res, next) {
 			}
 
 			var mailOptions = {
-				from: options.mail["default"].from,
+				from: options.mail['default'].from,
 				to: user.email,
-				subject: "Password Assistance",
+				subject: 'Password Assistance',
 				html: result.html,
 				text: result.text
 			};
@@ -171,6 +180,3 @@ function forgot(req, res, next) {
 		});
 	});
 }
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});

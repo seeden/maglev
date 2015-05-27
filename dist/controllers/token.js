@@ -1,7 +1,8 @@
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
-
+Object.defineProperty(exports, '__esModule', {
+	value: true
+});
 exports.generateForCurrent = generateForCurrent;
 exports.generate = generate;
 exports.invalidate = invalidate;
@@ -9,7 +10,11 @@ exports.ensure = ensure;
 exports.ensureWithSession = ensureWithSession;
 exports.tryEnsure = tryEnsure;
 
-var WebError = _interopRequire(require("web-error"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _webError = require('web-error');
+
+var _webError2 = _interopRequireDefault(_webError);
 
 function generateForCurrent(req, res, next) {
 	var user = req.user;
@@ -17,7 +22,7 @@ function generateForCurrent(req, res, next) {
 	var rbac = req.server.rbac;
 
 	if (!user) {
-		return next(new WebError(401));
+		return next(new _webError2['default'](401));
 	}
 
 	res.jsonp({
@@ -32,7 +37,7 @@ function generate(req, res, next) {
 	var rbac = req.server.rbac;
 
 	if (!req.body.username || !req.body.password) {
-		return next(new WebError(400, "One of parameter missing"));
+		return next(new _webError2['default'](400, 'One of parameter missing'));
 	}
 
 	User.findByUsernamePassword(req.body.username, req.body.password, false, function (err, user) {
@@ -41,7 +46,7 @@ function generate(req, res, next) {
 		}
 
 		if (!user) {
-			return next(new WebError(404, "Invalid username or password"));
+			return next(new _webError2['default'](404, 'Invalid username or password'));
 		}
 
 		res.jsonp({
@@ -53,7 +58,7 @@ function generate(req, res, next) {
 
 function invalidate(req, res, next) {
 	if (!req.body.access_token) {
-		return next(new WebError(400, "Token is missing"));
+		return next(new _webError2['default'](400, 'Token is missing'));
 	}
 
 	//TODO remove from keystore db and invalidate token
@@ -61,7 +66,7 @@ function invalidate(req, res, next) {
 }
 
 function ensure(req, res, next) {
-	req.server.secure.authenticate("bearer", {
+	req.server.secure.authenticate('bearer', {
 		session: false
 	})(req, res, next);
 }
@@ -71,17 +76,13 @@ function ensureWithSession(req, res, next) {
 		return next(); // already authenticated via session cookie
 	}
 
-	req.server.secure.authenticate("bearer", {
+	req.server.secure.authenticate('bearer', {
 		session: false
 	})(req, res, next);
 }
 
 function tryEnsure(req, res, next) {
-	req.server.secure.authenticate(["bearer", "anonymous"], {
+	req.server.secure.authenticate(['bearer', 'anonymous'], {
 		session: false
 	})(req, res, next);
 }
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});

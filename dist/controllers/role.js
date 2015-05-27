@@ -1,46 +1,27 @@
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
-
+Object.defineProperty(exports, '__esModule', {
+	value: true
+});
 exports.role = role;
-
-/**
- * Create new role
- */
 exports.create = create;
-
-/**
- * Remove existing role
- */
 exports.remove = remove;
-
-/**
- * Return true if role exists
- */
 exports.exists = exists;
-
-/**
- * Get role details
- */
 exports.get = get;
-
-/**
- * Grant role or permission to the role
- */
 exports.grant = grant;
-
-/**
- * Revoke role or permission to the role
- */
 exports.revoke = revoke;
 
-var WebError = _interopRequire(require("web-error"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _webError = require('web-error');
+
+var _webError2 = _interopRequireDefault(_webError);
 
 function role(req, res, next, name) {
 	var rbac = req.server.rbac;
 
 	if (!name) {
-		return next(new WebError(400));
+		return next(new _webError2['default'](400));
 	}
 
 	rbac.getRole(name, function (err, role) {
@@ -49,7 +30,7 @@ function role(req, res, next, name) {
 		}
 
 		if (!role) {
-			return next(new WebError(404));
+			return next(new _webError2['default'](404));
 		}
 
 		req.objects.role = role;
@@ -57,11 +38,15 @@ function role(req, res, next, name) {
 	});
 }
 
+/**
+ * Create new role
+ */
+
 function create(req, res, next) {
 	var rbac = req.server.rbac;
 
 	if (!req.body.name) {
-		return next(new WebError(400, "Role name is undefined"));
+		return next(new _webError2['default'](400, 'Role name is undefined'));
 	}
 
 	rbac.createRole(req.body.name, function (err, role) {
@@ -70,7 +55,7 @@ function create(req, res, next) {
 		}
 
 		if (!role) {
-			return next(new WebError(400));
+			return next(new _webError2['default'](400));
 		}
 
 		return res.jsonp({
@@ -81,11 +66,15 @@ function create(req, res, next) {
 	});
 }
 
+/**
+ * Remove existing role
+ */
+
 function remove(req, res, next) {
 	var User = req.models.User;
 
 	if (!req.objects.role) {
-		return next(new WebError(404));
+		return next(new _webError2['default'](404));
 	}
 
 	var role = req.objects.role;
@@ -103,7 +92,7 @@ function remove(req, res, next) {
 			}
 
 			if (!isDeleted) {
-				return next(new WebError(400));
+				return next(new _webError2['default'](400));
 			}
 
 			return res.status(204).end();
@@ -111,17 +100,25 @@ function remove(req, res, next) {
 	});
 }
 
+/**
+ * Return true if role exists
+ */
+
 function exists(req, res, next) {
 	if (!req.objects.role) {
-		return next(new WebError(404));
+		return next(new _webError2['default'](404));
 	}
 
 	return res.status(204).end();
 }
 
+/**
+ * Get role details
+ */
+
 function get(req, res, next) {
 	if (!req.objects.role) {
-		return next(new WebError(404));
+		return next(new _webError2['default'](404));
 	}
 
 	var role = req.objects.role;
@@ -133,11 +130,15 @@ function get(req, res, next) {
 	});
 }
 
+/**
+ * Grant role or permission to the role
+ */
+
 function grant(req, res, next) {
 	var rbac = req.server.rbac;
 
 	if (!req.objects.role || !req.body.name) {
-		return next(new WebError(400));
+		return next(new _webError2['default'](400));
 	}
 
 	var role = req.objects.role;
@@ -148,18 +149,22 @@ function grant(req, res, next) {
 		}
 
 		if (!isGranted) {
-			return next(new WebError(400));
+			return next(new _webError2['default'](400));
 		}
 
 		return res.status(204).end();
 	});
 }
 
+/**
+ * Revoke role or permission to the role
+ */
+
 function revoke(req, res, next) {
 	var rbac = req.server.rbac;
 
 	if (!req.objects.role || !req.body.name) {
-		return next(new WebError(400));
+		return next(new _webError2['default'](400));
 	}
 
 	var role = req.objects.role;
@@ -170,13 +175,9 @@ function revoke(req, res, next) {
 		}
 
 		if (!isRevoked) {
-			return next(new WebError(400));
+			return next(new _webError2['default'](400));
 		}
 
 		return res.status(204).end();
 	});
 }
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
