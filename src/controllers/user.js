@@ -14,7 +14,7 @@ export function isOwner(req, res, next) {
 }
 
 export function user(req, res, next, id) {
-	var User = req.models.User;
+	const User = req.models.User;
 
 	if(!id) {
 		return next(new WebError(400));
@@ -35,7 +35,7 @@ export function user(req, res, next, id) {
 }
 
 export function permalink(req, res, next, permalink) {
-	var User = req.models.User;
+	const User = req.models.User;
 
 	if(!permalink) {
 		return next(new WebError(400));

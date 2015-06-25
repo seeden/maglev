@@ -14,7 +14,7 @@ describe('Run server', function() {
 				secret: '123456789'
 			},
 			server: {
-				post: 4433
+				port: 4433
 			},
 			favicon: false
 		}, function(err, server) {
