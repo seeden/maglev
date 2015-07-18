@@ -1,147 +1,147 @@
 export default {
-	root: null, 
+  root: null,
 
-	rbac: {
-		options: {
-			
-		},
-		role: {
-			guest: 'guest'
-		}
-	},
+  rbac: {
+    options: {
 
-	log: true,
+    },
+    role: {
+      guest: 'guest'
+    }
+  },
 
-	morgan: {
-		format: process.env.NODE_ENV === 'development' ? 'dev' : 'combined',
-		options: {
-			immediate: false
-			//stream: process.stdout
-		}
-	},
-	
-	server: {
-		build: 1,
-		host: process.env.HOST || '127.0.0.1',
-		port: process.env.PORT || 4000
-	},
+  log: true,
 
-	request: {
-		timeout: 1000*60*5
-	},
+  morgan: {
+    format: process.env.NODE_ENV === 'development' ? 'dev' : 'combined',
+    options: {
+      immediate: false
+      // stream: process.stdout
+    }
+  },
 
-	compression: {},
+  server: {
+    build: 1,
+    host: process.env.HOST || '127.0.0.1',
+    port: process.env.PORT || 4000
+  },
 
-	powered: {
-		value: 'Maglev'
-	},
+  request: {
+    timeout: 1000 * 60 * 5
+  },
 
-	responseTime: {},
+  compression: {},
 
-	methodOverride: {
-		//https://github.com/expressjs/method-override
-		enabled: true,
-		getter: 'X-HTTP-Method-Override',
-		options: {}
-	},
+  powered: {
+    value: 'Maglev'
+  },
 
-	bodyParser: [{
-		parse: 'urlencoded',
-		options: {
-			extended: true
-		}
-	}, {
-		parse: 'json',
-		options: {}
-	}, {
-		parse: 'json',
-		options: {
-			type: 'application/vnd.api+json'
-		}
-	}],
+  responseTime: {},
 
-	cookieParser: {
-		secret: null,
-		options: {}
-	},
+  methodOverride: {
+    // https://github.com/expressjs/method-override
+    enabled: true,
+    getter: 'X-HTTP-Method-Override',
+    options: {}
+  },
 
-	token: {
-		secret: null,
-		expiration: 60*24*14
-	},
+  bodyParser: [{
+    parse: 'urlencoded',
+    options: {
+      extended: true
+    }
+  }, {
+    parse: 'json',
+    options: {}
+  }, {
+    parse: 'json',
+    options: {
+      type: 'application/vnd.api+json'
+    }
+  }],
 
-	session: {
-		secret: null,
-		cookie: {
-			maxAge: 14 *24 * 60 * 60 * 1000 //2 weeks
-		},
-		resave: true,
-		saveUninitialized: true
-	},
+  cookieParser: {
+    secret: null,
+    options: {}
+  },
 
-	view: {
-		engine: 'swig'
-	},
+  token: {
+    secret: null,
+    expiration: 60 * 24 * 14
+  },
 
-	router: {
-		api: {
-			path: '/api'
-		}
-	},
+  session: {
+    secret: null,
+    cookie: {
+      maxAge: 14 * 24 * 60 * 60 * 1000 // 2 weeks
+    },
+    resave: true,
+    saveUninitialized: true
+  },
 
-	locale: {
-		'default': 'en',
-		available: ['en'],
-		inUrl: false
-	},
+  view: {
+    engine: 'swig'
+  },
 
-	country: {
-		'default': null,
-		available: [],
-		inUrl: false
-	},	
+  router: {
+    api: {
+      path: '/api'
+    }
+  },
 
-	registration: {
-		simple: true
-	},
+  locale: {
+    'default': 'en',
+    available: ['en'],
+    inUrl: false
+  },
 
-	facebook: {
-		appID: null,
-		appSecret: null,
-		namespace: null
-	},
+  country: {
+    'default': null,
+    available: [],
+    inUrl: false
+  },
 
-	upload: {
-    	maxFieldsSize: 2000000,
-    	maxFields: 1000,
-    	path: null
+  registration: {
+    simple: true
+  },
+
+  facebook: {
+    appID: null,
+    appSecret: null,
+    namespace: null
+  },
+
+  upload: {
+      maxFieldsSize: 2000000,
+      maxFields: 1000,
+      path: null
     },
 
     cors: {},
 
     page: {
-    	error: null,
-    	notFound: null
+      error: null,
+      notFound: null
     },
 
     strategies: [],
 
     css: {
-    	path: '/public/css',
-		root: 'public/css',
-		options: {}
-	},
+      path: '/public/css',
+      root: 'public/css',
+      options: {}
+    },
 
     'static': {
-    	path: '/public',
-    	root: 'public',
-    	options: {
-    		index: ['index.html']
-    	}
+      path: '/public',
+      root: 'public',
+      options: {
+        index: ['index.html']
+      }
     },
 
     favicon: {
-    	root: 'public/favicon.ico',
-    	options: {}
+      root: 'public/favicon.ico',
+      options: {}
     }
 };

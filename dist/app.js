@@ -1,7 +1,7 @@
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
-	value: true
+  value: true
 });
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -95,267 +95,267 @@ var pageController = _interopRequireWildcard(_controllersPage);
 var log = (0, _debug2['default'])('maglev:app');
 
 var App = (function () {
-	function App(server, options) {
-		_classCallCheck(this, App);
+  function App(server) {
+    var options = arguments[1] === undefined ? {} : arguments[1];
 
-		options = options || {};
+    _classCallCheck(this, App);
 
-		this._server = server;
-		this._options = options;
-		this._expressApp = (0, _express2['default'])();
-		this._httpServer = null;
+    this._server = server;
+    this._options = options;
+    this._expressApp = (0, _express2['default'])();
+    this._httpServer = null;
 
-		this._prepareCompression();
-		this._prepareLog();
-		this._prepareEngine();
-		this._prepareHtml();
-		this._prepareVars();
-		this._prepareSession();
-		this._prepareSecure();
-		this._prepareStatic();
-		this._prepareRouter();
-	}
+    this._prepareCompression();
+    this._prepareLog();
+    this._prepareEngine();
+    this._prepareHtml();
+    this._prepareVars();
+    this._prepareSession();
+    this._prepareSecure();
+    this._prepareStatic();
+    this._prepareRouter();
+  }
 
-	_createClass(App, [{
-		key: 'options',
-		get: function () {
-			return this._options;
-		}
-	}, {
-		key: 'server',
-		get: function () {
-			return this._server;
-		}
-	}, {
-		key: 'expressApp',
-		get: function () {
-			return this._expressApp;
-		}
-	}, {
-		key: 'listen',
-		value: function listen(port, host, callback) {
-			callback = callback || function () {};
+  _createClass(App, [{
+    key: 'options',
+    get: function () {
+      return this._options;
+    }
+  }, {
+    key: 'server',
+    get: function () {
+      return this._server;
+    }
+  }, {
+    key: 'expressApp',
+    get: function () {
+      return this._expressApp;
+    }
+  }, {
+    key: 'listen',
+    value: function listen(port, host, callback) {
+      callback = callback || function () {};
 
-			if (this._httpServer) {
-				return callback(new Error('You need to close first'));
-			}
+      if (this._httpServer) {
+        return callback(new Error('You need to close first'));
+      }
 
-			this._httpServer = _http2['default'].createServer(this.expressApp).listen(port, host, callback);
+      this._httpServer = _http2['default'].createServer(this.expressApp).listen(port, host, callback);
 
-			log('App started on port ' + port + ' and host ' + host);
-			return this;
-		}
-	}, {
-		key: 'close',
-		value: function close(callback) {
-			if (!this._httpServer) {
-				return callback(new Error('You need to listen first'));
-			}
+      log('App started on port ' + port + ' and host ' + host);
+      return this;
+    }
+  }, {
+    key: 'close',
+    value: function close(callback) {
+      if (!this._httpServer) {
+        return callback(new Error('You need to listen first'));
+      }
 
-			this._httpServer.close(callback);
-			this._httpServer = null;
-			return this;
-		}
-	}, {
-		key: '_prepareCompression',
-		value: function _prepareCompression() {
-			var app = this.expressApp;
-			var options = this.options;
+      this._httpServer.close(callback);
+      this._httpServer = null;
+      return this;
+    }
+  }, {
+    key: '_prepareCompression',
+    value: function _prepareCompression() {
+      var app = this.expressApp;
+      var options = this.options;
 
-			if (!options.compression) {
-				return;
-			}
+      if (!options.compression) {
+        return;
+      }
 
-			app.use((0, _compression2['default'])(options.compression));
-		}
-	}, {
-		key: '_prepareLog',
-		value: function _prepareLog(server) {
-			var app = this.expressApp;
-			var options = this.options;
+      app.use((0, _compression2['default'])(options.compression));
+    }
+  }, {
+    key: '_prepareLog',
+    value: function _prepareLog() {
+      var app = this.expressApp;
+      var options = this.options;
 
-			if (!options.log) {
-				return;
-			}
+      if (!options.log) {
+        return;
+      }
 
-			app.set('showStackError', true);
+      app.set('showStackError', true);
 
-			if (!options.morgan) {
-				return;
-			}
-			app.use((0, _morgan2['default'])(options.morgan.format, options.morgan.options));
-		}
-	}, {
-		key: '_prepareEngine',
-		value: function _prepareEngine() {
-			var app = this.expressApp;
-			var options = this.options;
+      if (!options.morgan) {
+        return;
+      }
+      app.use((0, _morgan2['default'])(options.morgan.format, options.morgan.options));
+    }
+  }, {
+    key: '_prepareEngine',
+    value: function _prepareEngine() {
+      var app = this.expressApp;
+      var options = this.options;
 
-			app.locals.pretty = true;
-			app.locals.cache = 'memory';
-			app.enable('jsonp callback');
+      app.locals.pretty = true;
+      app.locals.cache = 'memory';
+      app.enable('jsonp callback');
 
-			app.engine('html', _consolidate2['default'][options.view.engine]);
+      app.engine('html', _consolidate2['default'][options.view.engine]);
 
-			app.set('view engine', 'html');
-			app.set('views', options.root + '/views');
-		}
-	}, {
-		key: '_prepareHtml',
-		value: function _prepareHtml() {
-			var app = this.expressApp;
-			var options = this.options;
+      app.set('view engine', 'html');
+      app.set('views', options.root + '/views');
+    }
+  }, {
+    key: '_prepareHtml',
+    value: function _prepareHtml() {
+      var app = this.expressApp;
+      var options = this.options;
 
-			if (!options.powered) {
-				app.disable('x-powered-by');
-			}
+      if (!options.powered) {
+        app.disable('x-powered-by');
+      }
 
-			if (options.responseTime) {
-				app.use((0, _responseTime2['default'])(options.responseTime));
-			}
+      if (options.responseTime) {
+        app.use((0, _responseTime2['default'])(options.responseTime));
+      }
 
-			if (options.cors) {
-				app.use((0, _cors2['default'])(options.cors));
-			}
+      if (options.cors) {
+        app.use((0, _cors2['default'])(options.cors));
+      }
 
-			if (options.request.timeout) {
-				app.use((0, _connectTimeout2['default'])(options.request.timeout));
-			}
+      if (options.request.timeout) {
+        app.use((0, _connectTimeout2['default'])(options.request.timeout));
+      }
 
-			if (options.cookieParser) {
-				app.use((0, _cookieParser2['default'])(options.cookieParser.secret, options.cookieParser.options));
-			}
+      if (options.cookieParser) {
+        app.use((0, _cookieParser2['default'])(options.cookieParser.secret, options.cookieParser.options));
+      }
 
-			if (options.bodyParser) {
-				for (var i = 0; i < options.bodyParser.length; i++) {
-					var bp = options.bodyParser[i];
-					app.use(_bodyParser2['default'][bp.parse](bp.options));
-				}
-			}
+      if (options.bodyParser) {
+        for (var i = 0; i < options.bodyParser.length; i++) {
+          var bp = options.bodyParser[i];
+          app.use(_bodyParser2['default'][bp.parse](bp.options));
+        }
+      }
 
-			if (options.methodOverride) {
-				app.use((0, _methodOverride2['default'])(options.methodOverride.getter, options.methodOverride.options));
-			}
-		}
-	}, {
-		key: '_prepareVars',
-		value: function _prepareVars() {
-			var app = this.expressApp;
-			var server = this.server;
-			var options = this.options;
+      if (options.methodOverride) {
+        app.use((0, _methodOverride2['default'])(options.methodOverride.getter, options.methodOverride.options));
+      }
+    }
+  }, {
+    key: '_prepareVars',
+    value: function _prepareVars() {
+      var app = this.expressApp;
+      var server = this.server;
+      var options = this.options;
 
-			//add access to req from template
-			app.use(function (req, res, next) {
-				res.locals._req = req;
-				res.locals._production = process.env.NODE_ENV === 'production';
-				res.locals._build = options.server.build;
+      // add access to req from template
+      app.use(function (req, res, next) {
+        res.locals._req = req;
+        res.locals._production = process.env.NODE_ENV === 'production';
+        res.locals._build = options.server.build;
 
-				next();
-			});
+        next();
+      });
 
-			//add access to req from template
-			app.use(function (req, res, next) {
-				req.objects = {};
-				req.server = server;
-				req.models = server.models;
+      // add access to req from template
+      app.use(function (req, res, next) {
+        req.objects = {};
+        req.server = server;
+        req.models = server.models;
 
-				next();
-			});
-		}
-	}, {
-		key: '_prepareSession',
-		value: function _prepareSession() {
-			var app = this.expressApp;
-			var options = this.options;
+        next();
+      });
+    }
+  }, {
+    key: '_prepareSession',
+    value: function _prepareSession() {
+      var app = this.expressApp;
+      var options = this.options;
 
-			if (!options.session) {
-				return;
-			}
+      if (!options.session) {
+        return;
+      }
 
-			app.use((0, _expressSession2['default'])(options.session));
-		}
-	}, {
-		key: '_prepareSecure',
-		value: function _prepareSecure() {
-			var app = this.expressApp;
-			var server = this.server;
-			var options = this.options;
+      app.use((0, _expressSession2['default'])(options.session));
+    }
+  }, {
+    key: '_prepareSecure',
+    value: function _prepareSecure() {
+      var app = this.expressApp;
+      var server = this.server;
+      var options = this.options;
 
-			app.use(server.secure.passport.initialize());
+      app.use(server.secure.passport.initialize());
 
-			if (!options.session) {
-				return;
-			}
+      if (!options.session) {
+        return;
+      }
 
-			app.use(server.secure.passport.session());
-		}
-	}, {
-		key: '_prepareStatic',
-		value: function _prepareStatic() {
-			var app = this.expressApp;
-			var options = this.options;
+      app.use(server.secure.passport.session());
+    }
+  }, {
+    key: '_prepareStatic',
+    value: function _prepareStatic() {
+      var app = this.expressApp;
+      var options = this.options;
 
-			if (options.flash) {
-				app.use((0, _connectFlash2['default'])());
-			}
+      if (options.flash) {
+        app.use((0, _connectFlash2['default'])());
+      }
 
-			if (options.favicon) {
-				app.use((0, _serveFavicon2['default'])(options.favicon.root, options.favicon.options));
-			}
+      if (options.favicon) {
+        app.use((0, _serveFavicon2['default'])(options.favicon.root, options.favicon.options));
+      }
 
-			if (options.css) {
-				app.use(options.css.path, (0, _lessMiddleware2['default'])(options.css.root, options.css.options));
-			}
+      if (options.css) {
+        app.use(options.css.path, (0, _lessMiddleware2['default'])(options.css.root, options.css.options));
+      }
 
-			if (options['static']) {
-				app.use(options['static'].path, (0, _serveStatic2['default'])(options['static'].root, options['static'].options));
-			}
-		}
-	}, {
-		key: '_prepareRouter',
-		value: function _prepareRouter() {
-			var app = this.expressApp;
-			var options = this.options;
-			var server = this.server;
+      if (options['static']) {
+        app.use(options['static'].path, (0, _serveStatic2['default'])(options['static'].root, options['static'].options));
+      }
+    }
+  }, {
+    key: '_prepareRouter',
+    value: function _prepareRouter() {
+      var app = this.expressApp;
+      var options = this.options;
+      var server = this.server;
 
-			//use server router
-			app.use(server.router.expressRouter);
+      // use server router
+      app.use(server.router.expressRouter);
 
-			//delete uploaded files
-			app.use(fileController.clearAfterError); //error must be first
-			app.use(fileController.clear);
+      // delete uploaded files
+      app.use(fileController.clearAfterError); // error must be first
+      app.use(fileController.clear);
 
-			//at the end add 500 and 404
-			app.use(options.page.notFound || pageController.notFound);
-			app.use(options.page.error || pageController.error);
-		}
-	}]);
+      // at the end add 500 and 404
+      app.use(options.page.notFound || pageController.notFound);
+      app.use(options.page.error || pageController.error);
+    }
+  }]);
 
-	return App;
+  return App;
 })();
 
 exports['default'] = App;
 
 function prepareRequest(req) {
-	req.__defineGetter__('httpHost', function () {
-		var trustProxy = this.app.get('trust proxy');
-		var host = trustProxy && this.get('X-Forwarded-Host');
-		return host || this.get('Host');
-	});
+  req.__defineGetter__('httpHost', function () {
+    var trustProxy = this.app.get('trust proxy');
+    var host = trustProxy && this.get('X-Forwarded-Host');
+    return host || this.get('Host');
+  });
 
-	req.__defineGetter__('port', function () {
-		host = this.httpHost;
-		if (!host) {
-			return;
-		}
+  req.__defineGetter__('port', function () {
+    var host = this.httpHost;
+    if (!host) {
+      return null;
+    }
 
-		var parts = host.split(':');
-		return parts.length === 2 ? parseInt(parts[1], 10) : 80;
-	});
+    var parts = host.split(':');
+    return parts.length === 2 ? parseInt(parts[1], 10) : 80;
+  });
 
-	req.__defineGetter__('protocolHost', function () {
-		return this.protocol + '://' + this.httpHost;
-	});
+  req.__defineGetter__('protocolHost', function () {
+    return this.protocol + '://' + this.httpHost;
+  });
 }
 
 prepareRequest(_expressLibRequest2['default']);

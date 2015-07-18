@@ -14,8 +14,8 @@ import timeout from 'connect-timeout';
 import morgan from 'morgan';
 import cors from 'cors';
 import lessMiddleware from 'less-middleware';
-	
-import req from 'express/lib/request';
+
+import request from 'express/lib/request';
 import consolidate from 'consolidate';
 import flash from 'connect-flash';
 
@@ -26,247 +26,245 @@ import * as pageController from './controllers/page';
 const log = debug('maglev:app');
 
 export default class App {
-	constructor(server, options) {
-		options = options || {};
+  constructor(server, options = {}) {
+    this._server = server;
+    this._options = options;
+    this._expressApp = express();
+    this._httpServer = null;
 
-		this._server = server;
-		this._options = options;
-		this._expressApp = express();
-		this._httpServer = null;
+    this._prepareCompression();
+    this._prepareLog();
+    this._prepareEngine();
+    this._prepareHtml();
+    this._prepareVars();
+    this._prepareSession();
+    this._prepareSecure();
+    this._prepareStatic();
+    this._prepareRouter();
+  }
 
-		this._prepareCompression();
-		this._prepareLog();
-		this._prepareEngine();
-		this._prepareHtml();
-		this._prepareVars();
-		this._prepareSession();
-		this._prepareSecure();
-		this._prepareStatic();
-		this._prepareRouter();
-	}
+  get options() {
+    return this._options;
+  }
 
-	get options() {
-		return this._options;
-	}
+  get server() {
+    return this._server;
+  }
 
-	get server() {
-		return this._server;
-	}
+  get expressApp() {
+    return this._expressApp;
+  }
 
-	get expressApp() {
-		return this._expressApp;
-	}
+  listen(port, host, callback) {
+    callback = callback || function() {};
 
-	listen(port, host, callback) {
-		callback = callback || function() {};
+    if (this._httpServer) {
+      return callback(new Error('You need to close first'));
+    }
 
-		if(this._httpServer) {
-			return callback(new Error('You need to close first'));
-		}
+    this._httpServer = http.createServer(this.expressApp).listen(port, host, callback);
 
-		this._httpServer = http.createServer(this.expressApp).listen(port, host, callback);
+    log('App started on port ' + port + ' and host ' + host);
+    return this;
+  }
 
-		log('App started on port ' + port + ' and host ' + host);
-		return this;
-	}
+  close(callback) {
+    if (!this._httpServer) {
+      return callback(new Error('You need to listen first'));
+    }
 
-	close(callback) {
-		if(!this._httpServer) {
-			return callback(new Error('You need to listen first'));
-		}
+    this._httpServer.close(callback);
+    this._httpServer = null;
+    return this;
+  }
 
-		this._httpServer.close(callback);
-		this._httpServer = null;
-		return this;
-	}
+  _prepareCompression() {
+    const app = this.expressApp;
+    const options = this.options;
 
-	_prepareCompression() {
-		var app = this.expressApp;
-		var options = this.options;
+    if (!options.compression) {
+      return;
+    }
 
-		if(!options.compression) {
-			return;
-		}
+    app.use(compression(options.compression));
+  }
 
-		app.use(compression(options.compression));
-	}	
+  _prepareLog() {
+    const app = this.expressApp;
+    const options = this.options;
 
-	_prepareLog(server) {
-		var app = this.expressApp;
-		var options = this.options;
+    if (!options.log) {
+      return;
+    }
 
-		if (!options.log) {
-			return;
-		}
-		
-		app.set('showStackError', true);
+    app.set('showStackError', true);
 
-		if (!options.morgan) {
-			return;
-		}		
-		app.use(morgan(options.morgan.format, options.morgan.options));
-	}
+    if (!options.morgan) {
+      return;
+    }
+    app.use(morgan(options.morgan.format, options.morgan.options));
+  }
 
-	_prepareEngine() {
-		var app = this.expressApp;
-		var options = this.options;
+  _prepareEngine() {
+    const app = this.expressApp;
+    const options = this.options;
 
-		app.locals.pretty = true;
-		app.locals.cache = 'memory';
-		app.enable('jsonp callback');
+    app.locals.pretty = true;
+    app.locals.cache = 'memory';
+    app.enable('jsonp callback');
 
-		app.engine('html', consolidate[options.view.engine]);
+    app.engine('html', consolidate[options.view.engine]);
 
-		app.set('view engine', 'html');
-		app.set('views', options.root + '/views');
-	}
+    app.set('view engine', 'html');
+    app.set('views', options.root + '/views');
+  }
 
-	_prepareHtml() {
-		var app = this.expressApp;
-		var options = this.options;
+  _prepareHtml() {
+    const app = this.expressApp;
+    const options = this.options;
 
-		if(!options.powered) {
-			app.disable('x-powered-by');
-		}
-		
-		if(options.responseTime) {
-			app.use(responseTime(options.responseTime));
-		}
+    if (!options.powered) {
+      app.disable('x-powered-by');
+    }
 
-		if(options.cors) {
-			app.use(cors(options.cors));
-		}
+    if (options.responseTime) {
+      app.use(responseTime(options.responseTime));
+    }
 
-		if(options.request.timeout) {
-			app.use(timeout(options.request.timeout));
-		}
-		
-		if(options.cookieParser) {
-			app.use(cookieParser(options.cookieParser.secret, options.cookieParser.options));
-		}
+    if (options.cors) {
+      app.use(cors(options.cors));
+    }
 
-		if(options.bodyParser) {
-			for(var i=0; i<options.bodyParser.length; i++) {
-				var bp = options.bodyParser[i];
-				app.use(bodyParser[bp.parse](bp.options));
-			}
-		}
+    if (options.request.timeout) {
+      app.use(timeout(options.request.timeout));
+    }
 
-		if(options.methodOverride) {
-			app.use(methodOverride(options.methodOverride.getter, options.methodOverride.options));
-		}
-	}
+    if (options.cookieParser) {
+      app.use(cookieParser(options.cookieParser.secret, options.cookieParser.options));
+    }
 
-	_prepareVars() {
-		var app     = this.expressApp;
-		var server  = this.server;
-		var options = this.options;
+    if (options.bodyParser) {
+      for (let i = 0; i < options.bodyParser.length; i++) {
+        const bp = options.bodyParser[i];
+        app.use(bodyParser[bp.parse](bp.options));
+      }
+    }
 
-		//add access to req from template
-		app.use(function(req, res, next) {
-			res.locals._req        = req;
-			res.locals._production = process.env.NODE_ENV === 'production';
-			res.locals._build      = options.server.build;
+    if (options.methodOverride) {
+      app.use(methodOverride(options.methodOverride.getter, options.methodOverride.options));
+    }
+  }
 
-			next();
-		});
+  _prepareVars() {
+    const app = this.expressApp;
+    const server = this.server;
+    const options = this.options;
 
-		//add access to req from template
-		app.use(function(req, res, next) {
-			req.objects = {};
-			req.server  = server;
-			req.models  = server.models;
+    // add access to req from template
+    app.use(function(req, res, next) {
+      res.locals._req = req;
+      res.locals._production = process.env.NODE_ENV === 'production';
+      res.locals._build = options.server.build;
 
-			next();
-		});
-	}	
+      next();
+    });
 
-	_prepareSession() {
-		var app = this.expressApp;
-		var options = this.options;
+    // add access to req from template
+    app.use(function(req, res, next) {
+      req.objects = {};
+      req.server = server;
+      req.models = server.models;
 
-		if(!options.session) {
-			return;
-		}
+      next();
+    });
+  }
 
-		app.use(session(options.session));
-	}
+  _prepareSession() {
+    const app = this.expressApp;
+    const options = this.options;
 
-	_prepareSecure() {
-		var app = this.expressApp;
-		var server  = this.server;
-		var options = this.options;
+    if (!options.session) {
+      return;
+    }
 
-		app.use(server.secure.passport.initialize());
+    app.use(session(options.session));
+  }
 
-		if(!options.session) {
-			return;
-		}
+  _prepareSecure() {
+    const app = this.expressApp;
+    const server = this.server;
+    const options = this.options;
 
-		app.use(server.secure.passport.session());
-	}
+    app.use(server.secure.passport.initialize());
 
-	_prepareStatic() {
-		var app = this.expressApp;
-		var options = this.options;
+    if (!options.session) {
+      return;
+    }
 
-		if(options.flash) {
-			app.use(flash());
-		}
+    app.use(server.secure.passport.session());
+  }
 
-		if(options.favicon) {
-			app.use(serveFavicon(options.favicon.root, options.favicon.options));
-		}
+  _prepareStatic() {
+    const app = this.expressApp;
+    const options = this.options;
 
-		if(options.css) {
-			app.use(options.css.path, lessMiddleware(options.css.root, options.css.options));	
-		}
+    if (options.flash) {
+      app.use(flash());
+    }
 
-		if(options.static) {
-			app.use(options.static.path, serveStatic(options.static.root, options.static.options));
-		}
-	}
+    if (options.favicon) {
+      app.use(serveFavicon(options.favicon.root, options.favicon.options));
+    }
 
-	_prepareRouter() {
-		var app = this.expressApp;
-		var options = this.options;
-		var server = this.server;
+    if (options.css) {
+      app.use(options.css.path, lessMiddleware(options.css.root, options.css.options));
+    }
 
-		//use server router
-		app.use(server.router.expressRouter);
+    if (options.static) {
+      app.use(options.static.path, serveStatic(options.static.root, options.static.options));
+    }
+  }
 
-		//delete uploaded files
-		app.use(fileController.clearAfterError); //error must be first
-		app.use(fileController.clear);
+  _prepareRouter() {
+    const app = this.expressApp;
+    const options = this.options;
+    const server = this.server;
 
-		//at the end add 500 and 404
-		app.use(options.page.notFound || pageController.notFound);
-		app.use(options.page.error || pageController.error);
-	}
+    // use server router
+    app.use(server.router.expressRouter);
+
+    // delete uploaded files
+    app.use(fileController.clearAfterError); // error must be first
+    app.use(fileController.clear);
+
+    // at the end add 500 and 404
+    app.use(options.page.notFound || pageController.notFound);
+    app.use(options.page.error || pageController.error);
+  }
 }
 
 function prepareRequest(req) {
-	req.__defineGetter__('httpHost', function() {
-		var trustProxy = this.app.get('trust proxy');
-		var host = trustProxy && this.get('X-Forwarded-Host');
-		return host || this.get('Host');
-	});
+  req.__defineGetter__('httpHost', function() {
+    const trustProxy = this.app.get('trust proxy');
+    const host = trustProxy && this.get('X-Forwarded-Host');
+    return host || this.get('Host');
+  });
 
-	req.__defineGetter__('port', function(){
-		host = this.httpHost;
-		if (!host) {
-			return;
-		}
+  req.__defineGetter__('port', function() {
+    const host = this.httpHost;
+    if (!host) {
+      return null;
+    }
 
-		var parts = host.split(':');
-		return (parts.length === 2)
-			? parseInt(parts[1], 10) 
-			: 80;
-	});
+    const parts = host.split(':');
+    return (parts.length === 2)
+      ? parseInt(parts[1], 10)
+      : 80;
+  });
 
-	req.__defineGetter__('protocolHost', function(){
-		return this.protocol + '://' + this.httpHost;
-	});
+  req.__defineGetter__('protocolHost', function() {
+    return this.protocol + '://' + this.httpHost;
+  });
 }
 
-prepareRequest(req);
+prepareRequest(request);

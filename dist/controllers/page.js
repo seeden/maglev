@@ -1,7 +1,7 @@
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
-	value: true
+  value: true
 });
 exports.error = error;
 exports.notFound = notFound;
@@ -25,35 +25,35 @@ var _prettyjson2 = _interopRequireDefault(_prettyjson);
  */
 
 function error(err, req, res, next) {
-	var options = req.server.options;
+  var options = req.server.options;
 
-	var error = {
-		status: err.status || 500,
-		message: err.message || 'Internal server error',
-		stack: err.stack,
-		url: req.originalUrl,
-		errors: err.errors || []
-	};
+  var errorObj = {
+    status: err.status || 500,
+    message: err.message || 'Internal server error',
+    stack: err.stack,
+    url: req.originalUrl,
+    errors: err.errors || []
+  };
 
-	if (error.status >= 500 && options.log && options.morgan.options.stream) {
-		var data = _prettyjson2['default'].render(err);
-		options.morgan.options.stream.write(data + '\n');
-	}
+  if (errorObj.status >= 500 && options.log && options.morgan.options.stream) {
+    var data = _prettyjson2['default'].render(err);
+    options.morgan.options.stream.write(data + '\n');
+  }
 
-	res.status(error.status).format({
-		'text/plain': function textPlain() {
-			res.send(error.message);
-		},
+  res.status(errorObj.status).format({
+    'text/plain': function textPlain() {
+      res.send(errorObj.message);
+    },
 
-		'text/html': function textHtml() {
-			var view = error.status === 404 ? 'error404' : 'error';
-			res.render(view, error);
-		},
+    'text/html': function textHtml() {
+      var view = errorObj.status === 404 ? 'error404' : 'error';
+      res.render(view, errorObj);
+    },
 
-		'application/json': function applicationJson() {
-			res.jsonp(error);
-		}
-	});
+    'application/json': function applicationJson() {
+      res.jsonp(errorObj);
+    }
+  });
 }
 
 /**
@@ -63,5 +63,5 @@ function error(err, req, res, next) {
  */
 
 function notFound(req, res, next) {
-	return next(new _webError2['default'](404));
+  return next(new _webError2['default'](404));
 }

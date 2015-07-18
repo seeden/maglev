@@ -10,168 +10,162 @@ import jwt from 'jsonwebtoken';
 import WebError from 'web-error';
 
 export function anonymous() {
-	return new AnonymousStrategy();
+  return new AnonymousStrategy();
 }
 
 export function local(options, models) {
-	// Use local strategy TODO find by object
-	return new LocalStrategy({
-		usernameField: 'username',
-		passwordField: 'password'
-	}, function(email, password, done) {
-		var User = models.User;
+  // Use local strategy TODO find by object
+  return new LocalStrategy({
+    usernameField: 'username',
+    passwordField: 'password'
+  }, function(email, password, done) {
+    const User = models.User;
 
-		User.findOne({
-			email: email
-		}, function(err, user) {
-			if (err) {
-				return done(err);
-			}
+    User.findOne({
+      email: email
+    }, function(err, user) {
+      if (err) {
+        return done(err);
+      }
 
-			if (!user) {
-				return done(null, false, {
-					message: 'Unknown user'
-				});
-			}
+      if (!user) {
+        return done(null, false, {
+          message: 'Unknown user'
+        });
+      }
 
-			if (!user.authenticate(password)) {
-				return done(null, false, {
-					message: 'Invalid password'
-				});
-			}
-			
-			return done(null, user);
-		});
-	});
-};
+      if (!user.authenticate(password)) {
+        return done(null, false, {
+          message: 'Invalid password'
+        });
+      }
+
+      return done(null, user);
+    });
+  });
+}
 
 export function bearer(options, models) {
-	return new BearerStrategy(function(token, done) {
-		var User = models.User;
+  return new BearerStrategy(function(token, done) {
+    const User = models.User;
 
-		if(!token) {
-			return done(new WebError(401, 'Invalid token'));	
-		}
+    if (!token) {
+      return done(new WebError(401, 'Invalid token'));
+    }
 
-		jwt.verify(token, options.token.secret, function(err, data) {
-			if (err) {
-				return done(new WebError(401, err.message));	
-			}
+    jwt.verify(token, options.token.secret, function(err, data) {
+      if (err) {
+        return done(new WebError(401, err.message));
+      }
 
-			if(!data.user) {
-				return done(new WebError(404, 'Unknown user'));
-			}
+      if (!data.user) {
+        return done(new WebError(404, 'Unknown user'));
+      }
 
-			User.findById(data.user, function(err, user) {
-				if (err) {
-					return done(err);
-				}
+      User.findById(data.user, function(err2, user) {
+        if (err2) {
+          return done(err2);
+        }
 
-				if (!user) {
-					return done(new WebError(404, 'Unknown user'));
-				}
+        if (!user) {
+          return done(new WebError(404, 'Unknown user'));
+        }
 
-				return done(null, user);
-			});
-		});
-	});
+        return done(null, user);
+      });
+    });
+  });
 }
 
 export function facebook(options, models) {
-	return new FacebookStrategy({
-		clientID: options.facebook.appID,
-		clientSecret: options.facebook.appSecret
-	}, function(accessToken, refreshToken, profile, done) {
-		var User = models.User;
+  return new FacebookStrategy({
+    clientID: options.facebook.appID,
+    clientSecret: options.facebook.appSecret
+  }, function(accessToken, refreshToken, profile, done) {
+    const User = models.User;
 
-		if (!profile.id) {
-			return done(new Error('Profile ID is null'));
-		}
+    if (!profile.id) {
+      return done(new Error('Profile ID is null'));
+    }
 
-		if(!options.facebook.appID || !options.facebook.appSecret) {
-			return done(new Error('Missing Facebook appID or appSecret'));
-		}
-			
-		User.findByFacebookID(profile.id, function(err, user) {
-			if (err || user) {
-				return done(err, user);
-			}
+    if (!options.facebook.appID || !options.facebook.appSecret) {
+      return done(new Error('Missing Facebook appID or appSecret'));
+    }
 
-			if (!options.registration.simple) {
-				return done(null, false, {
-					message: 'Unknown user'
-				});
-			}
+    User.findByFacebookID(profile.id, function(err, user) {
+      if (err || user) {
+        return done(err, user);
+      }
 
-			User.createByFacebook(profile._json, function(err, user) {
-				return done(err, user);
-			});
-		});
-	});
+      if (!options.registration.simple) {
+        return done(null, false, {
+          message: 'Unknown user'
+        });
+      }
+
+      User.createByFacebook(profile._json, done);
+    });
+  });
 }
 
 export function twitter(options, models) {
-	return new TwitterStrategy({
-		consumerKey: options.twitter.consumerKey,
-		consumerSecret: options.twitter.consumerSecret
-	}, function(token, tokenSecret, profile, done) {
-		var User = models.User;
+  return new TwitterStrategy({
+    consumerKey: options.twitter.consumerKey,
+    consumerSecret: options.twitter.consumerSecret
+  }, function(token, tokenSecret, profile, done) {
+    const User = models.User;
 
-		if (!profile.id) {
-			return done(new Error('Profile ID is null'));
-		}
+    if (!profile.id) {
+      return done(new Error('Profile ID is null'));
+    }
 
-		if(!options.twitter.consumerKey || !options.twitter.consumerSecret) {
-			return done(new Error('Missing Twitter consumerKey or consumerSecret'));
-		}
+    if (!options.twitter.consumerKey || !options.twitter.consumerSecret) {
+      return done(new Error('Missing Twitter consumerKey or consumerSecret'));
+    }
 
-		User.findByTwitterID(profile.id, function(err, user) {
-			if (err || user) {
-				return done(err, user);
-			}
+    User.findByTwitterID(profile.id, function(err, user) {
+      if (err || user) {
+        return done(err, user);
+      }
 
-			if (!options.registration.simple) {
-				return done(null, false, {
-					message: 'Unknown user'
-				});
-			}
+      if (!options.registration.simple) {
+        return done(null, false, {
+          message: 'Unknown user'
+        });
+      }
 
-			User.createByTwitter(profile, function(err, user) {
-				return done(err, user);
-			});
-		});
-	});
+      User.createByTwitter(profile, done);
+    });
+  });
 }
 
 export function facebookCanvas(options, models) {
-	return new FacebookCanvasStrategy({
-		clientID: options.facebook.appID,
-		clientSecret: options.facebook.appSecret
-	}, function(accessToken, refreshToken, profile, done) {
-		var User = models.User;
+  return new FacebookCanvasStrategy({
+    clientID: options.facebook.appID,
+    clientSecret: options.facebook.appSecret
+  }, function(accessToken, refreshToken, profile, done) {
+    const User = models.User;
 
-		if (!profile.id) {
-			return done(new Error('Profile ID is null'));
-		}
+    if (!profile.id) {
+      return done(new Error('Profile ID is null'));
+    }
 
-		if(!options.facebook.appID || !options.facebook.appSecret) {
-			return done(new Error('Missing Facebook appID or appSecret'));
-		}
+    if (!options.facebook.appID || !options.facebook.appSecret) {
+      return done(new Error('Missing Facebook appID or appSecret'));
+    }
 
-		User.findByFacebookID(profile.id, function(err, user) {
-			if (err || user) {
-				return done(err, user);
-			}
+    User.findByFacebookID(profile.id, function(err, user) {
+      if (err || user) {
+        return done(err, user);
+      }
 
-			if (!options.registration.simple) {
-				return done(null, false, {
-					message: 'Unknown user'
-				});
-			}
+      if (!options.registration.simple) {
+        return done(null, false, {
+          message: 'Unknown user'
+        });
+      }
 
-			User.createByFacebook(profile._json, function(err, user) {
-				return done(err, user);
-			});
-		});
-	});
+      User.createByFacebook(profile._json, done);
+    });
+  });
 }

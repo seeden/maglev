@@ -12,5 +12,5 @@ import * as user from './user';
 import * as userPermission from './userpermission';
 
 
-export { auth, facebook, file, logic, page, password, 
-	permission, rbac, role, token, user, userPermission };
+export { auth, facebook, file, logic, page, password,
+  permission, rbac, role, token, user, userPermission };

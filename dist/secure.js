@@ -1,7 +1,7 @@
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
-	value: true
+  value: true
 });
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -21,66 +21,66 @@ var _strategy = require('./strategy');
 var strategy = _interopRequireWildcard(_strategy);
 
 var Secure = (function () {
-	function Secure(server) {
-		_classCallCheck(this, Secure);
+  function Secure(server) {
+    _classCallCheck(this, Secure);
 
-		this._server = server;
+    this._server = server;
 
-		this._prepare();
-	}
+    this._prepare();
+  }
 
-	_createClass(Secure, [{
-		key: 'server',
-		get: function () {
-			return this._server;
-		}
-	}, {
-		key: 'passport',
-		get: function () {
-			return _passport2['default'];
-		}
-	}, {
-		key: '_prepare',
-		value: function _prepare() {
-			var server = this.server;
-			var passport = this.passport;
+  _createClass(Secure, [{
+    key: 'server',
+    get: function () {
+      return this._server;
+    }
+  }, {
+    key: 'passport',
+    get: function () {
+      return _passport2['default'];
+    }
+  }, {
+    key: '_prepare',
+    value: function _prepare() {
+      var server = this.server;
+      var pp = this.passport;
 
-			passport.serializeUser(function (user, done) {
-				done(null, user.id);
-			});
+      pp.serializeUser(function (user, done) {
+        done(null, user.id);
+      });
 
-			passport.deserializeUser(function (id, done) {
-				var User = server.models.User;
+      pp.deserializeUser(function (id, done) {
+        var User = server.models.User;
 
-				User.findById(id, function (err, user) {
-					done(err, user);
-				});
-			});
+        User.findById(id, function (err, user) {
+          done(err, user);
+        });
+      });
 
-			var options = server.options;
-			var models = server.models;
+      var options = server.options;
+      var models = server.models;
 
-			passport.use(strategy.anonymous(options, models));
-			passport.use(strategy.local(options, models));
-			passport.use(strategy.bearer(options, models));
+      pp.use(strategy.anonymous(options, models));
+      pp.use(strategy.local(options, models));
+      pp.use(strategy.bearer(options, models));
 
-			options.strategies.forEach(function (strategy) {
-				passport.use(strategy(options, models));
-			});
-		}
-	}, {
-		key: 'authenticate',
-		value: function authenticate() {
-			for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-				args[_key] = arguments[_key];
-			}
+      options.strategies.forEach(function (strategy2) {
+        pp.use(strategy2(options, models));
+      });
+    }
+  }, {
+    key: 'authenticate',
+    value: function authenticate() {
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
 
-			var passport = this.passport;
-			return passport.authenticate.apply(passport, args);
-		}
-	}]);
+      var pp = this.passport;
+      return pp.authenticate.apply(pp, args);
+    }
+  }]);
 
-	return Secure;
+  return Secure;
 })();
 
 exports['default'] = Secure;

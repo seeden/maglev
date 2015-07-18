@@ -1,7 +1,7 @@
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
-	value: true
+  value: true
 });
 exports.can = can;
 exports.hasRole = hasRole;
@@ -22,37 +22,37 @@ var _webError2 = _interopRequireDefault(_webError);
  * @return {Function}          Middleware function
  */
 
-function can(action, resource, redirect, redirectStatus) {
-	redirectStatus = redirectStatus || 302;
+function can(action, resource, redirect) {
+  var redirectStatus = arguments[3] === undefined ? 302 : arguments[3];
 
-	return function (req, res, next) {
-		var server = req.server;
-		var options = server.options;
-		var rbac = server.rbac;
-		var user = req.user;
+  return function (req, res, next) {
+    var server = req.server;
+    var options = server.options;
+    var rbac = server.rbac;
+    var user = req.user;
 
-		function callback(err, can) {
-			if (err) {
-				return next(err);
-			}
+    function callback(err, canDoIt) {
+      if (err) {
+        return next(err);
+      }
 
-			if (!can) {
-				if (redirect) {
-					return res.redirect(redirectStatus, redirect);
-				}
+      if (!canDoIt) {
+        if (redirect) {
+          return res.redirect(redirectStatus, redirect);
+        }
 
-				return next(new _webError2['default'](401));
-			}
+        return next(new _webError2['default'](401));
+      }
 
-			next();
-		}
+      next();
+    }
 
-		if (!user) {
-			rbac.can(options.rbac.role.guest, action, resource, callback);
-		} else {
-			user.can(rbac, action, resource, callback);
-		}
-	};
+    if (!user) {
+      rbac.can(options.rbac.role.guest, action, resource, callback);
+    } else {
+      user.can(rbac, action, resource, callback);
+    }
+  };
 }
 
 /**
@@ -63,53 +63,53 @@ function can(action, resource, redirect, redirectStatus) {
  * @return {Function}       Middleware function
  */
 
-function hasRole(name, redirect, redirectStatus) {
-	redirectStatus = redirectStatus || 302;
+function hasRole(name, redirect) {
+  var redirectStatus = arguments[2] === undefined ? 302 : arguments[2];
 
-	return function (req, res, next) {
-		var server = this.server;
-		var rbac = server.rbac;
+  return function (req, res, next) {
+    var server = this.server;
+    var rbac = server.rbac;
 
-		if (!req.user) {
-			return next(new _webError2['default'](401));
-		}
+    if (!req.user) {
+      return next(new _webError2['default'](401));
+    }
 
-		req.user.hasRole(rbac, name, function (err, has) {
-			if (err) {
-				return next(err);
-			}
+    req.user.hasRole(rbac, name, function (err, has) {
+      if (err) {
+        return next(err);
+      }
 
-			if (!has) {
-				if (redirect) {
-					return res.redirect(redirectStatus, redirect);
-				}
-				return next(new _webError2['default'](401));
-			}
+      if (!has) {
+        if (redirect) {
+          return res.redirect(redirectStatus, redirect);
+        }
+        return next(new _webError2['default'](401));
+      }
 
-			next();
-		});
-	};
+      next();
+    });
+  };
 }
 
 /**
  * Allow only guest user show content
  * @param  {String}  redirect Url where is user redirected when he has no permissions
  * @param  {Number}  status   Status code of redirect action
- * @return {Function}	Middleware function
+ * @return {Function} Middleware function
  */
 
-function isGuest(redirect, redirectStatus) {
-	redirectStatus = redirectStatus || 302;
+function isGuest(redirect) {
+  var redirectStatus = arguments[1] === undefined ? 302 : arguments[1];
 
-	return function (req, res, next) {
-		if (!req.user) {
-			return next();
-		}
+  return function (req, res, next) {
+    if (!req.user) {
+      return next();
+    }
 
-		if (redirect) {
-			return res.redirect(redirectStatus, redirect);
-		}
+    if (redirect) {
+      return res.redirect(redirectStatus, redirect);
+    }
 
-		next(new _webError2['default'](401, 'You are not a guest'));
-	};
+    next(new _webError2['default'](401, 'You are not a guest'));
+  };
 }

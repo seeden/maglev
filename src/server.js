@@ -11,132 +11,131 @@ import debug from 'debug';
 const log = debug('maglev:server');
 
 export default class Server {
-	constructor(options, callback) {
-		if(!callback) {
-			throw new Error('Please use callback for server');
-		}
+  constructor(options, callback) {
+    if (!callback) {
+      throw new Error('Please use callback for server');
+    }
 
-		options = extend(true, {}, defaultOptions, options);
+    options = extend(true, {}, defaultOptions, options);
 
-		if(!options.db) {
-			throw new Error('Db is not defined');
-		}
+    if (!options.db) {
+      throw new Error('Db is not defined');
+    }
 
-		this._options = options;
-		this._db = options.db;
+    this._options = options;
+    this._db = options.db;
 
-		this._rbac   = new RBAC(options.rbac.options, err => {
-			if(err) {
-				return callback(err);
-			}
+    this._rbac = new RBAC(options.rbac.options, err => {
+      if (err) {
+        return callback(err);
+      }
 
-			this._router = new Router(options.router); //router is used in app
-			this._models = new Models(this, options.models); //models is used in secure
-			this._secure = new Secure(this);
-			
-			this._app    = new App(this, options);
+      this._router = new Router(options.router); // router is used in app
+      this._models = new Models(this, options.models); // models is used in secure
+      this._secure = new Secure(this);
 
-			this._loadRoutes();
-			
-			this._loadModels(err => {
-				if(err) {
-					return callback(err);
-				}
+      this._app = new App(this, options);
 
-				callback(null, this);
-			});
-		});
-	}
+      this._loadRoutes();
 
-	get options() {
-		return this._options;
-	}
+      this._loadModels((err2) => {
+        if (err2) {
+          return callback(err2);
+        }
 
-	get rbac() {
-		return this._rbac;
-	}
+        callback(null, this);
+      });
+    });
+  }
 
-	get db() {
-		return this._db;
-	}
+  get options() {
+    return this._options;
+  }
 
-	get secure() {
-		return this._secure;
-	}
+  get rbac() {
+    return this._rbac;
+  }
 
-	get app() {
-		return this._app;
-	}
+  get db() {
+    return this._db;
+  }
 
-	get router() {
-		return this._router;
-	}
+  get secure() {
+    return this._secure;
+  }
 
-	get models() {
-		return this._models;
-	}
+  get app() {
+    return this._app;
+  }
 
-	listen(callback) {
-		var options = this.options;
-		this.app.listen(options.server.port, options.server.host, callback);
-		return this;
-	}
+  get router() {
+    return this._router;
+  }
 
-	close(callback) {
-		this.app.close(callback);
-		return this;
-	}
+  get models() {
+    return this._models;
+  }
 
-	_loadModels(callback) {
-		var server = this;
-		var models = this._models;
-		var path = this.options.root + '/models';
+  listen(callback) {
+    const options = this.options;
+    this.app.listen(options.server.port, options.server.host, callback);
+    return this;
+  }
 
-		Server.walk(path, function(model, modelPath) {
-			try {
-				models.register(model);
-			} catch(e) {
-				log('problem with model: '+ modelPath);
-				throw e;
-			}
-		});
+  close(callback) {
+    this.app.close(callback);
+    return this;
+  }
 
-		//preload all models
-		models.preload(callback);
-	}
+  _loadModels(callback) {
+    const models = this._models;
+    const path = this.options.root + '/models';
 
-	_loadRoutes() {
-		var router = this.router;
-		var path = this.options.root + '/routes';
+    Server.walk(path, function(model, modelPath) {
+      try {
+        models.register(model);
+      } catch(e) {
+        log('problem with model: ' + modelPath);
+        throw e;
+      }
+    });
 
-		Server.walk(path, function(route, routePath) {
-			try {
-				route(router);
-			} catch(e) {
-				log('problem with route: ' + routePath);
-				throw e;
-			}
-		});
-	}
+    // preload all models
+    models.preload(callback);
+  }
 
-	static walk(path, callback) {
-		if (!fs.existsSync(path)) {
-	    	log('Path does not exists: ' + path);
-	    	return;
-	    }
+  _loadRoutes() {
+    const router = this.router;
+    const path = this.options.root + '/routes';
 
-		fs.readdirSync(path).forEach(function(file) {
-			var newPath = path + '/' + file;
-			var stat = fs.statSync(newPath);
+    Server.walk(path, function(route, routePath) {
+      try {
+        route(router);
+      } catch(e) {
+        log('problem with route: ' + routePath);
+        throw e;
+      }
+    });
+  }
 
-			if (stat.isFile()) {
-				if (/(.*)\.(js$|coffee$)/.test(file)) {
-					var model = require(newPath);
-					callback(model, newPath, file);
-				}
-			} else if (stat.isDirectory()) {
-				Server.walk(newPath, callback);
-			}
-		});
-	}
+  static walk(path, callback) {
+    if (!fs.existsSync(path)) {
+      log('Path does not exists: ' + path);
+      return;
+    }
+
+    fs.readdirSync(path).forEach(function(file) {
+      const newPath = path + '/' + file;
+      const stat = fs.statSync(newPath);
+
+      if (stat.isFile()) {
+        if (/(.*)\.(js$|coffee$)/.test(file)) {
+          const model = require(newPath);
+          callback(model, newPath, file);
+        }
+      } else if (stat.isDirectory()) {
+        Server.walk(newPath, callback);
+      }
+    });
+  }
 }

@@ -1,7 +1,7 @@
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
-	value: true
+  value: true
 });
 exports.isOwner = isOwner;
 exports.user = user;
@@ -21,59 +21,59 @@ var _tv4 = require('tv4');
 var _tv42 = _interopRequireDefault(_tv4);
 
 function isOwner(req, res, next) {
-	if (!req.user || !req.objects.user) {
-		return next(new _webError2['default'](401));
-	}
+  if (!req.user || !req.objects.user) {
+    return next(new _webError2['default'](401));
+  }
 
-	if (!req.user.isMe(req.objects.user)) {
-		return next(new _webError2['default'](401));
-	}
+  if (!req.user.isMe(req.objects.user)) {
+    return next(new _webError2['default'](401));
+  }
 
-	next();
+  next();
 }
 
 function user(req, res, next, id) {
-	var User = req.models.User;
+  var User = req.models.User;
 
-	if (!id) {
-		return next(new _webError2['default'](400));
-	}
+  if (!id) {
+    return next(new _webError2['default'](400));
+  }
 
-	User.findById(id, function (err, user) {
-		if (err) {
-			return next(err);
-		}
+  User.findById(id, function (err, user) {
+    if (err) {
+      return next(err);
+    }
 
-		if (!user) {
-			return next(new _webError2['default'](404));
-		}
+    if (!user) {
+      return next(new _webError2['default'](404));
+    }
 
-		req.objects.user = user;
-		next();
-	});
+    req.objects.user = user;
+    next();
+  });
 }
 
 function permalink(req, res, next, permalink) {
-	var User = req.models.User;
+  var User = req.models.User;
 
-	if (!permalink) {
-		return next(new _webError2['default'](400));
-	}
+  if (!permalink) {
+    return next(new _webError2['default'](400));
+  }
 
-	User.findOne({
-		permalink: permalink
-	}, function (err, user) {
-		if (err) {
-			return next(err);
-		}
+  User.findOne({
+    permalink: permalink
+  }, function (err, user) {
+    if (err) {
+      return next(err);
+    }
 
-		if (!user) {
-			return next(new _webError2['default'](404));
-		}
+    if (!user) {
+      return next(new _webError2['default'](404));
+    }
 
-		req.objects.user = user;
-		next();
-	});
+    req.objects.user = user;
+    next();
+  });
 }
 
 /**
@@ -81,55 +81,53 @@ function permalink(req, res, next, permalink) {
  */
 
 function create(req, res, next) {
-	var User = req.models.User;
-	var options = req.server.options;
+  var User = req.models.User;
+  var options = req.server.options;
 
-	exports.createSchema = exports.createSchema || User.getRestJSONSchema();
-	var result = _tv42['default'].validateMultiple(req.body, exports.createSchema);
-	if (!result.valid) {
-		return next(new _webError2['default'](400, 'Validation errors', result.errors));
-	}
+  exports.createSchema = exports.createSchema || User.getRestJSONSchema();
+  var result = _tv42['default'].validateMultiple(req.body, exports.createSchema);
+  if (!result.valid) {
+    return next(new _webError2['default'](400, 'Validation errors', result.errors));
+  }
 
-	User.create(req.body, function (err, user) {
-		if (err) {
-			return next(err);
-		}
+  User.create(req.body, function (err, user) {
+    if (err) {
+      return next(err);
+    }
 
-		if (!user) {
-			return next(new Error('User is undefined'));
-		}
+    if (!user) {
+      return next(new Error('User is undefined'));
+    }
 
-		res.jsonp({
-			token: user.generateBearerToken(options.token.secret, options.token.expiration),
-			user: user.toPrivateJSON()
-		});
-	});
+    res.jsonp({
+      token: user.generateBearerToken(options.token.secret, options.token.expiration),
+      user: user.toPrivateJSON()
+    });
+  });
 }
 
 function remove(req, res, next) {
-	var user = req.objects.user;
+  var user = req.objects.user;
+  if (!user) {
+    return next(new _webError2['default'](404));
+  }
 
-	if (!user) {
-		return next(new _webError2['default'](404));
-	}
+  user.remove(function (err) {
+    if (err) {
+      return next(err);
+    }
 
-	user.remove(function (err) {
-		if (err) {
-			return next(err);
-		}
-
-		res.status(204).end();
-	});
+    res.status(204).end();
+  });
 }
 
 function current(req, res, next) {
-	var user = req.user;
+  var user = req.user;
+  if (!user) {
+    return next(new _webError2['default'](404));
+  }
 
-	if (!user) {
-		return next(new _webError2['default'](404));
-	}
-
-	res.jsonp({
-		user: user.toPrivateJSON()
-	});
+  res.jsonp({
+    user: user.toPrivateJSON()
+  });
 }

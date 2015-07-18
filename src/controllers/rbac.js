@@ -8,37 +8,35 @@ import WebError from 'web-error';
  * @param  {Number}  status   Status code of redirect action
  * @return {Function}          Middleware function
  */
-export function can(action, resource, redirect, redirectStatus) {
-	redirectStatus = redirectStatus || 302;
+export function can(action, resource, redirect, redirectStatus = 302) {
+  return function(req, res, next) {
+    const server = req.server;
+    const options = server.options;
+    const rbac = server.rbac;
+    const user = req.user;
 
-	return function(req, res, next) {
-		var server = req.server;
-		var options = server.options;
-		var rbac = server.rbac;
-		var user = req.user;
+    function callback(err, canDoIt) {
+      if (err) {
+        return next(err);
+      }
 
-		function callback(err, can) {
-			if(err) {
-				return next(err);
-			}
+      if (!canDoIt) {
+        if (redirect) {
+          return res.redirect(redirectStatus, redirect);
+        }
 
-			if(!can) {
-				if(redirect) {
-					return res.redirect(redirectStatus, redirect);
-				}
+        return next(new WebError(401));
+      }
 
-				return next(new WebError(401));	
-			}
+      next();
+    }
 
-			next();
-		}
-
-		if(!user) {
-			rbac.can(options.rbac.role.guest, action, resource, callback);
-		} else {
-			user.can(rbac, action, resource, callback);
-		}
-	};
+    if (!user) {
+      rbac.can(options.rbac.role.guest, action, resource, callback);
+    } else {
+      user.can(rbac, action, resource, callback);
+    }
+  };
 }
 
 /**
@@ -48,52 +46,48 @@ export function can(action, resource, redirect, redirectStatus) {
  * @param  {Number}  status   Status code of redirect action
  * @return {Function}       Middleware function
  */
-export function hasRole(name, redirect, redirectStatus) {
-	redirectStatus = redirectStatus || 302;
+export function hasRole(name, redirect, redirectStatus = 302) {
+  return function(req, res, next) {
+    const server = this.server;
+    const rbac = server.rbac;
 
-	return function(req, res, next) {
-		var server = this.server;
-		var rbac = server.rbac;
+    if (!req.user) {
+      return next(new WebError(401));
+    }
 
-		if(!req.user) {
-			return next(new WebError(401));
-		}
+    req.user.hasRole(rbac, name, function(err, has) {
+      if (err) {
+        return next(err);
+      }
 
-		req.user.hasRole(rbac, name, function(err, has) {
-			if(err) {
-				return next(err);
-			}
+      if (!has) {
+        if (redirect) {
+          return res.redirect(redirectStatus, redirect);
+        }
+        return next(new WebError(401));
+      }
 
-			if(!has) {
-				if(redirect) {
-					return res.redirect(redirectStatus, redirect);
-				}
-				return next(new WebError(401));	
-			}
-
-			next();			
-		});
-	};
+      next();
+    });
+  };
 }
 
 /**
  * Allow only guest user show content
  * @param  {String}  redirect Url where is user redirected when he has no permissions
  * @param  {Number}  status   Status code of redirect action
- * @return {Function}	Middleware function
+ * @return {Function} Middleware function
  */
-export function isGuest(redirect, redirectStatus) {
-	redirectStatus = redirectStatus || 302;
+export function isGuest(redirect, redirectStatus = 302) {
+  return function(req, res, next) {
+    if (!req.user) {
+      return next();
+    }
 
-	return function(req, res, next) {
-		if(!req.user) {
-			return next();
-		}
+    if (redirect) {
+      return res.redirect(redirectStatus, redirect);
+    }
 
-		if(redirect) {
-			return res.redirect(redirectStatus, redirect);
-		}
-
-		next(new WebError(401, 'You are not a guest'));
-	};
+    next(new WebError(401, 'You are not a guest'));
+  };
 }

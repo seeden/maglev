@@ -5,238 +5,230 @@ import WebError from 'web-error';
 import Download from 'download';
 import tmp from 'temporary';
 
+function deleteFiles(files, callback) {
+  map(files, function(file, cb) {
+    fs.unlink(file.path, function(err) {
+      if (err && err.message.indexOf('ENOENT') === -1) {
+        return cb(err);
+      }
+
+      cb(null, file);
+    });
+  }, function(err, removedFiles) {
+    if (err) {
+      return callback(err);
+    }
+
+    callback(null, removedFiles);
+  });
+}
+
 export function upload(req, res, next) {
-	var options = req.server.options;
-	var files = req.objects.files = [];
+  const serverOptions = req.server.options;
+  const files = req.objects.files = [];
 
-	var options = options || {};
-	options.maxFieldsSize = options.maxFieldsSize || options.upload.maxFieldsSize;
-	options.maxFields = options.maxFields || options.upload.maxFields;
-	
-	var form = new multiparty.Form(options);
+  const options = {
+    maxFieldsSize: serverOptions.upload.maxFieldsSize,
+    maxFields: serverOptions.upload.maxFields
+  };
 
-	form.on('error', function (err) {
-		next(err);
-	});
+  const form = new multiparty.Form(options);
 
-	form.on('field', function (field, value) {
-		req.body[field] = value;
-	});
+  form.on('error', function(err) {
+    next(err);
+  });
 
-	form.on('file', function (name, file) {
-		files.push(file);
-	});
+  form.on('field', function(field, value) {
+    req.body[field] = value;
+  });
 
-	form.on('close', function() {
-		next();
-	});
+  form.on('file', function(name, file) {
+    files.push(file);
+  });
 
-	form.parse(req);
+  form.on('close', function() {
+    next();
+  });
+
+  form.parse(req);
 }
 
 export function clear(req, res, next) {
-	if(!req.objects.files || !req.objects.files.length) {
-		return next();
-	}
+  if (!req.objects.files || !req.objects.files.length) {
+    return next();
+  }
 
-	deleteFiles(req.objects.files, function(err, removedFiles) {
-		if(err) {
-			return next(err);
-		}
+  deleteFiles(req.objects.files, function(err, removedFiles) {
+    if (err) {
+      return next(err);
+    }
 
-		req.objects.files = [];
-		req.objects.removedFiles = removedFiles;
-		next();
-	});
+    req.objects.files = [];
+    req.objects.removedFiles = removedFiles;
+    next();
+  });
 }
 
 export function clearAfterError(err, req, res, next) {
-	clear(req, res, function(err2) {
-		next(err2 || err);
-	});
-}
-
-function deleteFiles(files, callback) {
-	map(files, function (file, cb) {
-		fs.unlink(file.path, function (err) {
-			if(err && err.message.indexOf('ENOENT')===-1) {
-				return cb(err);
-			};
-
-			cb(null, file);
-		});
-	}, function (err, removedFiles) {
-		if(err) {
-			return callback(err);
-		}
-
-		callback(null, removedFiles);
-	});	
+  clear(req, res, function(err2) {
+    next(err2 || err);
+  });
 }
 
 export function get(req, res, next) {
-	var file = req.objects.file;
+  const file = req.objects.file;
+  if (!file) {
+    return next(new WebError(404));
+  }
 
-	if(!file) {
-		return next(new WebError(404));
-	}
-
-	res.jsonp({
-		file: file.toPrivateJSON()
-	});
+  res.jsonp({
+    file: file.toPrivateJSON()
+  });
 }
 
 export function download(req, res, next) {
-	var options = req.server.options;
-	var files = req.objects.files = [];
+  const files = req.objects.files = [];
 
-	if(!req.body.url) {
-		return next(new WebError(401));	
-	}
+  if (!req.body.url) {
+    return next(new WebError(401));
+  }
 
-	var options = options || {};
-	options.maxFieldsSize = options.maxFieldsSize || options.upload.maxFieldsSize;
+  const downloadInstance = new Download().get(req.body.url);
+  downloadInstance.run(function(err, downloadedFiles) {
+    if (err) {
+      return next(err);
+    }
 
-	var download = new Download().get(req.body.url);
+    if (!downloadedFiles.length) {
+      return next(new WebError(401));
+    }
 
-    download.run(function (err, downloadedFiles) {
-    	if(err) {
-    		return next(err);
-    	}
+    const tmpFile = new tmp.File();
 
-    	if(!downloadedFiles.length) {
-    		return next(new WebError(401));		
-    	}
+    const file = {
+      fieldName: 'file',
+      originalFilename: downloadedFiles[0].path,
+      path: tmpFile.path,
+      size: downloadedFiles[0].contents.length
+    };
 
-    	var tmpFile = new tmp.File();
+    tmpFile.writeFile(downloadedFiles[0].contents, function(err2) {
+      if (err2) {
+        return next(err2);
+      }
 
-    	var file = {
-    		fieldName: 'file',
-    		originalFilename: downloadedFiles[0].path,
-    		path: tmpFile.path,
-    		size: downloadedFiles[0].contents.length
-    	};
-
-    	tmpFile.writeFile(downloadedFiles[0].contents, function(err) {
-    		if(err) {
-    			return next(err);
-    		}
-
-    		files.push(file);
-    		next();
-    	});
-	});
+      files.push(file);
+      next();
+    });
+  });
 }
 
-
-
 /*
-
 var useExt= function(orgPath, ext){
-	if(!ext) {
-		return orgPath; 
-	}
+  if(!ext) {
+    return orgPath;
+  }
 
-	orgPath = orgPath.replace(/\.[^/.]+$/, "");
+  orgPath = orgPath.replace(/\.[^/.]+$/, "");
 
-	return orgPath+'.'+ext;
+  return orgPath+'.'+ext;
 };
 
 exports.storeFirstImage = function(options) {
-	options = options || {};
+  options = options || {};
 
-	options.exts = options.exts || ['jpg', 'jpeg', 'png']; //available exts
-	options.ext = options.ext || null;   //finall ext
+  options.exts = options.exts || ['jpg', 'jpeg', 'png']; //available exts
+  options.ext = options.ext || null;   //finall ext
 
-	options.maxWidth = options.maxWidth || null;
-	options.maxHeight = options.maxHeight || null;
-	options.minWidth = options.minWidth || null;
-	options.minHeight = options.minHeight || null;
-	options.compress = options.compress || null; //None, BZip, Fax, Group4, JPEG, Lossless, LZW, RLE, Zip, or LZMA
-	options.quality = options.quality || null;  //0 - 100
-	options.interlace = options.interlace || false;  //null|Line|Plane|Partition
-	options.noProfile = typeof options.noProfile !== 'undefined' ? options.noProfile : true;
+  options.maxWidth = options.maxWidth || null;
+  options.maxHeight = options.maxHeight || null;
+  options.minWidth = options.minWidth || null;
+  options.minHeight = options.minHeight || null;
+  options.compress = options.compress || null; //None, BZip, Fax, Group4, JPEG, Lossless, LZW, RLE, Zip, or LZMA
+  options.quality = options.quality || null;  //0 - 100
+  options.interlace = options.interlace || false;  //null|Line|Plane|Partition
+  options.noProfile = typeof options.noProfile !== 'undefined' ? options.noProfile : true;
 
-	var storeFirstMiddleware = storeFirst(options);
+  var storeFirstMiddleware = storeFirst(options);
 
-	if(options.compress === 'JPEG') {
-		options.ext = 'jpg';
-	}
+  if(options.compress === 'JPEG') {
+    options.ext = 'jpg';
+  }
 
-	return function(req, res, next) {
-		var files = req.objects.files;
+  return function(req, res, next) {
+    var files = req.objects.files;
 
 
-		if(!files || !files.length) {
-			return next(new WebError(401, 'Files is undefined'));
-		}
+    if(!files || !files.length) {
+      return next(new WebError(401, 'Files is undefined'));
+    }
 
-		var file = files[0],
-			orgPath = file.path,
-			image = gm(orgPath);
+    var file = files[0],
+      orgPath = file.path,
+      image = gm(orgPath);
 
-		if(!image) {
-			return next(new WebError(401, 'Image is not a image'));
-		}
+    if(!image) {
+      return next(new WebError(401, 'Image is not a image'));
+    }
 
-		image.size(function (err, size) {
-			if(err) {
-				return next(err);
-			}
+    image.size(function (err, size) {
+      if(err) {
+        return next(err);
+      }
 
-			var changed = false;
+      var changed = false;
 
-			if(options.minWidth && options.minWidth>size.width) {
-				return next(new WebError(401, 'Image has smaller width'));
-			}
+      if(options.minWidth && options.minWidth>size.width) {
+        return next(new WebError(401, 'Image has smaller width'));
+      }
 
-			if(options.minHeight && options.minHeight>size.height) {
-				return next(new WebError(401, 'Image has smaller height'));
-			}	
+      if(options.minHeight && options.minHeight>size.height) {
+        return next(new WebError(401, 'Image has smaller height'));
+      }
 
-			if(options.maxWidth || options.maxHeight) {
-				image.resize(options.maxWidth, options.maxHeight);
-				changed=true;
-			}
+      if(options.maxWidth || options.maxHeight) {
+        image.resize(options.maxWidth, options.maxHeight);
+        changed=true;
+      }
 
-			if(options.interlace) {
-				image.interlace();
-				changed=true;
-			}
+      if(options.interlace) {
+        image.interlace();
+        changed=true;
+      }
 
-			if(options.quality) {
-				image.quality(options.quality);
-				changed=true;
-			}
+      if(options.quality) {
+        image.quality(options.quality);
+        changed=true;
+      }
 
-			if(options.compress) {
-				image.compress(options.compress);
-				changed=true;
-			}
+      if(options.compress) {
+        image.compress(options.compress);
+        changed=true;
+      }
 
-			if(options.noProfile) {
-				image.noProfile();
-				changed=true;
-			}
+      if(options.noProfile) {
+        image.noProfile();
+        changed=true;
+      }
 
-			if(!changed) {
-				return storeFirstMiddleware(req, res, next);
-			}
+      if(!changed) {
+        return storeFirstMiddleware(req, res, next);
+      }
 
-			var newPath = useExt(file.path, options.ext);
-			
-			image.write(newPath, function (err) {
-  				if (err) {
-  					return next(err);
-  				};
+      var newPath = useExt(file.path, options.ext);
 
-  				var stats = fs.statSync(newPath);
-  				file.size = stats['size'];
-  				file.path = newPath;
-				file.originalFilename = useExt(file.originalFilename, options.ext);
+      image.write(newPath, function (err) {
+          if (err) {
+            return next(err);
+          };
 
-  				return storeFirstMiddleware(req, res, next);
-			});
-		});
-	}
+          var stats = fs.statSync(newPath);
+          file.size = stats['size'];
+          file.path = newPath;
+        file.originalFilename = useExt(file.originalFilename, options.ext);
+
+          return storeFirstMiddleware(req, res, next);
+      });
+    });
+  }
 };*/
