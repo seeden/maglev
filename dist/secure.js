@@ -30,16 +30,6 @@ var Secure = (function () {
   }
 
   _createClass(Secure, [{
-    key: 'server',
-    get: function () {
-      return this._server;
-    }
-  }, {
-    key: 'passport',
-    get: function () {
-      return _passport2['default'];
-    }
-  }, {
     key: '_prepare',
     value: function _prepare() {
       var server = this.server;
@@ -71,12 +61,23 @@ var Secure = (function () {
   }, {
     key: 'authenticate',
     value: function authenticate() {
+      var pp = this.passport;
+
       for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
         args[_key] = arguments[_key];
       }
 
-      var pp = this.passport;
       return pp.authenticate.apply(pp, args);
+    }
+  }, {
+    key: 'server',
+    get: function get() {
+      return this._server;
+    }
+  }, {
+    key: 'passport',
+    get: function get() {
+      return _passport2['default'];
     }
   }]);
 

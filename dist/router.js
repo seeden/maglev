@@ -20,8 +20,8 @@ var _express2 = _interopRequireDefault(_express);
 
 var Router = (function () {
   function Router() {
-    var options = arguments[0] === undefined ? {} : arguments[0];
-    var parent = arguments[1] === undefined ? null : arguments[1];
+    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+    var parent = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
     _classCallCheck(this, Router);
 
@@ -31,16 +31,6 @@ var Router = (function () {
   }
 
   _createClass(Router, [{
-    key: 'parent',
-    get: function () {
-      return this._parent;
-    }
-  }, {
-    key: 'expressRouter',
-    get: function () {
-      return this._expressRouter;
-    }
-  }, {
     key: 'end',
     value: function end() {
       return this.parent;
@@ -68,6 +58,16 @@ var Router = (function () {
       this.expressRouter.param.apply(this.expressRouter, args);
       return this;
     }
+  }, {
+    key: 'parent',
+    get: function get() {
+      return this._parent;
+    }
+  }, {
+    key: 'expressRouter',
+    get: function get() {
+      return this._expressRouter;
+    }
   }]);
 
   return Router;
@@ -77,11 +77,12 @@ exports['default'] = Router;
 
 _methods2['default'].forEach(function (method) {
   Router.prototype[method] = function () {
+    var expressRouter = this.expressRouter;
+
     for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
       args[_key2] = arguments[_key2];
     }
 
-    var expressRouter = this.expressRouter;
     expressRouter[method].apply(expressRouter, args);
     return this;
   };

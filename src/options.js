@@ -1,9 +1,10 @@
+const portOffset = parseInt(process.env.NODE_APP_INSTANCE || 0, 10);
+
 export default {
   root: null,
 
   rbac: {
     options: {
-
     },
     role: {
       guest: 'guest'
@@ -13,9 +14,8 @@ export default {
   log: true,
 
   morgan: {
-    format: process.env.NODE_ENV === 'development' ? 'dev' : 'combined',
+    format: process.env.NODE_ENV === 'development' ? 'dev' : 'tiny',
     options: {
-      immediate: false
       // stream: process.stdout
     }
   },
@@ -23,7 +23,7 @@ export default {
   server: {
     build: 1,
     host: process.env.HOST || '127.0.0.1',
-    port: process.env.PORT || 4000
+    port: process.env.PORT || 4000 + portOffset
   },
 
   request: {
@@ -79,6 +79,10 @@ export default {
     saveUninitialized: true
   },
 
+  sessionRecovery: {
+    tries: 3
+  },
+
   view: {
     engine: 'swig'
   },
@@ -112,36 +116,54 @@ export default {
   },
 
   upload: {
-      maxFieldsSize: 2000000,
-      maxFields: 1000,
-      path: null
-    },
+    maxFieldsSize: 1024 * 1024 * 20,
+    maxFields: 1000,
+    path: null
+  },
 
-    cors: {},
+  cors: {},
 
-    page: {
-      error: null,
-      notFound: null
-    },
+  page: {
+    error: null,
+    notFound: null
+  },
 
-    strategies: [],
+  strategies: [],
 
-    css: {
-      path: '/public/css',
-      root: 'public/css',
-      options: {}
-    },
-
-    'static': {
-      path: '/public',
-      root: 'public',
-      options: {
-        index: ['index.html']
+  css: {
+    path: '/public/css',
+    root: 'public/css',
+    options: {
+      render: {
+        ieCompat: false
       }
-    },
-
-    favicon: {
-      root: 'public/favicon.ico',
-      options: {}
     }
+  },
+
+  'static': {
+    path: '/public',
+    root: 'public',
+    options: {
+      index: ['index.html']
+    }
+  },
+
+  favicon: {
+    root: 'public/favicon.ico',
+    options: {}
+  },
+
+  memoryLeaks: {
+    watch: true,
+    showHeap: true,
+    path: null
+  },
+
+  socket: {
+    idleTimeout: 10 * 1000
+  },
+
+  shutdown: {
+    timeout: 30 * 1000
+  }
 };

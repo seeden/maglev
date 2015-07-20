@@ -96,7 +96,7 @@ var log = (0, _debug2['default'])('maglev:app');
 
 var App = (function () {
   function App(server) {
-    var options = arguments[1] === undefined ? {} : arguments[1];
+    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     _classCallCheck(this, App);
 
@@ -104,6 +104,7 @@ var App = (function () {
     this._options = options;
     this._expressApp = (0, _express2['default'])();
     this._httpServer = null;
+    this._activeConnections = {};
 
     this._prepareCompression();
     this._prepareLog();
@@ -117,30 +118,25 @@ var App = (function () {
   }
 
   _createClass(App, [{
-    key: 'options',
-    get: function () {
-      return this._options;
-    }
-  }, {
-    key: 'server',
-    get: function () {
-      return this._server;
-    }
-  }, {
-    key: 'expressApp',
-    get: function () {
-      return this._expressApp;
-    }
-  }, {
     key: 'listen',
     value: function listen(port, host, callback) {
-      callback = callback || function () {};
-
       if (this._httpServer) {
         return callback(new Error('You need to close first'));
       }
 
       this._httpServer = _http2['default'].createServer(this.expressApp).listen(port, host, callback);
+
+      var activeConnections = this.activeConnections;
+      var httpServer = this.httpServer;
+
+      httpServer.on('connection', function (conn) {
+        var key = conn.remoteAddress + ':' + conn.remotePort;
+        activeConnections[key] = conn;
+
+        conn.on('close', function () {
+          delete activeConnections[key];
+        });
+      });
 
       log('App started on port ' + port + ' and host ' + host);
       return this;
@@ -148,12 +144,31 @@ var App = (function () {
   }, {
     key: 'close',
     value: function close(callback) {
+      var _this = this;
+
       if (!this._httpServer) {
         return callback(new Error('You need to listen first'));
       }
 
-      this._httpServer.close(callback);
-      this._httpServer = null;
+      this._httpServer.close(function (err) {
+        _this._httpServer = null;
+        callback(err);
+      });
+
+      var activeConnections = this.activeConnections;
+      var options = this.options;
+
+      setTimeout(function () {
+        Object.keys(activeConnections).forEach(function (key) {
+          var conn = activeConnections[key];
+          if (!conn) {
+            return;
+          }
+
+          conn.destroy();
+        });
+      }, options.socket.idleTimeout);
+
       return this;
     }
   }, {
@@ -272,7 +287,38 @@ var App = (function () {
         return;
       }
 
-      app.use((0, _expressSession2['default'])(options.session));
+      //use session middleware
+      var sessionMiddleware = (0, _expressSession2['default'])(options.session);
+      app.use(sessionMiddleware);
+
+      if (!options.sessionRecovery) {
+        return;
+      }
+
+      //session recovery
+      app.use(function (req, res, next) {
+        var tries = options.sessionRecovery.tries;
+
+        function lookupSession(error) {
+          if (error) {
+            return next(error);
+          }
+
+          if (typeof req.session !== 'undefined') {
+            return next();
+          }
+
+          tries -= 1;
+
+          if (tries < 0) {
+            return next(new Error('Session is undefined'));
+          }
+
+          sessionMiddleware(req, res, lookupSession);
+        }
+
+        lookupSession();
+      });
     }
   }, {
     key: '_prepareSecure',
@@ -328,6 +374,31 @@ var App = (function () {
       // at the end add 500 and 404
       app.use(options.page.notFound || pageController.notFound);
       app.use(options.page.error || pageController.error);
+    }
+  }, {
+    key: 'options',
+    get: function get() {
+      return this._options;
+    }
+  }, {
+    key: 'activeConnections',
+    get: function get() {
+      return this._activeConnections;
+    }
+  }, {
+    key: 'server',
+    get: function get() {
+      return this._server;
+    }
+  }, {
+    key: 'httpServer',
+    get: function get() {
+      return this._httpServer;
+    }
+  }, {
+    key: 'expressApp',
+    get: function get() {
+      return this._expressApp;
     }
   }]);
 

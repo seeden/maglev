@@ -23,7 +23,7 @@ var _webError2 = _interopRequireDefault(_webError);
  */
 
 function can(action, resource, redirect) {
-  var redirectStatus = arguments[3] === undefined ? 302 : arguments[3];
+  var redirectStatus = arguments.length <= 3 || arguments[3] === undefined ? 302 : arguments[3];
 
   return function (req, res, next) {
     var server = req.server;
@@ -64,7 +64,7 @@ function can(action, resource, redirect) {
  */
 
 function hasRole(name, redirect) {
-  var redirectStatus = arguments[2] === undefined ? 302 : arguments[2];
+  var redirectStatus = arguments.length <= 2 || arguments[2] === undefined ? 302 : arguments[2];
 
   return function (req, res, next) {
     var server = this.server;
@@ -99,7 +99,7 @@ function hasRole(name, redirect) {
  */
 
 function isGuest(redirect) {
-  var redirectStatus = arguments[1] === undefined ? 302 : arguments[1];
+  var redirectStatus = arguments.length <= 1 || arguments[1] === undefined ? 302 : arguments[1];
 
   return function (req, res, next) {
     if (!req.user) {

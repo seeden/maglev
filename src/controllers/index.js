@@ -10,7 +10,8 @@ import * as role from './role';
 import * as token from './token';
 import * as user from './user';
 import * as userPermission from './userpermission';
+import * as heap from './heap';
 
 
-export { auth, facebook, file, logic, page, password,
+export { auth, facebook, file, heap, logic, page, password,
   permission, rbac, role, token, user, userPermission };

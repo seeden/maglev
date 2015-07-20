@@ -3,6 +3,8 @@
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
+var portOffset = parseInt(process.env.NODE_APP_INSTANCE || 0, 10);
+
 exports['default'] = {
   root: null,
 
@@ -16,17 +18,14 @@ exports['default'] = {
   log: true,
 
   morgan: {
-    format: process.env.NODE_ENV === 'development' ? 'dev' : 'combined',
-    options: {
-      immediate: false
-      // stream: process.stdout
-    }
+    format: process.env.NODE_ENV === 'development' ? 'dev' : 'tiny',
+    options: {}
   },
 
   server: {
     build: 1,
     host: process.env.HOST || '127.0.0.1',
-    port: process.env.PORT || 4000
+    port: process.env.PORT || 4000 + portOffset
   },
 
   request: {
@@ -82,6 +81,10 @@ exports['default'] = {
     saveUninitialized: true
   },
 
+  sessionRecovery: {
+    tries: 3
+  },
+
   view: {
     engine: 'swig'
   },
@@ -115,7 +118,7 @@ exports['default'] = {
   },
 
   upload: {
-    maxFieldsSize: 2000000,
+    maxFieldsSize: 1024 * 1024 * 20,
     maxFields: 1000,
     path: null
   },
@@ -132,7 +135,11 @@ exports['default'] = {
   css: {
     path: '/public/css',
     root: 'public/css',
-    options: {}
+    options: {
+      render: {
+        ieCompat: false
+      }
+    }
   },
 
   'static': {
@@ -146,6 +153,22 @@ exports['default'] = {
   favicon: {
     root: 'public/favicon.ico',
     options: {}
+  },
+
+  memoryLeaks: {
+    watch: true,
+    showHeap: true,
+    path: null
+  },
+
+  socket: {
+    idleTimeout: 10 * 1000
+  },
+
+  shutdown: {
+    timeout: 30 * 1000
   }
 };
 module.exports = exports['default'];
+
+// stream: process.stdout

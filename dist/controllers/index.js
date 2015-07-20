@@ -54,9 +54,14 @@ var _userpermission = require('./userpermission');
 
 var userPermission = _interopRequireWildcard(_userpermission);
 
+var _heap = require('./heap');
+
+var heap = _interopRequireWildcard(_heap);
+
 exports.auth = auth;
 exports.facebook = facebook;
 exports.file = file;
+exports.heap = heap;
 exports.logic = logic;
 exports.page = page;
 exports.password = password;

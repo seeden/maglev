@@ -12,7 +12,7 @@ var _async = require('async');
 
 var Models = (function () {
   function Models(server) {
-    var options = arguments[1] === undefined ? {} : arguments[1];
+    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     _classCallCheck(this, Models);
 
@@ -24,16 +24,6 @@ var Models = (function () {
   }
 
   _createClass(Models, [{
-    key: 'options',
-    get: function () {
-      return this._options;
-    }
-  }, {
-    key: 'server',
-    get: function () {
-      return this._server;
-    }
-  }, {
     key: '_createModelFromFactory',
     value: function _createModelFromFactory(name) {
       if (!this._modelFactories.has(name)) {
@@ -110,6 +100,16 @@ var Models = (function () {
       (0, _async.each)(keys, function (modelName, cb) {
         return _this.model(modelName, cb);
       }, callback);
+    }
+  }, {
+    key: 'options',
+    get: function get() {
+      return this._options;
+    }
+  }, {
+    key: 'server',
+    get: function get() {
+      return this._server;
     }
   }]);
 

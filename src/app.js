@@ -31,6 +31,7 @@ export default class App {
     this._options = options;
     this._expressApp = express();
     this._httpServer = null;
+    this._activeConnections = {};
 
     this._prepareCompression();
     this._prepareLog();
@@ -47,8 +48,16 @@ export default class App {
     return this._options;
   }
 
+  get activeConnections() {
+    return this._activeConnections;
+  }
+
   get server() {
     return this._server;
+  }
+
+  get httpServer() {
+    return this._httpServer;
   }
 
   get expressApp() {
@@ -56,13 +65,24 @@ export default class App {
   }
 
   listen(port, host, callback) {
-    callback = callback || function() {};
-
     if (this._httpServer) {
       return callback(new Error('You need to close first'));
     }
 
-    this._httpServer = http.createServer(this.expressApp).listen(port, host, callback);
+    this._httpServer = http
+      .createServer(this.expressApp)
+      .listen(port, host, callback);
+
+    const { activeConnections, httpServer } = this;
+
+    httpServer.on('connection', (conn) => {
+      const key = `${conn.remoteAddress}:${conn.remotePort}`;
+      activeConnections[key] = conn;
+
+      conn.on('close', function() {
+        delete activeConnections[key];
+      });
+    });
 
     log('App started on port ' + port + ' and host ' + host);
     return this;
@@ -73,8 +93,24 @@ export default class App {
       return callback(new Error('You need to listen first'));
     }
 
-    this._httpServer.close(callback);
-    this._httpServer = null;
+    this._httpServer.close((err) => {
+      this._httpServer = null;
+      callback(err);
+    });
+
+    const { activeConnections, options } = this;
+
+    setTimeout(() => {
+      Object.keys(activeConnections).forEach(function(key) {
+          const conn = activeConnections[key];
+          if (!conn) {
+            return;
+          }
+
+          conn.destroy();
+      });
+    }, options.socket.idleTimeout);
+
     return this;
   }
 
@@ -187,7 +223,38 @@ export default class App {
       return;
     }
 
-    app.use(session(options.session));
+    //use session middleware
+    const sessionMiddleware = session(options.session);
+    app.use(sessionMiddleware);
+
+    if(!options.sessionRecovery) {
+      return;
+    }
+
+    //session recovery
+    app.use(function(req, res, next) {
+      let tries = options.sessionRecovery.tries;
+
+      function lookupSession(error) {
+        if (error) {
+          return next(error)
+        }
+
+        if (typeof req.session !== 'undefined') {
+          return next();
+        }
+
+        tries -= 1
+
+        if (tries < 0) {
+          return next(new Error('Session is undefined'));
+        }
+
+        sessionMiddleware(req, res, lookupSession);
+      }
+
+      lookupSession();
+    })
   }
 
   _prepareSecure() {

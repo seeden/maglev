@@ -46,6 +46,14 @@ var _debug = require('debug');
 
 var _debug2 = _interopRequireDefault(_debug);
 
+var _memwatchNext = require('memwatch-next');
+
+var _memwatchNext2 = _interopRequireDefault(_memwatchNext);
+
+var _heapdump = require('heapdump');
+
+var _heapdump2 = _interopRequireDefault(_heapdump);
+
 var log = (0, _debug2['default'])('maglev:server');
 
 var Server = (function () {
@@ -67,6 +75,18 @@ var Server = (function () {
     this._options = options;
     this._db = options.db;
 
+    this.watchMemoryLeaks(options);
+
+    //catch system termination and PM2
+    process.on('SIGINT', function () {
+      return _this.processTerm();
+    });
+    process.on('message', function (msg) {
+      if (msg === 'shutdown') {
+        _this.processTerm();
+      }
+    });
+
     this._rbac = new _rbac2['default'](options.rbac.options, function (err) {
       if (err) {
         return callback(err);
@@ -85,58 +105,137 @@ var Server = (function () {
           return callback(err2);
         }
 
+        log('Server is listening on port: ' + options.server.port);
+
+        _this.notifyPM2Online();
         callback(null, _this);
       });
     });
   }
 
   _createClass(Server, [{
-    key: 'options',
-    get: function () {
-      return this._options;
+    key: 'notifyPM2Online',
+    value: function notifyPM2Online() {
+      if (!process.send) {
+        return;
+      }
+
+      setTimeout(function () {
+        process.send('online');
+      }, 0);
     }
   }, {
-    key: 'rbac',
-    get: function () {
-      return this._rbac;
+    key: 'watchMemoryLeaks',
+    value: function watchMemoryLeaks(options) {
+      var _this2 = this;
+
+      if (!options.memoryLeaks.watch) {
+        return;
+      }
+
+      _memwatchNext2['default'].on('leak', function (info) {
+        log('Memory leak detected: ', info);
+
+        if (options.memoryLeaks.showHeap) {
+          _this2.showHeapDiff();
+        }
+
+        if (options.memoryLeaks.path) {
+          (function () {
+            var file = options.memoryLeaks.path + '/' + process.pid + '-' + Date.now() + '.heapsnapshot';
+            _heapdump2['default'].writeSnapshot(file, function (err) {
+              if (err) {
+                log(err);
+              } else {
+                log('Wrote snapshot: ' + file);
+              }
+            });
+          })();
+        }
+      });
     }
   }, {
-    key: 'db',
-    get: function () {
-      return this._db;
-    }
-  }, {
-    key: 'secure',
-    get: function () {
-      return this._secure;
-    }
-  }, {
-    key: 'app',
-    get: function () {
-      return this._app;
-    }
-  }, {
-    key: 'router',
-    get: function () {
-      return this._router;
-    }
-  }, {
-    key: 'models',
-    get: function () {
-      return this._models;
+    key: 'showHeapDiff',
+    value: function showHeapDiff() {
+      if (!this.hd) {
+        this.hd = new _memwatchNext2['default'].HeapDiff();
+      } else {
+        var diff = this.hd.end();
+        log(util.inspect(diff, true, null));
+        this.hd = null;
+      }
     }
   }, {
     key: 'listen',
     value: function listen(callback) {
+      if (!callback) {
+        throw new Error('Callback is undefined');
+      }
+
+      if (this._listening) {
+        callback(new Error('Server is already listening'));
+        return this;
+      }
+
+      this._listening = true;
+
       var options = this.options;
       this.app.listen(options.server.port, options.server.host, callback);
+
       return this;
     }
   }, {
     key: 'close',
     value: function close(callback) {
+      if (!callback) {
+        throw new Error('Callback is undefined');
+      }
+
+      if (!this._listening) {
+        callback(new Error('Server is not listening'));
+        return this;
+      }
+
+      this._listening = false;
+
       this.app.close(callback);
+
       return this;
+    }
+  }, {
+    key: 'processTerm',
+    value: function processTerm() {
+      log('Received kill signal (SIGTERM), shutting down gracefully.');
+      if (!this._listening) {
+        log('Ended without any problem');
+        process.exit(0);
+        return;
+      }
+
+      var termTimeoutID = null;
+
+      this.close(function closeCallback(err) {
+        if (termTimeoutID) {
+          clearTimeout(termTimeoutID);
+          termTimeoutID = null;
+        }
+
+        if (err) {
+          log(err.message);
+          process.exit(1);
+          return;
+        }
+
+        log('Ended without any problem');
+        process.exit(0);
+      });
+
+      var options = this.options;
+      termTimeoutID = setTimeout(function timeoutCallback() {
+        termTimeoutID = null;
+        log('Could not close connections in time, forcefully shutting down');
+        process.exit(1);
+      }, options.shutdown.timeout);
     }
   }, {
     key: '_loadModels',
@@ -170,6 +269,41 @@ var Server = (function () {
           throw e;
         }
       });
+    }
+  }, {
+    key: 'options',
+    get: function get() {
+      return this._options;
+    }
+  }, {
+    key: 'rbac',
+    get: function get() {
+      return this._rbac;
+    }
+  }, {
+    key: 'db',
+    get: function get() {
+      return this._db;
+    }
+  }, {
+    key: 'secure',
+    get: function get() {
+      return this._secure;
+    }
+  }, {
+    key: 'app',
+    get: function get() {
+      return this._app;
+    }
+  }, {
+    key: 'router',
+    get: function get() {
+      return this._router;
+    }
+  }, {
+    key: 'models',
+    get: function get() {
+      return this._models;
     }
   }], [{
     key: 'walk',
