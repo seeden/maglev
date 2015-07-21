@@ -75,8 +75,8 @@ var Router = (function () {
 
 exports['default'] = Router;
 
-_methods2['default'].forEach(function (method) {
-  Router.prototype[method] = function () {
+_methods2['default'].forEach(function eachMethod(method) {
+  Router.prototype[method] = function methodHandler() {
     var expressRouter = this.expressRouter;
 
     for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {

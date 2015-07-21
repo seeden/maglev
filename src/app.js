@@ -2,6 +2,7 @@ import express from 'express';
 import debug from 'debug';
 import http from 'http';
 
+import expressDomainMiddleware from 'express-domain-middleware';
 import compression from 'compression';
 import serveFavicon from 'serve-favicon';
 import serveStatic from 'serve-static';
@@ -33,6 +34,7 @@ export default class App {
     this._httpServer = null;
     this._activeConnections = {};
 
+    this._prepareErrorHandler();
     this._prepareCompression();
     this._prepareLog();
     this._prepareEngine();
@@ -79,7 +81,7 @@ export default class App {
       const key = `${conn.remoteAddress}:${conn.remotePort}`;
       activeConnections[key] = conn;
 
-      conn.on('close', function() {
+      conn.on('close', function connCloseCallback() {
         delete activeConnections[key];
       });
     });
@@ -101,17 +103,23 @@ export default class App {
     const { activeConnections, options } = this;
 
     setTimeout(() => {
-      Object.keys(activeConnections).forEach(function(key) {
-          const conn = activeConnections[key];
-          if (!conn) {
-            return;
-          }
+      Object.keys(activeConnections).forEach(function destroyConnection(key) {
+        const conn = activeConnections[key];
+        if (!conn) {
+          return;
+        }
 
-          conn.destroy();
+        conn.destroy();
       });
     }, options.socket.idleTimeout);
 
     return this;
+  }
+
+  _prepareErrorHandler() {
+    const app = this.expressApp;
+
+    app.use(expressDomainMiddleware);
   }
 
   _prepareCompression() {
@@ -197,7 +205,7 @@ export default class App {
     const options = this.options;
 
     // add access to req from template
-    app.use(function(req, res, next) {
+    app.use(function setTemplateVariables(req, res, next) {
       res.locals._req = req;
       res.locals._production = process.env.NODE_ENV === 'production';
       res.locals._build = options.server.build;
@@ -206,7 +214,7 @@ export default class App {
     });
 
     // add access to req from template
-    app.use(function(req, res, next) {
+    app.use(function setBasicVariables(req, res, next) {
       req.objects = {};
       req.server = server;
       req.models = server.models;
@@ -223,28 +231,28 @@ export default class App {
       return;
     }
 
-    //use session middleware
+    // use session middleware
     const sessionMiddleware = session(options.session);
     app.use(sessionMiddleware);
 
-    if(!options.sessionRecovery) {
+    if (!options.sessionRecovery) {
       return;
     }
 
-    //session recovery
-    app.use(function(req, res, next) {
+    // session recovery
+    app.use(function sessionRecovery(req, res, next) {
       let tries = options.sessionRecovery.tries;
 
       function lookupSession(error) {
         if (error) {
-          return next(error)
+          return next(error);
         }
 
         if (typeof req.session !== 'undefined') {
           return next();
         }
 
-        tries -= 1
+        tries -= 1;
 
         if (tries < 0) {
           return next(new Error('Session is undefined'));
@@ -254,7 +262,7 @@ export default class App {
       }
 
       lookupSession();
-    })
+    });
   }
 
   _prepareSecure() {
@@ -311,13 +319,13 @@ export default class App {
 }
 
 function prepareRequest(req) {
-  req.__defineGetter__('httpHost', function() {
+  req.__defineGetter__('httpHost', function getHttpHost() {
     const trustProxy = this.app.get('trust proxy');
     const host = trustProxy && this.get('X-Forwarded-Host');
     return host || this.get('Host');
   });
 
-  req.__defineGetter__('port', function() {
+  req.__defineGetter__('port', function getPort() {
     const host = this.httpHost;
     if (!host) {
       return null;
@@ -329,7 +337,7 @@ function prepareRequest(req) {
       : 80;
   });
 
-  req.__defineGetter__('protocolHost', function() {
+  req.__defineGetter__('protocolHost', function getProtocolHost() {
     return this.protocol + '://' + this.httpHost;
   });
 }

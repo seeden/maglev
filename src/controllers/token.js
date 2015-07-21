@@ -1,4 +1,5 @@
 import WebError from 'web-error';
+import ok from 'okay';
 
 export function generateForCurrent(req, res, next) {
   const user = req.user;
@@ -22,11 +23,7 @@ export function generate(req, res, next) {
     return next(new WebError(400, 'One of parameter missing'));
   }
 
-  User.findByUsernamePassword(req.body.username, req.body.password, false, function(err, user) {
-    if (err) {
-      return next(err);
-    }
-
+  User.findByUsernamePassword(req.body.username, req.body.password, false, ok(next, function(user) {
     if (!user) {
       return next(new WebError(404, 'Invalid username or password'));
     }
@@ -35,7 +32,7 @@ export function generate(req, res, next) {
       token: user.generateBearerToken(options.token.secret, options.token.expiration),
       user: user.toPrivateJSON()
     });
-  });
+  }));
 }
 
 export function invalidate(req, res, next) {

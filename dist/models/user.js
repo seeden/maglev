@@ -90,7 +90,7 @@ function createByFacebook(profile, cb) {
 
     _this.findOne({
       email: profile.email
-    }, function (err, user) {
+    }, function findOneCallback(err, user) {
       if (err) {
         return callback(err);
       }
@@ -133,14 +133,13 @@ function createByTwitter(profile, cb) {
  * @param  {[Array]} scope List of scopes
  * @return {Object} Access token of user
  */
-function generateBearerToken(tokenSecret, expiresInMinutes, scope) {
+function generateBearerToken(tokenSecret) {
+  var expiresInMinutes = arguments.length <= 1 || arguments[1] === undefined ? 60 * 24 * 14 : arguments[1];
+  var scope = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
+
   if (!tokenSecret) {
     throw new Error('Token secret is undefined');
   }
-
-  scope = scope || [];
-
-  expiresInMinutes = expiresInMinutes || 60 * 24 * 14;
 
   var data = {
     user: this._id.toString()
@@ -208,7 +207,7 @@ function findByUsernamePassword(username, password, strict, cb) {
     strict = true;
   }
 
-  return this.findByUsername(username, strict, function (err, user) {
+  return this.findByUsername(username, strict, function findByUsernameCallback(err, user) {
     if (err) {
       return cb(err);
     }
@@ -217,7 +216,7 @@ function findByUsernamePassword(username, password, strict, cb) {
       return cb(null, null);
     }
 
-    user.comparePassword(password, function (err2, isMatch) {
+    user.comparePassword(password, function compareCallback(err2, isMatch) {
       if (err2) {
         return cb(err2);
       }
@@ -278,7 +277,7 @@ function removeProvider(providerName, uid, cb) {
 }
 
 function getProvider(providerName, providerUID) {
-  var providers = this.providers.filter(function (p) {
+  var providers = this.providers.filter(function filter(p) {
     if (p.name !== providerName) {
       return false;
     }
@@ -298,7 +297,7 @@ function hasProvider(providerName, providerUID) {
 }
 
 function getProvidersNameUIDs() {
-  return this.providers.map(function (p) {
+  return this.providers.map(function eachProvider(p) {
     return p.nameUID;
   });
 }
@@ -309,7 +308,7 @@ function getProvidersNameUIDs() {
  * @param  {Function} cb
  */
 function comparePassword(candidatePassword, cb) {
-  _bcrypt2['default'].compare(candidatePassword, this.password, function (err, isMatch) {
+  _bcrypt2['default'].compare(candidatePassword, this.password, function compareCallback(err, isMatch) {
     if (err) {
       return cb(err);
     }
@@ -401,12 +400,12 @@ function createSchema(Schema) {
   schema.index({ 'providers.name': 1, 'providers.id': 1 });
   schema.index({ 'providers.nameUID': 1 }, { unique: true, sparse: true });
 
-  schema.virtual('isLocked').get(function () {
+  schema.virtual('isLocked').get(function isLocked() {
     // check for a future lockUntil timestamp
     return !!(this.lockUntil && this.lockUntil > Date.now());
   });
 
-  schema.pre('validate', function (next) {
+  schema.pre('validate', function validate(next) {
     var user = this;
 
     // update name
@@ -422,7 +421,7 @@ function createSchema(Schema) {
   });
 
   // add preprocess validation
-  schema.pre('save', function (next) {
+  schema.pre('save', function save(next) {
     var user = this;
 
     // only hash the password if it has been modified (or is new)
@@ -431,7 +430,7 @@ function createSchema(Schema) {
     }
 
     // hash the password using our new salt
-    _bcrypt2['default'].hash(user.password, SALT_WORK_FACTOR, function (err, hash) {
+    _bcrypt2['default'].hash(user.password, SALT_WORK_FACTOR, function hashCallback(err, hash) {
       if (err) {
         return next(err);
       }

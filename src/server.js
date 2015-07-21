@@ -9,11 +9,16 @@ import Models from './models';
 import debug from 'debug';
 import memwatch from 'memwatch-next';
 import heapdump from 'heapdump';
+import domain from 'domain';
+import { EventEmitter } from 'events';
+import util from 'util';
 
 const log = debug('maglev:server');
 
-export default class Server {
+export default class Server extends EventEmitter {
   constructor(options, callback) {
+    super();
+
     if (!callback) {
       throw new Error('Please use callback for server');
     }
@@ -27,13 +32,45 @@ export default class Server {
     this._options = options;
     this._db = options.db;
 
+    this.catchErrors(() => {
+      this.init(options, callback);
+    });
+  }
+
+  handleError(e) {
+    log(e);
+
+    this.emit('err', e);
+
+    this.closeGracefully();
+  }
+
+  catchErrors(callback) {
+    const d = domain.create();
+
+    d.id = 'ServerDomain';
+    d.on('error', (e) => this.handleError(e));
+
+    try {
+      d.run(callback);
+    } catch(e) {
+      process.nextTick(() => this.handleError(e));
+    }
+  }
+
+  init(options, callback) {
     this.watchMemoryLeaks(options);
 
-    //catch system termination and PM2
-    process.on('SIGINT', () => this.processTerm());
+    // catch system termination
+    const signals = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
+    signals.forEach((signal) => {
+      process.on(signal, () => this.closeGracefully());
+    });
+
+    // catch PM2 termination
     process.on('message', (msg) => {
       if (msg === 'shutdown') {
-        this.processTerm()
+        this.closeGracefully();
       }
     });
 
@@ -68,26 +105,27 @@ export default class Server {
       return;
     }
 
-    setTimeout(function() {
+    // after callback
+    process.nextTick(function notify() {
       process.send('online');
-    }, 0);
+    });
   }
 
   watchMemoryLeaks(options) {
-    if(!options.memoryLeaks.watch) {
+    if (!options.memoryLeaks.watch) {
       return;
     }
 
     memwatch.on('leak', (info) => {
       log('Memory leak detected: ', info);
 
-      if(options.memoryLeaks.showHeap) {
+      if (options.memoryLeaks.showHeap) {
         this.showHeapDiff();
       }
 
-      if(options.memoryLeaks.path) {
+      if (options.memoryLeaks.path) {
         const file = options.memoryLeaks.path + '/' + process.pid + '-' + Date.now() + '.heapsnapshot';
-        heapdump.writeSnapshot(file, function(err) {
+        heapdump.writeSnapshot(file, function writeSnapshotCallback(err) {
           if (err) {
             log(err);
           } else {
@@ -155,7 +193,7 @@ export default class Server {
   }
 
   close(callback) {
-    if(!callback) {
+    if (!callback) {
       throw new Error('Callback is undefined');
     }
 
@@ -171,7 +209,7 @@ export default class Server {
     return this;
   }
 
-  processTerm() {
+  closeGracefully() {
     log('Received kill signal (SIGTERM), shutting down gracefully.');
     if (!this._listening) {
       log('Ended without any problem');
@@ -182,7 +220,7 @@ export default class Server {
     let termTimeoutID = null;
 
     this.close(function closeCallback(err) {
-      if(termTimeoutID) {
+      if (termTimeoutID) {
         clearTimeout(termTimeoutID);
         termTimeoutID = null;
       }
@@ -209,11 +247,11 @@ export default class Server {
     const models = this._models;
     const path = this.options.root + '/models';
 
-    Server.walk(path, function(model, modelPath) {
+    Server.walk(path, function processModel(model, modelPath) {
       try {
         models.register(model);
       } catch(e) {
-        log('problem with model: ' + modelPath);
+        log('Problem with model: ' + modelPath);
         throw e;
       }
     });
@@ -226,11 +264,11 @@ export default class Server {
     const router = this.router;
     const path = this.options.root + '/routes';
 
-    Server.walk(path, function(route, routePath) {
+    Server.walk(path, function processPath(route, routePath) {
       try {
         route(router);
       } catch(e) {
-        log('problem with route: ' + routePath);
+        log('Problem with route: ' + routePath);
         throw e;
       }
     });
@@ -242,7 +280,7 @@ export default class Server {
       return;
     }
 
-    fs.readdirSync(path).forEach(function(file) {
+    fs.readdirSync(path).forEach(function eachFile(file) {
       const newPath = path + '/' + file;
       const stat = fs.statSync(newPath);
 

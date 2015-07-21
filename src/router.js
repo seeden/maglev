@@ -37,8 +37,8 @@ export default class Router {
   }
 }
 
-methods.forEach(function(method) {
-  Router.prototype[method] = function(...args) {
+methods.forEach(function eachMethod(method) {
+  Router.prototype[method] = function methodHandler(...args) {
     const expressRouter = this.expressRouter;
     expressRouter[method].apply(expressRouter, args);
     return this;

@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import async from 'async';
 import WebError from 'web-error';
+import ok from 'okay';
 
 export function tokenToUser(req, res, next, id) {
   const User = req.models.User;
@@ -10,29 +11,20 @@ export function tokenToUser(req, res, next, id) {
     return next(new WebError(400, 'Token is undefined'));
   }
 
-  jwt.verify(id, options.mail.token.secret, function(err, data) {
-    if (err) {
-      return next(err);
-    }
-
+  jwt.verify(id, options.mail.token.secret, ok(next, function(data) {
     if (!data.user) {
       return next(new WebError(400, 'Unknown user'));
     }
 
-
-    User.findById(id, function(err2, user) {
-      if (err2) {
-        return next(err2);
-      }
-
+    User.findById(id, ok(next, function(user) {
       if (!user) {
         return next(new WebError(404));
       }
 
       req.objects.user = user;
       next();
-    });
-  });
+    }));
+  }));
 }
 
 
@@ -51,50 +43,36 @@ export function change(req, res, next) {
   }
 
   if (!user.hasPassword()) {
-    user.setPassword(req.body.password, function(err) {
-      if (err) {
-        return next(err);
-      }
-
+    user.setPassword(req.body.password, ok(next, function() {
       return res.status(204).end();
-    });
+    }));
   } else {
     if (!req.body.password_old) {
       return next(new WebError(400, 'Parameter password_old is missing'));
     }
 
-    user.comparePassword(req.body.password_old, function(err, isMatch) {
-      if (err) {
-        return next(err);
-      }
-
+    user.comparePassword(req.body.password_old, ok(next, function(isMatch) {
       if (!isMatch) {
         return next(new WebError(400, 'Password is not match with actual password'));
       }
 
-      user.setPassword(req.body.password, function(err2) {
-        if (err2) {
-          return next(err2);
-        }
-
+      user.setPassword(req.body.password, ok(next, function() {
         return res.status(204).end();
-      });
-    });
+      }));
+    }));
   }
 }
 
-export function generateForgotToken(user, tokenSecret, expiresInMinutes) {
+export function generateForgotToken(user, tokenSecret, expiresInMinutes = 60 * 24) {
   if (!tokenSecret) {
     throw new Error('Token secret is undefined');
   }
-
-  expiresInMinutes = expiresInMinutes || 60 * 24;
 
   const data = {
     user: user._id
   };
 
-  return jwt.sign(data, tokenSecret, { expiresInMinutes: expiresInMinutes });
+  return jwt.sign(data, tokenSecret, { expiresInMinutes });
 }
 
 export function forgot(req, res, next) {
@@ -107,11 +85,7 @@ export function forgot(req, res, next) {
     return next(new WebError(400, 'Parameter username is missing'));
   }
 
-  User.findByUsername(req.body.username, false, function(err, user) {
-    if (err) {
-      return next(err);
-    }
-
+  User.findByUsername(req.body.username, false, ok(next, function(user) {
     if (!user) {
       return next(new WebError(404));
     }
@@ -139,11 +113,7 @@ export function forgot(req, res, next) {
       text: function(callback) {
         res.render('mail/forgot_plain', data, callback);
       }
-    }, function(err2, result) {
-      if (err2) {
-        return next(new Error(err2));
-      }
-
+    }, ok(next, function(result) {
       const mailOptions = {
         from: options.mail.default.from,
         to: user.email,
@@ -152,13 +122,9 @@ export function forgot(req, res, next) {
         text: result.text
       };
 
-      mail.sendMail(mailOptions, function(err3) {
-        if (err3) {
-          return next(new Error(err3));
-        }
-
+      mail.sendMail(mailOptions, ok(next, function() {
         return res.status(204).end();
-      });
-    });
-  });
+      }));
+    }));
+  }));
 }

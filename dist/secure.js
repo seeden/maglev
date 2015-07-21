@@ -35,16 +35,14 @@ var Secure = (function () {
       var server = this.server;
       var pp = this.passport;
 
-      pp.serializeUser(function (user, done) {
+      pp.serializeUser(function serializeUserCallback(user, done) {
         done(null, user.id);
       });
 
-      pp.deserializeUser(function (id, done) {
+      pp.deserializeUser(function deserializeUserCallback(id, done) {
         var User = server.models.User;
 
-        User.findById(id, function (err, user) {
-          done(err, user);
-        });
+        User.findById(id, done);
       });
 
       var options = server.options;
@@ -54,7 +52,7 @@ var Secure = (function () {
       pp.use(strategy.local(options, models));
       pp.use(strategy.bearer(options, models));
 
-      options.strategies.forEach(function (strategy2) {
+      options.strategies.forEach(function eachStrategy(strategy2) {
         pp.use(strategy2(options, models));
       });
     }

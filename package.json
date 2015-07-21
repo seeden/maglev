@@ -1,6 +1,6 @@
 {
   "name": "maglev",
-  "version": "4.2.13",
+  "version": "4.3.1",
   "description": "Preconfigured NodeJS framework",
   "author": {
     "name": "Zlatko Fedor",
@@ -84,7 +84,9 @@
     "cors": "~2.7.1",
     "debug": "~2.2.0",
     "memwatch-next": "~0.2.7",
-    "heapdump": "~0.3.6"
+    "heapdump": "~0.3.6",
+    "express-domain-middleware": "~0.1.0",
+    "okay": "~1.0.0"
   },
   "devDependencies": {
     "gulp": "~3.9.0",

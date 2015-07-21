@@ -102,12 +102,12 @@ function change(req, res, next) {
   }
 }
 
-function generateForgotToken(user, tokenSecret, expiresInMinutes) {
+function generateForgotToken(user, tokenSecret) {
+  var expiresInMinutes = arguments.length <= 2 || arguments[2] === undefined ? 60 * 24 : arguments[2];
+
   if (!tokenSecret) {
     throw new Error('Token secret is undefined');
   }
-
-  expiresInMinutes = expiresInMinutes || 60 * 24;
 
   var data = {
     user: user._id

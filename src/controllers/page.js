@@ -1,5 +1,8 @@
 import WebError from 'web-error';
 import prettyjson from 'prettyjson';
+import debug from 'debug';
+
+const log = debug('maglev:pageController');
 
 /**
  * Handler of errors caused by controllers
@@ -9,7 +12,12 @@ import prettyjson from 'prettyjson';
  * @param  {Function} next
  */
 export function error(err, req, res, next) {
-  const options = req.server.options;
+  const server = req.server;
+  const options = server.options;
+
+  log(err);
+
+  server.emit('err', err);
 
   const errorObj = {
     status: err.status || 500,
@@ -25,16 +33,16 @@ export function error(err, req, res, next) {
   }
 
   res.status(errorObj.status).format({
-    'text/plain': function() {
+    'text/plain': function sendTextPlain() {
       res.send(errorObj.message);
     },
 
-    'text/html': function() {
+    'text/html': function sendTextHtml() {
       const view = (errorObj.status === 404) ? 'error404' : 'error';
       res.render(view, errorObj);
     },
 
-    'application/json': function() {
+    'application/json': function sendJSON() {
       res.jsonp(errorObj);
     }
   });

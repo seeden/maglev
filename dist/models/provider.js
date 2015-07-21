@@ -29,7 +29,7 @@ function createSchema(Schema) {
   });
 
   // add preprocess validation
-  schema.pre('save', function (next) {
+  schema.pre('save', function saveCallback(next) {
     // only hash the password if it has been modified (or is new)
     if (this.isModified('name') || this.isModified('uid') || !this.nameUID) {
       this.nameUID = genNameUID(this.name, this.uid);

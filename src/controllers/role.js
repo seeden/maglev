@@ -1,4 +1,5 @@
 import WebError from 'web-error';
+import ok from 'okay';
 
 export function role(req, res, next, name) {
   const rbac = req.server.rbac;
@@ -7,18 +8,14 @@ export function role(req, res, next, name) {
     return next(new WebError(400));
   }
 
-  rbac.getRole(name, function(err, role) {
-    if (err) {
-      return next(err);
-    }
-
+  rbac.getRole(name, ok(next, function(role) {
     if (!role) {
       return next(new WebError(404));
     }
 
     req.objects.role = role;
     next();
-  });
+  }));
 }
 
 /**
@@ -31,11 +28,7 @@ export function create(req, res, next) {
     return next(new WebError(400, 'Role name is undefined'));
   }
 
-  rbac.createRole(req.body.name, function(err, role) {
-    if (err) {
-      return next(err);
-    }
-
+  rbac.createRole(req.body.name, ok(next, function(role) {
     if (!role) {
       return next(new WebError(400));
     }
@@ -45,7 +38,7 @@ export function create(req, res, next) {
         name: role.name
       }
     });
-  });
+  }));
 }
 
 /**
@@ -61,24 +54,16 @@ export function remove(req, res, next) {
   const role = req.objects.role;
 
   // unassign role from all users
-  User.removeRoleFromCollection(role.name, function(err) {
-    if (err) {
-      return next(err);
-    }
-
+  User.removeRoleFromCollection(role.name, ok(next, function() {
     // remove role from rbac
-    role.remove(function(err2, isDeleted) {
-      if (err2) {
-        return next(err2);
-      }
-
+    role.remove(ok(next, function(isDeleted) {
       if (!isDeleted) {
         return next(new WebError(400));
       }
 
       return res.status(204).end();
-    });
-  });
+    }));
+  }));
 }
 
 /**
@@ -121,17 +106,13 @@ export function grant(req, res, next) {
 
   const role = req.objects.role;
 
-  rbac.grantByName(role.name, req.body.name, function(err, isGranted) {
-    if (err) {
-      return next(err);
-    }
-
+  rbac.grantByName(role.name, req.body.name, ok(next, function(isGranted) {
     if (!isGranted) {
       return next(new WebError(400));
     }
 
     return res.status(204).end();
-  });
+  }));
 }
 
 /**
@@ -146,15 +127,11 @@ export function revoke(req, res, next) {
 
   const role = req.objects.role;
 
-  rbac.revokeByName(role.name, req.body.name, function(err, isRevoked) {
-    if (err) {
-      return next(err);
-    }
-
+  rbac.revokeByName(role.name, req.body.name, ok(next, function(isRevoked) {
     if (!isRevoked) {
       return next(new WebError(400));
     }
 
     return res.status(204).end();
-  });
+  }));
 }

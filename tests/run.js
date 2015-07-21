@@ -61,6 +61,18 @@ describe('Run server', function() {
     });
   });
 
+  it('should be able to handle error', function(done) {
+    const uri = '/api/test/error';
+
+    request('http://localhost:4433')
+      .get(uri)
+      .set('Accept', 'application/json')
+      .expect(500)
+      .end(function(err, res) {
+        done();
+      });
+  });
+
   it('should be able to close server', function(done) {
     server.close(function(err) {
       if (err) {

@@ -1,4 +1,5 @@
 import WebError from 'web-error';
+import ok from 'okay';
 
 export function getScope(req, res, next) {
   const rbac = req.server.rbac;
@@ -7,15 +8,11 @@ export function getScope(req, res, next) {
     return next(new WebError(401));
   }
 
-  user.getScope(rbac, function(err, scope) {
-    if (err) {
-      return next(err);
-    }
-
+  user.getScope(rbac, ok(next, function(scope) {
     res.jsonp({
       scope: scope
     });
-  });
+  }));
 }
 
 export function can(req, res, next) {
@@ -31,15 +28,11 @@ export function can(req, res, next) {
     return next(new WebError(400));
   }
 
-  user.can(rbac, action, resource, function(err, userCan) {
-    if (err) {
-      return next(err);
-    }
-
+  user.can(rbac, action, resource, ok(next, function(userCan) {
     res.jsonp({
       can: userCan
     });
-  });
+  }));
 }
 
 export function addPermission(req, res, next) {
@@ -55,13 +48,9 @@ export function addPermission(req, res, next) {
     return next(new WebError(400));
   }
 
-  user.addPermission(rbac, action, resource, function(err) {
-    if (err) {
-      return next(err);
-    }
-
+  user.addPermission(rbac, action, resource, ok(next, function() {
     res.status(204).end();
-  });
+  }));
 }
 
 export function removePermission(req, res, next) {
@@ -76,13 +65,9 @@ export function removePermission(req, res, next) {
     return next(new WebError(400));
   }
 
-  user.removePermission(rbac, permissionName, function(err) {
-    if (err) {
-      return next(err);
-    }
-
+  user.removePermission(rbac, permissionName, ok(next, function() {
     res.status(204).end();
-  });
+  }));
 }
 
 export function hasRole(req, res, next) {
@@ -97,15 +82,11 @@ export function hasRole(req, res, next) {
     return next(new WebError(400));
   }
 
-  user.hasRole(rbac, role, function(err, has) {
-    if (err) {
-      return next(err);
-    }
-
+  user.hasRole(rbac, role, ok(next, function(has) {
     res.jsonp({
       has: has
     });
-  });
+  }));
 }
 
 export function setRole(req, res, next) {
@@ -120,13 +101,9 @@ export function setRole(req, res, next) {
     return next(new WebError(400));
   }
 
-  user.setRole(rbac, role, function(err) {
-    if (err) {
-      return next(err);
-    }
-
+  user.setRole(rbac, role, ok(next, function() {
     res.status(204).end();
-  });
+  }));
 }
 
 export function removeRole(req, res, next) {
@@ -135,11 +112,7 @@ export function removeRole(req, res, next) {
     return next(new WebError(401));
   }
 
-  user.removeRole(function(err) {
-    if (err) {
-      return next(err);
-    }
-
+  user.removeRole(ok(next, function() {
     res.status(204).end();
-  });
+  }));
 }

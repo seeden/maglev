@@ -28,11 +28,11 @@ export default class Models {
       callbacks: []
     };
 
-    config.model = modelFactory(this.server, function(error) {
+    config.model = modelFactory(this.server, function modelFactoryCallback(error) {
       config.loaded = true;
       config.error = error;
 
-      config.callbacks.forEach(function(callback) {
+      config.callbacks.forEach(function eachCallback(callback) {
         callback(error, config.model);
       });
 
@@ -74,7 +74,7 @@ export default class Models {
       : modelModul);
 
     Object.defineProperty(this, name, {
-      get: function() {
+      get: function getProperty() {
         return this.model(name);
       }
     });
@@ -82,7 +82,7 @@ export default class Models {
 
   preload(callback) {
     const keys = [];
-    this._modelFactories.forEach(function(factory, modelName) {
+    this._modelFactories.forEach(function eachModelFactory(factory, modelName) {
       keys.push(modelName);
     });
 

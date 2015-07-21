@@ -1,5 +1,6 @@
 import WebError from 'web-error';
 import tv4 from 'tv4';
+import ok from 'okay';
 
 export function isOwner(req, res, next) {
   if (!req.user || !req.objects.user) {
@@ -20,18 +21,14 @@ export function user(req, res, next, id) {
     return next(new WebError(400));
   }
 
-  User.findById(id, function(err, user) {
-    if (err) {
-      return next(err);
-    }
-
+  User.findById(id, ok(next, function(user) {
     if (!user) {
       return next(new WebError(404));
     }
 
     req.objects.user = user;
     next();
-  });
+  }));
 }
 
 export function permalink(req, res, next, permalink) {
@@ -43,18 +40,14 @@ export function permalink(req, res, next, permalink) {
 
   User.findOne({
     permalink: permalink
-  }, function(err, user) {
-    if (err) {
-      return next(err);
-    }
-
+  }, ok(next, function(user) {
     if (!user) {
       return next(new WebError(404));
     }
 
     req.objects.user = user;
     next();
-  });
+  }));
 }
 
 /**
@@ -70,11 +63,7 @@ export function create(req, res, next) {
     return next(new WebError(400, 'Validation errors', result.errors));
   }
 
-  User.create(req.body, function(err, user) {
-    if (err) {
-      return next(err);
-    }
-
+  User.create(req.body, ok(next, function(user) {
     if (!user) {
       return next(new Error('User is undefined'));
     }
@@ -83,7 +72,7 @@ export function create(req, res, next) {
       token: user.generateBearerToken(options.token.secret, options.token.expiration),
       user: user.toPrivateJSON()
     });
-  });
+  }));
 }
 
 export function remove(req, res, next) {
@@ -92,13 +81,9 @@ export function remove(req, res, next) {
     return next(new WebError(404));
   }
 
-  user.remove(function(err) {
-    if (err) {
-      return next(err);
-    }
-
+  user.remove(ok(next, function() {
     res.status(204).end();
-  });
+  }));
 }
 
 export function current(req, res, next) {

@@ -24,6 +24,10 @@ var _http = require('http');
 
 var _http2 = _interopRequireDefault(_http);
 
+var _expressDomainMiddleware = require('express-domain-middleware');
+
+var _expressDomainMiddleware2 = _interopRequireDefault(_expressDomainMiddleware);
+
 var _compression = require('compression');
 
 var _compression2 = _interopRequireDefault(_compression);
@@ -106,6 +110,7 @@ var App = (function () {
     this._httpServer = null;
     this._activeConnections = {};
 
+    this._prepareErrorHandler();
     this._prepareCompression();
     this._prepareLog();
     this._prepareEngine();
@@ -133,7 +138,7 @@ var App = (function () {
         var key = conn.remoteAddress + ':' + conn.remotePort;
         activeConnections[key] = conn;
 
-        conn.on('close', function () {
+        conn.on('close', function connCloseCallback() {
           delete activeConnections[key];
         });
       });
@@ -159,7 +164,7 @@ var App = (function () {
       var options = this.options;
 
       setTimeout(function () {
-        Object.keys(activeConnections).forEach(function (key) {
+        Object.keys(activeConnections).forEach(function destroyConnection(key) {
           var conn = activeConnections[key];
           if (!conn) {
             return;
@@ -170,6 +175,13 @@ var App = (function () {
       }, options.socket.idleTimeout);
 
       return this;
+    }
+  }, {
+    key: '_prepareErrorHandler',
+    value: function _prepareErrorHandler() {
+      var app = this.expressApp;
+
+      app.use(_expressDomainMiddleware2['default']);
     }
   }, {
     key: '_prepareCompression',
@@ -260,7 +272,7 @@ var App = (function () {
       var options = this.options;
 
       // add access to req from template
-      app.use(function (req, res, next) {
+      app.use(function setTemplateVariables(req, res, next) {
         res.locals._req = req;
         res.locals._production = process.env.NODE_ENV === 'production';
         res.locals._build = options.server.build;
@@ -269,7 +281,7 @@ var App = (function () {
       });
 
       // add access to req from template
-      app.use(function (req, res, next) {
+      app.use(function setBasicVariables(req, res, next) {
         req.objects = {};
         req.server = server;
         req.models = server.models;
@@ -287,7 +299,7 @@ var App = (function () {
         return;
       }
 
-      //use session middleware
+      // use session middleware
       var sessionMiddleware = (0, _expressSession2['default'])(options.session);
       app.use(sessionMiddleware);
 
@@ -295,8 +307,8 @@ var App = (function () {
         return;
       }
 
-      //session recovery
-      app.use(function (req, res, next) {
+      // session recovery
+      app.use(function sessionRecovery(req, res, next) {
         var tries = options.sessionRecovery.tries;
 
         function lookupSession(error) {
@@ -408,13 +420,13 @@ var App = (function () {
 exports['default'] = App;
 
 function prepareRequest(req) {
-  req.__defineGetter__('httpHost', function () {
+  req.__defineGetter__('httpHost', function getHttpHost() {
     var trustProxy = this.app.get('trust proxy');
     var host = trustProxy && this.get('X-Forwarded-Host');
     return host || this.get('Host');
   });
 
-  req.__defineGetter__('port', function () {
+  req.__defineGetter__('port', function getPort() {
     var host = this.httpHost;
     if (!host) {
       return null;
@@ -424,7 +436,7 @@ function prepareRequest(req) {
     return parts.length === 2 ? parseInt(parts[1], 10) : 80;
   });
 
-  req.__defineGetter__('protocolHost', function () {
+  req.__defineGetter__('protocolHost', function getProtocolHost() {
     return this.protocol + '://' + this.httpHost;
   });
 }

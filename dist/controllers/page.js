@@ -16,6 +16,12 @@ var _prettyjson = require('prettyjson');
 
 var _prettyjson2 = _interopRequireDefault(_prettyjson);
 
+var _debug = require('debug');
+
+var _debug2 = _interopRequireDefault(_debug);
+
+var log = (0, _debug2['default'])('maglev:pageController');
+
 /**
  * Handler of errors caused by controllers
  * @param  {Error}   err
@@ -25,7 +31,12 @@ var _prettyjson2 = _interopRequireDefault(_prettyjson);
  */
 
 function error(err, req, res, next) {
-  var options = req.server.options;
+  var server = req.server;
+  var options = server.options;
+
+  log(err);
+
+  server.emit('err', err);
 
   var errorObj = {
     status: err.status || 500,
@@ -41,16 +52,16 @@ function error(err, req, res, next) {
   }
 
   res.status(errorObj.status).format({
-    'text/plain': function textPlain() {
+    'text/plain': function sendTextPlain() {
       res.send(errorObj.message);
     },
 
-    'text/html': function textHtml() {
+    'text/html': function sendTextHtml() {
       var view = errorObj.status === 404 ? 'error404' : 'error';
       res.render(view, errorObj);
     },
 
-    'application/json': function applicationJson() {
+    'application/json': function sendJSON() {
       res.jsonp(errorObj);
     }
   });

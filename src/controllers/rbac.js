@@ -1,4 +1,5 @@
 import WebError from 'web-error';
+import ok from 'okay';
 
 /**
  * Return middleware function for permission check
@@ -15,11 +16,7 @@ export function can(action, resource, redirect, redirectStatus = 302) {
     const rbac = server.rbac;
     const user = req.user;
 
-    function callback(err, canDoIt) {
-      if (err) {
-        return next(err);
-      }
-
+    const callback = ok(next, function (canDoIt) {
       if (!canDoIt) {
         if (redirect) {
           return res.redirect(redirectStatus, redirect);
@@ -29,7 +26,7 @@ export function can(action, resource, redirect, redirectStatus = 302) {
       }
 
       next();
-    }
+    });
 
     if (!user) {
       rbac.can(options.rbac.role.guest, action, resource, callback);
@@ -55,11 +52,7 @@ export function hasRole(name, redirect, redirectStatus = 302) {
       return next(new WebError(401));
     }
 
-    req.user.hasRole(rbac, name, function(err, has) {
-      if (err) {
-        return next(err);
-      }
-
+    req.user.hasRole(rbac, name, ok(next, (has) {
       if (!has) {
         if (redirect) {
           return res.redirect(redirectStatus, redirect);
@@ -68,7 +61,7 @@ export function hasRole(name, redirect, redirectStatus = 302) {
       }
 
       next();
-    });
+    }));
   };
 }
 

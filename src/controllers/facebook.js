@@ -1,5 +1,6 @@
 import FB from 'fb';
 import WebError from 'web-error';
+import ok from 'okay';
 
 const fbScope = ['email', 'publish_actions'];
 const fbSuccessRedirect = '/';
@@ -88,11 +89,7 @@ export function ensureBySignedRequest(req, res, next) {
   }
 
   // search user in database
-  User.findByFacebookID(signedRequest.user_id, function(err, user) {
-    if (err) {
-      return next(err);
-    }
-
+  User.findByFacebookID(signedRequest.user_id, ok(next, function(user) {
     if (user) {
       return req.logIn(user, { session }, next);
     }
@@ -105,14 +102,10 @@ export function ensureBySignedRequest(req, res, next) {
       return next(new WebError(400, 'Profile.id is different from signedRequest.user_id'));
     }
 
-    User.createByFacebook(profile, function(err2, createdUser) {
-      if (err2) {
-        return next(err2);
-      }
-
+    User.createByFacebook(profile, ok(next, function(createdUser) {
       req.logIn(createdUser, { session }, next);
-    });
-  });
+    }));
+  }));
 }
 
 export function redirectPeopleToCanvas(req, res, next) {

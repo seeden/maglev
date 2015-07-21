@@ -20,16 +20,14 @@ export default class Secure {
     const server = this.server;
     const pp = this.passport;
 
-    pp.serializeUser(function(user, done) {
+    pp.serializeUser(function serializeUserCallback(user, done) {
       done(null, user.id);
     });
 
-    pp.deserializeUser(function(id, done) {
+    pp.deserializeUser(function deserializeUserCallback(id, done) {
       const User = server.models.User;
 
-      User.findById(id, function(err, user) {
-        done(err, user);
-      });
+      User.findById(id, done);
     });
 
     const options = server.options;
@@ -39,7 +37,7 @@ export default class Secure {
     pp.use(strategy.local(options, models));
     pp.use(strategy.bearer(options, models));
 
-    options.strategies.forEach(function(strategy2) {
+    options.strategies.forEach(function eachStrategy(strategy2) {
       pp.use(strategy2(options, models));
     });
   }

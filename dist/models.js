@@ -36,11 +36,11 @@ var Models = (function () {
         callbacks: []
       };
 
-      config.model = modelFactory(this.server, function (error) {
+      config.model = modelFactory(this.server, function modelFactoryCallback(error) {
         config.loaded = true;
         config.error = error;
 
-        config.callbacks.forEach(function (callback) {
+        config.callbacks.forEach(function eachCallback(callback) {
           callback(error, config.model);
         });
 
@@ -82,7 +82,7 @@ var Models = (function () {
       this._modelFactories.set(name, modelModul['default'] ? modelModul['default'] : modelModul);
 
       Object.defineProperty(this, name, {
-        get: function get() {
+        get: function getProperty() {
           return this.model(name);
         }
       });
@@ -93,7 +93,7 @@ var Models = (function () {
       var _this = this;
 
       var keys = [];
-      this._modelFactories.forEach(function (factory, modelName) {
+      this._modelFactories.forEach(function eachModelFactory(factory, modelName) {
         keys.push(modelName);
       });
 
