@@ -13,6 +13,10 @@ var _webError = require('web-error');
 
 var _webError2 = _interopRequireDefault(_webError);
 
+var _okay = require('okay');
+
+var _okay2 = _interopRequireDefault(_okay);
+
 /**
  * Return middleware function for permission check
  * @param  {String}  action    Name of action
@@ -31,11 +35,7 @@ function can(action, resource, redirect) {
     var rbac = server.rbac;
     var user = req.user;
 
-    function callback(err, canDoIt) {
-      if (err) {
-        return next(err);
-      }
-
+    var callback = (0, _okay2['default'])(next, function (canDoIt) {
       if (!canDoIt) {
         if (redirect) {
           return res.redirect(redirectStatus, redirect);
@@ -45,7 +45,7 @@ function can(action, resource, redirect) {
       }
 
       next();
-    }
+    });
 
     if (!user) {
       rbac.can(options.rbac.role.guest, action, resource, callback);
@@ -74,11 +74,7 @@ function hasRole(name, redirect) {
       return next(new _webError2['default'](401));
     }
 
-    req.user.hasRole(rbac, name, function (err, has) {
-      if (err) {
-        return next(err);
-      }
-
+    req.user.hasRole(rbac, name, (0, _okay2['default'])(next, function (has) {
       if (!has) {
         if (redirect) {
           return res.redirect(redirectStatus, redirect);
@@ -87,7 +83,7 @@ function hasRole(name, redirect) {
       }
 
       next();
-    });
+    }));
   };
 }
 

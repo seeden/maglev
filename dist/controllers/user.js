@@ -20,6 +20,10 @@ var _tv4 = require('tv4');
 
 var _tv42 = _interopRequireDefault(_tv4);
 
+var _okay = require('okay');
+
+var _okay2 = _interopRequireDefault(_okay);
+
 function isOwner(req, res, next) {
   if (!req.user || !req.objects.user) {
     return next(new _webError2['default'](401));
@@ -39,18 +43,14 @@ function user(req, res, next, id) {
     return next(new _webError2['default'](400));
   }
 
-  User.findById(id, function (err, user) {
-    if (err) {
-      return next(err);
-    }
-
+  User.findById(id, (0, _okay2['default'])(next, function (user) {
     if (!user) {
       return next(new _webError2['default'](404));
     }
 
     req.objects.user = user;
     next();
-  });
+  }));
 }
 
 function permalink(req, res, next, permalink) {
@@ -62,18 +62,14 @@ function permalink(req, res, next, permalink) {
 
   User.findOne({
     permalink: permalink
-  }, function (err, user) {
-    if (err) {
-      return next(err);
-    }
-
+  }, (0, _okay2['default'])(next, function (user) {
     if (!user) {
       return next(new _webError2['default'](404));
     }
 
     req.objects.user = user;
     next();
-  });
+  }));
 }
 
 /**
@@ -90,11 +86,7 @@ function create(req, res, next) {
     return next(new _webError2['default'](400, 'Validation errors', result.errors));
   }
 
-  User.create(req.body, function (err, user) {
-    if (err) {
-      return next(err);
-    }
-
+  User.create(req.body, (0, _okay2['default'])(next, function (user) {
     if (!user) {
       return next(new Error('User is undefined'));
     }
@@ -103,7 +95,7 @@ function create(req, res, next) {
       token: user.generateBearerToken(options.token.secret, options.token.expiration),
       user: user.toPrivateJSON()
     });
-  });
+  }));
 }
 
 function remove(req, res, next) {
@@ -112,13 +104,9 @@ function remove(req, res, next) {
     return next(new _webError2['default'](404));
   }
 
-  user.remove(function (err) {
-    if (err) {
-      return next(err);
-    }
-
+  user.remove((0, _okay2['default'])(next, function () {
     res.status(204).end();
-  });
+  }));
 }
 
 function current(req, res, next) {

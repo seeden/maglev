@@ -22,6 +22,10 @@ var _webError = require('web-error');
 
 var _webError2 = _interopRequireDefault(_webError);
 
+var _okay = require('okay');
+
+var _okay2 = _interopRequireDefault(_okay);
+
 function tokenToUser(req, res, next, id) {
   var User = req.models.User;
   var options = req.server.options;
@@ -30,28 +34,20 @@ function tokenToUser(req, res, next, id) {
     return next(new _webError2['default'](400, 'Token is undefined'));
   }
 
-  _jsonwebtoken2['default'].verify(id, options.mail.token.secret, function (err, data) {
-    if (err) {
-      return next(err);
-    }
-
+  _jsonwebtoken2['default'].verify(id, options.mail.token.secret, (0, _okay2['default'])(next, function (data) {
     if (!data.user) {
       return next(new _webError2['default'](400, 'Unknown user'));
     }
 
-    User.findById(id, function (err2, user) {
-      if (err2) {
-        return next(err2);
-      }
-
+    User.findById(id, (0, _okay2['default'])(next, function (user) {
       if (!user) {
         return next(new _webError2['default'](404));
       }
 
       req.objects.user = user;
       next();
-    });
-  });
+    }));
+  }));
 }
 
 /**
@@ -70,35 +66,23 @@ function change(req, res, next) {
   }
 
   if (!user.hasPassword()) {
-    user.setPassword(req.body.password, function (err) {
-      if (err) {
-        return next(err);
-      }
-
+    user.setPassword(req.body.password, (0, _okay2['default'])(next, function () {
       return res.status(204).end();
-    });
+    }));
   } else {
     if (!req.body.password_old) {
       return next(new _webError2['default'](400, 'Parameter password_old is missing'));
     }
 
-    user.comparePassword(req.body.password_old, function (err, isMatch) {
-      if (err) {
-        return next(err);
-      }
-
+    user.comparePassword(req.body.password_old, (0, _okay2['default'])(next, function (isMatch) {
       if (!isMatch) {
         return next(new _webError2['default'](400, 'Password is not match with actual password'));
       }
 
-      user.setPassword(req.body.password, function (err2) {
-        if (err2) {
-          return next(err2);
-        }
-
+      user.setPassword(req.body.password, (0, _okay2['default'])(next, function () {
         return res.status(204).end();
-      });
-    });
+      }));
+    }));
   }
 }
 
@@ -126,11 +110,7 @@ function forgot(req, res, next) {
     return next(new _webError2['default'](400, 'Parameter username is missing'));
   }
 
-  User.findByUsername(req.body.username, false, function (err, user) {
-    if (err) {
-      return next(err);
-    }
-
+  User.findByUsername(req.body.username, false, (0, _okay2['default'])(next, function (user) {
     if (!user) {
       return next(new _webError2['default'](404));
     }
@@ -158,11 +138,7 @@ function forgot(req, res, next) {
       text: function text(callback) {
         res.render('mail/forgot_plain', data, callback);
       }
-    }, function (err2, result) {
-      if (err2) {
-        return next(new Error(err2));
-      }
-
+    }, (0, _okay2['default'])(next, function (result) {
       var mailOptions = {
         from: options.mail['default'].from,
         to: user.email,
@@ -171,13 +147,9 @@ function forgot(req, res, next) {
         text: result.text
       };
 
-      mail.sendMail(mailOptions, function (err3) {
-        if (err3) {
-          return next(new Error(err3));
-        }
-
+      mail.sendMail(mailOptions, (0, _okay2['default'])(next, function () {
         return res.status(204).end();
-      });
-    });
-  });
+      }));
+    }));
+  }));
 }

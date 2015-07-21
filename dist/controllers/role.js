@@ -17,6 +17,10 @@ var _webError = require('web-error');
 
 var _webError2 = _interopRequireDefault(_webError);
 
+var _okay = require('okay');
+
+var _okay2 = _interopRequireDefault(_okay);
+
 function role(req, res, next, name) {
   var rbac = req.server.rbac;
 
@@ -24,18 +28,14 @@ function role(req, res, next, name) {
     return next(new _webError2['default'](400));
   }
 
-  rbac.getRole(name, function (err, role) {
-    if (err) {
-      return next(err);
-    }
-
+  rbac.getRole(name, (0, _okay2['default'])(next, function (role) {
     if (!role) {
       return next(new _webError2['default'](404));
     }
 
     req.objects.role = role;
     next();
-  });
+  }));
 }
 
 /**
@@ -49,11 +49,7 @@ function create(req, res, next) {
     return next(new _webError2['default'](400, 'Role name is undefined'));
   }
 
-  rbac.createRole(req.body.name, function (err, role) {
-    if (err) {
-      return next(err);
-    }
-
+  rbac.createRole(req.body.name, (0, _okay2['default'])(next, function (role) {
     if (!role) {
       return next(new _webError2['default'](400));
     }
@@ -63,7 +59,7 @@ function create(req, res, next) {
         name: role.name
       }
     });
-  });
+  }));
 }
 
 /**
@@ -80,24 +76,16 @@ function remove(req, res, next) {
   var role = req.objects.role;
 
   // unassign role from all users
-  User.removeRoleFromCollection(role.name, function (err) {
-    if (err) {
-      return next(err);
-    }
-
+  User.removeRoleFromCollection(role.name, (0, _okay2['default'])(next, function () {
     // remove role from rbac
-    role.remove(function (err2, isDeleted) {
-      if (err2) {
-        return next(err2);
-      }
-
+    role.remove((0, _okay2['default'])(next, function (isDeleted) {
       if (!isDeleted) {
         return next(new _webError2['default'](400));
       }
 
       return res.status(204).end();
-    });
-  });
+    }));
+  }));
 }
 
 /**
@@ -143,17 +131,13 @@ function grant(req, res, next) {
 
   var role = req.objects.role;
 
-  rbac.grantByName(role.name, req.body.name, function (err, isGranted) {
-    if (err) {
-      return next(err);
-    }
-
+  rbac.grantByName(role.name, req.body.name, (0, _okay2['default'])(next, function (isGranted) {
     if (!isGranted) {
       return next(new _webError2['default'](400));
     }
 
     return res.status(204).end();
-  });
+  }));
 }
 
 /**
@@ -169,15 +153,11 @@ function revoke(req, res, next) {
 
   var role = req.objects.role;
 
-  rbac.revokeByName(role.name, req.body.name, function (err, isRevoked) {
-    if (err) {
-      return next(err);
-    }
-
+  rbac.revokeByName(role.name, req.body.name, (0, _okay2['default'])(next, function (isRevoked) {
     if (!isRevoked) {
       return next(new _webError2['default'](400));
     }
 
     return res.status(204).end();
-  });
+  }));
 }

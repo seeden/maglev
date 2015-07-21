@@ -17,6 +17,10 @@ var _webError = require('web-error');
 
 var _webError2 = _interopRequireDefault(_webError);
 
+var _okay = require('okay');
+
+var _okay2 = _interopRequireDefault(_okay);
+
 function getScope(req, res, next) {
   var rbac = req.server.rbac;
   var user = req.user;
@@ -24,15 +28,11 @@ function getScope(req, res, next) {
     return next(new _webError2['default'](401));
   }
 
-  user.getScope(rbac, function (err, scope) {
-    if (err) {
-      return next(err);
-    }
-
+  user.getScope(rbac, (0, _okay2['default'])(next, function (scope) {
     res.jsonp({
       scope: scope
     });
-  });
+  }));
 }
 
 function can(req, res, next) {
@@ -48,15 +48,11 @@ function can(req, res, next) {
     return next(new _webError2['default'](400));
   }
 
-  user.can(rbac, action, resource, function (err, userCan) {
-    if (err) {
-      return next(err);
-    }
-
+  user.can(rbac, action, resource, (0, _okay2['default'])(next, function (userCan) {
     res.jsonp({
       can: userCan
     });
-  });
+  }));
 }
 
 function addPermission(req, res, next) {
@@ -72,13 +68,9 @@ function addPermission(req, res, next) {
     return next(new _webError2['default'](400));
   }
 
-  user.addPermission(rbac, action, resource, function (err) {
-    if (err) {
-      return next(err);
-    }
-
+  user.addPermission(rbac, action, resource, (0, _okay2['default'])(next, function () {
     res.status(204).end();
-  });
+  }));
 }
 
 function removePermission(req, res, next) {
@@ -93,13 +85,9 @@ function removePermission(req, res, next) {
     return next(new _webError2['default'](400));
   }
 
-  user.removePermission(rbac, permissionName, function (err) {
-    if (err) {
-      return next(err);
-    }
-
+  user.removePermission(rbac, permissionName, (0, _okay2['default'])(next, function () {
     res.status(204).end();
-  });
+  }));
 }
 
 function hasRole(req, res, next) {
@@ -114,15 +102,11 @@ function hasRole(req, res, next) {
     return next(new _webError2['default'](400));
   }
 
-  user.hasRole(rbac, role, function (err, has) {
-    if (err) {
-      return next(err);
-    }
-
+  user.hasRole(rbac, role, (0, _okay2['default'])(next, function (has) {
     res.jsonp({
       has: has
     });
-  });
+  }));
 }
 
 function setRole(req, res, next) {
@@ -137,13 +121,9 @@ function setRole(req, res, next) {
     return next(new _webError2['default'](400));
   }
 
-  user.setRole(rbac, role, function (err) {
-    if (err) {
-      return next(err);
-    }
-
+  user.setRole(rbac, role, (0, _okay2['default'])(next, function () {
     res.status(204).end();
-  });
+  }));
 }
 
 function removeRole(req, res, next) {
@@ -152,11 +132,7 @@ function removeRole(req, res, next) {
     return next(new _webError2['default'](401));
   }
 
-  user.removeRole(function (err) {
-    if (err) {
-      return next(err);
-    }
-
+  user.removeRole((0, _okay2['default'])(next, function () {
     res.status(204).end();
-  });
+  }));
 }

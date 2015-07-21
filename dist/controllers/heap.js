@@ -11,6 +11,10 @@ var _heapdump = require('heapdump');
 
 var _heapdump2 = _interopRequireDefault(_heapdump);
 
+var _okay = require('okay');
+
+var _okay2 = _interopRequireDefault(_okay);
+
 function save(req, res, next) {
   var options = req.server.options;
   var path = options.memoryLeaks.path;
@@ -19,11 +23,7 @@ function save(req, res, next) {
   }
 
   var file = path + '/' + process.pid + '-' + Date.now() + '.heapsnapshot';
-  _heapdump2['default'].writeSnapshot(file, function (err) {
-    if (err) {
-      return next(err);
-    }
-
+  _heapdump2['default'].writeSnapshot(file, (0, _okay2['default'])(next, function () {
     res.status(204).jsonp({});
-  });
+  }));
 }

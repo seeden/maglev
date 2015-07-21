@@ -16,6 +16,10 @@ var _webError = require('web-error');
 
 var _webError2 = _interopRequireDefault(_webError);
 
+var _okay = require('okay');
+
+var _okay2 = _interopRequireDefault(_okay);
+
 function generateForCurrent(req, res, next) {
   var user = req.user;
   var options = req.server.options;
@@ -38,11 +42,7 @@ function generate(req, res, next) {
     return next(new _webError2['default'](400, 'One of parameter missing'));
   }
 
-  User.findByUsernamePassword(req.body.username, req.body.password, false, function (err, user) {
-    if (err) {
-      return next(err);
-    }
-
+  User.findByUsernamePassword(req.body.username, req.body.password, false, (0, _okay2['default'])(next, function (user) {
     if (!user) {
       return next(new _webError2['default'](404, 'Invalid username or password'));
     }
@@ -51,7 +51,7 @@ function generate(req, res, next) {
       token: user.generateBearerToken(options.token.secret, options.token.expiration),
       user: user.toPrivateJSON()
     });
-  });
+  }));
 }
 
 function invalidate(req, res, next) {

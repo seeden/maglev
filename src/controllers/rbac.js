@@ -52,7 +52,7 @@ export function hasRole(name, redirect, redirectStatus = 302) {
       return next(new WebError(401));
     }
 
-    req.user.hasRole(rbac, name, ok(next, (has) {
+    req.user.hasRole(rbac, name, ok(next, function(has) {
       if (!has) {
         if (redirect) {
           return res.redirect(redirectStatus, redirect);

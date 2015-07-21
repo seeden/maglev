@@ -21,6 +21,10 @@ var _webError = require('web-error');
 
 var _webError2 = _interopRequireDefault(_webError);
 
+var _okay = require('okay');
+
+var _okay2 = _interopRequireDefault(_okay);
+
 var fbScope = ['email', 'publish_actions'];
 var fbSuccessRedirect = '/';
 var fbFailureRedirect = '/?fb_error=signin';
@@ -104,11 +108,7 @@ function ensureBySignedRequest(req, res, next) {
   }
 
   // search user in database
-  User.findByFacebookID(signedRequest.user_id, function (err, user) {
-    if (err) {
-      return next(err);
-    }
-
+  User.findByFacebookID(signedRequest.user_id, (0, _okay2['default'])(next, function (user) {
     if (user) {
       return req.logIn(user, { session: session }, next);
     }
@@ -121,14 +121,10 @@ function ensureBySignedRequest(req, res, next) {
       return next(new _webError2['default'](400, 'Profile.id is different from signedRequest.user_id'));
     }
 
-    User.createByFacebook(profile, function (err2, createdUser) {
-      if (err2) {
-        return next(err2);
-      }
-
+    User.createByFacebook(profile, (0, _okay2['default'])(next, function (createdUser) {
       req.logIn(createdUser, { session: session }, next);
-    });
-  });
+    }));
+  }));
 }
 
 function redirectPeopleToCanvas(req, res, next) {
