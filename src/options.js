@@ -23,7 +23,9 @@ export default {
   server: {
     build: 1,
     host: process.env.HOST || '127.0.0.1',
-    port: process.env.PORT || 4000 + portOffset
+    port: process.env.PORT
+      ? parseInt(process.env.PORT, 10) + portOffset
+      : 4000 + portOffset
   },
 
   request: {
@@ -165,5 +167,9 @@ export default {
 
   shutdown: {
     timeout: 30 * 1000
+  },
+
+  sourceMap: {
+    root: 'public/dist'
   }
 };

@@ -27,8 +27,7 @@ export default class Router {
   }
 
   api(prefix) {
-    prefix = prefix || this._options.api.path;
-    return this.route(prefix);
+    return this.route(prefix || this._options.api.path);
   }
 
   param(...args) {

@@ -1,4 +1,5 @@
 import WebError from 'web-error';
+import ok from 'okay';
 
 export function permission(req, res, next, name) {
   const rbac = req.server.rbac;
@@ -7,20 +8,15 @@ export function permission(req, res, next, name) {
     return next(new WebError(400));
   }
 
-  rbac.getPermissionByName(name, function(err, permission) {
-    if (err) {
-      return next(err);
-    }
-
+  rbac.getPermissionByName(name, ok(next, function(permission) {
     if (!permission) {
       return next(new WebError(404));
     }
 
     req.objects.permission = permission;
     next();
-  });
+  }));
 }
-
 
 /**
  * Create new permission
@@ -32,11 +28,7 @@ export function create(req, res, next) {
     return next(new WebError(400, 'Permission action or resource is undefined'));
   }
 
-  rbac.createPermission(req.body.action, req.body.resource, function(err, permission) {
-    if (err) {
-      return next(err);
-    }
-
+  rbac.createPermission(req.body.action, req.body.resource, ok(next, function(permission) {
     if (!permission) {
       return next(new WebError(400));
     }
@@ -48,7 +40,7 @@ export function create(req, res, next) {
         name: permission.name
       }
     });
-  });
+  }));
 }
 
 /**
@@ -64,23 +56,15 @@ export function remove(req, res, next) {
   const permission = req.objects.permission;
 
   // unassign permission from all users
-  User.removePermissionFromCollection(permission.name, function(err) {
-    if (err) {
-      return next(err);
-    }
-
-    permission.remove(function(err2, isDeleted) {
-      if (err2) {
-        return next(err2);
-      }
-
+  User.removePermissionFromCollection(permission.name, ok(next, function() {
+    permission.remove(ok(next, function(isDeleted) {
       if (!isDeleted) {
         return next(new WebError(400));
       }
 
       return res.status(204).end();
-    });
-  });
+    }));
+  }));
 }
 
 /**

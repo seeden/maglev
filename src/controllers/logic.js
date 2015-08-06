@@ -13,7 +13,7 @@ export function or(fn1, fn2) {
 export function and(fn1, fn2) {
   return function(req, res, next) {
     fn1(req, res, function(err) {
-      if (!err) {
+      if (err) {
         return next(err);
       }
 

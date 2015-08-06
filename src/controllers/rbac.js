@@ -16,7 +16,7 @@ export function can(action, resource, redirect, redirectStatus = 302) {
     const rbac = server.rbac;
     const user = req.user;
 
-    const callback = ok(next, function (canDoIt) {
+    const callback = ok(next, function(canDoIt) {
       if (!canDoIt) {
         if (redirect) {
           return res.redirect(redirectStatus, redirect);
