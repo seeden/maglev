@@ -33,6 +33,10 @@ var _temporary = require('temporary');
 
 var _temporary2 = _interopRequireDefault(_temporary);
 
+var _okay = require('okay');
+
+var _okay2 = _interopRequireDefault(_okay);
+
 function deleteFiles(files, callback) {
   (0, _async.map)(files, function (file, cb) {
     _fs2['default'].unlink(file.path, function (err) {
@@ -42,13 +46,9 @@ function deleteFiles(files, callback) {
 
       cb(null, file);
     });
-  }, function (err, removedFiles) {
-    if (err) {
-      return callback(err);
-    }
-
+  }, (0, _okay2['default'])(callback, function (removedFiles) {
     callback(null, removedFiles);
-  });
+  }));
 }
 
 function upload(req, res, next) {
@@ -86,21 +86,17 @@ function clear(req, res, next) {
     return next();
   }
 
-  deleteFiles(req.objects.files, function (err, removedFiles) {
-    if (err) {
-      return next(err);
-    }
-
+  deleteFiles(req.objects.files, (0, _okay2['default'])(next, function (removedFiles) {
     req.objects.files = [];
     req.objects.removedFiles = removedFiles;
     next();
-  });
+  }));
 }
 
 function clearAfterError(err, req, res, next) {
-  clear(req, res, function (err2) {
-    next(err2 || err);
-  });
+  clear(req, res, (0, _okay2['default'])(next, function () {
+    next(err);
+  }));
 }
 
 function get(req, res, next) {
@@ -122,11 +118,7 @@ function download(req, res, next) {
   }
 
   var downloadInstance = new _download2['default']().get(req.body.url);
-  downloadInstance.run(function (err, downloadedFiles) {
-    if (err) {
-      return next(err);
-    }
-
+  downloadInstance.run((0, _okay2['default'])(next, function (downloadedFiles) {
     if (!downloadedFiles.length) {
       return next(new _webError2['default'](401));
     }
@@ -140,123 +132,9 @@ function download(req, res, next) {
       size: downloadedFiles[0].contents.length
     };
 
-    tmpFile.writeFile(downloadedFiles[0].contents, function (err2) {
-      if (err2) {
-        return next(err2);
-      }
-
+    tmpFile.writeFile(downloadedFiles[0].contents, (0, _okay2['default'])(next, function () {
       files.push(file);
       next();
-    });
-  });
+    }));
+  }));
 }
-
-/*
-var useExt= function(orgPath, ext){
-  if(!ext) {
-    return orgPath;
-  }
-
-  orgPath = orgPath.replace(/\.[^/.]+$/, "");
-
-  return orgPath+'.'+ext;
-};
-
-exports.storeFirstImage = function(options) {
-  options = options || {};
-
-  options.exts = options.exts || ['jpg', 'jpeg', 'png']; //available exts
-  options.ext = options.ext || null;   //finall ext
-
-  options.maxWidth = options.maxWidth || null;
-  options.maxHeight = options.maxHeight || null;
-  options.minWidth = options.minWidth || null;
-  options.minHeight = options.minHeight || null;
-  options.compress = options.compress || null; //None, BZip, Fax, Group4, JPEG, Lossless, LZW, RLE, Zip, or LZMA
-  options.quality = options.quality || null;  //0 - 100
-  options.interlace = options.interlace || false;  //null|Line|Plane|Partition
-  options.noProfile = typeof options.noProfile !== 'undefined' ? options.noProfile : true;
-
-  var storeFirstMiddleware = storeFirst(options);
-
-  if(options.compress === 'JPEG') {
-    options.ext = 'jpg';
-  }
-
-  return function(req, res, next) {
-    var files = req.objects.files;
-
-
-    if(!files || !files.length) {
-      return next(new WebError(401, 'Files is undefined'));
-    }
-
-    var file = files[0],
-      orgPath = file.path,
-      image = gm(orgPath);
-
-    if(!image) {
-      return next(new WebError(401, 'Image is not a image'));
-    }
-
-    image.size(function (err, size) {
-      if(err) {
-        return next(err);
-      }
-
-      var changed = false;
-
-      if(options.minWidth && options.minWidth>size.width) {
-        return next(new WebError(401, 'Image has smaller width'));
-      }
-
-      if(options.minHeight && options.minHeight>size.height) {
-        return next(new WebError(401, 'Image has smaller height'));
-      }
-
-      if(options.maxWidth || options.maxHeight) {
-        image.resize(options.maxWidth, options.maxHeight);
-        changed=true;
-      }
-
-      if(options.interlace) {
-        image.interlace();
-        changed=true;
-      }
-
-      if(options.quality) {
-        image.quality(options.quality);
-        changed=true;
-      }
-
-      if(options.compress) {
-        image.compress(options.compress);
-        changed=true;
-      }
-
-      if(options.noProfile) {
-        image.noProfile();
-        changed=true;
-      }
-
-      if(!changed) {
-        return storeFirstMiddleware(req, res, next);
-      }
-
-      var newPath = useExt(file.path, options.ext);
-
-      image.write(newPath, function (err) {
-          if (err) {
-            return next(err);
-          };
-
-          var stats = fs.statSync(newPath);
-          file.size = stats['size'];
-          file.path = newPath;
-        file.originalFilename = useExt(file.originalFilename, options.ext);
-
-          return storeFirstMiddleware(req, res, next);
-      });
-    });
-  }
-};*/

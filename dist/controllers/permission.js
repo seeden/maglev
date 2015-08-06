@@ -15,6 +15,10 @@ var _webError = require('web-error');
 
 var _webError2 = _interopRequireDefault(_webError);
 
+var _okay = require('okay');
+
+var _okay2 = _interopRequireDefault(_okay);
+
 function permission(req, res, next, name) {
   var rbac = req.server.rbac;
 
@@ -22,18 +26,14 @@ function permission(req, res, next, name) {
     return next(new _webError2['default'](400));
   }
 
-  rbac.getPermissionByName(name, function (err, permission) {
-    if (err) {
-      return next(err);
-    }
-
+  rbac.getPermissionByName(name, (0, _okay2['default'])(next, function (permission) {
     if (!permission) {
       return next(new _webError2['default'](404));
     }
 
     req.objects.permission = permission;
     next();
-  });
+  }));
 }
 
 /**
@@ -47,11 +47,7 @@ function create(req, res, next) {
     return next(new _webError2['default'](400, 'Permission action or resource is undefined'));
   }
 
-  rbac.createPermission(req.body.action, req.body.resource, function (err, permission) {
-    if (err) {
-      return next(err);
-    }
-
+  rbac.createPermission(req.body.action, req.body.resource, (0, _okay2['default'])(next, function (permission) {
     if (!permission) {
       return next(new _webError2['default'](400));
     }
@@ -63,7 +59,7 @@ function create(req, res, next) {
         name: permission.name
       }
     });
-  });
+  }));
 }
 
 /**
@@ -80,23 +76,15 @@ function remove(req, res, next) {
   var permission = req.objects.permission;
 
   // unassign permission from all users
-  User.removePermissionFromCollection(permission.name, function (err) {
-    if (err) {
-      return next(err);
-    }
-
-    permission.remove(function (err2, isDeleted) {
-      if (err2) {
-        return next(err2);
-      }
-
+  User.removePermissionFromCollection(permission.name, (0, _okay2['default'])(next, function () {
+    permission.remove((0, _okay2['default'])(next, function (isDeleted) {
       if (!isDeleted) {
         return next(new _webError2['default'](400));
       }
 
       return res.status(204).end();
-    });
-  });
+    }));
+  }));
 }
 
 /**
