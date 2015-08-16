@@ -34,15 +34,20 @@ export default class App {
     this._httpServer = null;
     this._activeConnections = {};
 
+    // prepare basic
     this._prepareErrorHandler();
     this._prepareCompression();
     this._prepareLog();
     this._prepareEngine();
     this._prepareHtml();
+
+    // prepare static
+    this._prepareStatic();
+
+    // prepare middlewares
     this._prepareVars();
     this._prepareSession();
     this._prepareSecure();
-    this._prepareStatic();
     this._prepareRouter();
   }
 
@@ -160,7 +165,7 @@ export default class App {
     app.engine('html', consolidate[options.view.engine]);
 
     app.set('view engine', 'html');
-    app.set('views', options.root + '/views');
+    app.set('views', `${options.root}/views`);
   }
 
   _prepareHtml() {
@@ -272,11 +277,9 @@ export default class App {
 
     app.use(server.secure.passport.initialize());
 
-    if (!options.session) {
-      return;
+    if (options.session) {
+      app.use(server.secure.passport.session());
     }
-
-    app.use(server.secure.passport.session());
   }
 
   _prepareStatic() {
@@ -322,6 +325,7 @@ function prepareRequest(req) {
   req.__defineGetter__('httpHost', function getHttpHost() {
     const trustProxy = this.app.get('trust proxy');
     const host = trustProxy && this.get('X-Forwarded-Host');
+
     return host || this.get('Host');
   });
 
@@ -332,13 +336,11 @@ function prepareRequest(req) {
     }
 
     const parts = host.split(':');
-    return (parts.length === 2)
-      ? parseInt(parts[1], 10)
-      : 80;
+    return (parts.length === 2) ? parseInt(parts[1], 10) : 80;
   });
 
   req.__defineGetter__('protocolHost', function getProtocolHost() {
-    return this.protocol + '://' + this.httpHost;
+    return `${this.protocol}://${this.httpHost}`;
   });
 }
 

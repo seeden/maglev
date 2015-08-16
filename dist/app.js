@@ -110,15 +110,20 @@ var App = (function () {
     this._httpServer = null;
     this._activeConnections = {};
 
+    // prepare basic
     this._prepareErrorHandler();
     this._prepareCompression();
     this._prepareLog();
     this._prepareEngine();
     this._prepareHtml();
+
+    // prepare static
+    this._prepareStatic();
+
+    // prepare middlewares
     this._prepareVars();
     this._prepareSession();
     this._prepareSecure();
-    this._prepareStatic();
     this._prepareRouter();
   }
 
@@ -341,11 +346,9 @@ var App = (function () {
 
       app.use(server.secure.passport.initialize());
 
-      if (!options.session) {
-        return;
+      if (options.session) {
+        app.use(server.secure.passport.session());
       }
-
-      app.use(server.secure.passport.session());
     }
   }, {
     key: '_prepareStatic',
@@ -423,6 +426,7 @@ function prepareRequest(req) {
   req.__defineGetter__('httpHost', function getHttpHost() {
     var trustProxy = this.app.get('trust proxy');
     var host = trustProxy && this.get('X-Forwarded-Host');
+
     return host || this.get('Host');
   });
 

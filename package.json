@@ -1,6 +1,6 @@
 {
   "name": "maglev",
-  "version": "4.4.0",
+  "version": "4.4.1",
   "description": "Preconfigured NodeJS framework",
   "author": {
     "name": "Zlatko Fedor",
@@ -83,7 +83,7 @@
     "serve-static": "~1.10.0",
     "swig": "~1.4.2",
     "temporary": "~0.0.8",
-    "tv4": "~1.1.12",
+    "tv4": "~1.2.3",
     "underscore": "~1.8.3",
     "web-error": "~3.1.1"
   },
@@ -91,8 +91,8 @@
     "babel": "~5.8.21",
     "babel-eslint": "~4.0.5",
     "connect-mongo": "~0.8.2",
-    "eslint": "~1.0.0",
-    "eslint-loader": "~0.14.2",
+    "eslint": "~1.1.0",
+    "eslint-loader": "~1.0.0",
     "eslint-plugin-react": "~3.2.0",
     "gulp": "~3.9.0",
     "gulp-babel": "~5.2.0",
