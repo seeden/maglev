@@ -1,6 +1,6 @@
 {
   "name": "maglev",
-  "version": "4.4.1",
+  "version": "4.4.4",
   "description": "Preconfigured NodeJS framework",
   "author": {
     "name": "Zlatko Fedor",
@@ -85,7 +85,7 @@
     "temporary": "~0.0.8",
     "tv4": "~1.2.3",
     "underscore": "~1.8.3",
-    "web-error": "~3.1.1"
+    "web-error": "~3.1.2"
   },
   "devDependencies": {
     "babel": "~5.8.21",

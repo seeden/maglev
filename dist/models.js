@@ -36,6 +36,10 @@ var Models = (function () {
         callbacks: []
       };
 
+      if (typeof modelFactory !== 'function') {
+        throw new Error('Model factory is not a function for model: ' + name);
+      }
+
       config.model = modelFactory(this.server, function modelFactoryCallback(error) {
         config.loaded = true;
         config.error = error;

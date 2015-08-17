@@ -19,7 +19,7 @@ export default class Models {
 
   _createModelFromFactory(name) {
     if (!this._modelFactories.has(name)) {
-      throw new Error('Modul is not registered: ' + name);
+      throw new Error(`Modul is not registered: ${name}`);
     }
 
     const modelFactory = this._modelFactories.get(name);
@@ -27,6 +27,10 @@ export default class Models {
       model: null,
       callbacks: []
     };
+
+    if (typeof modelFactory !== 'function') {
+      throw new Error(`Model factory is not a function for model: ${name}`);
+    }
 
     config.model = modelFactory(this.server, function modelFactoryCallback(error) {
       config.loaded = true;
