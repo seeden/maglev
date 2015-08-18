@@ -42,7 +42,7 @@ function error(err, req, res, next) {
     status: err.status || 500,
     message: err.message || 'Internal server error',
     stack: err.stack,
-    url: req.originalUrl,
+    url: req.originalUrl || req.url,
     errors: err.errors || []
   };
 
