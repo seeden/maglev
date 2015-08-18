@@ -14,6 +14,7 @@ import { EventEmitter } from 'events';
 import util from 'util';
 
 const log = debug('maglev:server');
+const portOffset = parseInt(process.env.NODE_APP_INSTANCE || 0, 10);
 
 export default class Server extends EventEmitter {
   constructor(options, callback) {
@@ -92,9 +93,6 @@ export default class Server extends EventEmitter {
           return callback(err2);
         }
 
-        log(`Server is listening on port: ${options.server.port}`);
-
-        this.notifyPM2Online();
         callback(null, this);
       });
     });
@@ -187,7 +185,17 @@ export default class Server extends EventEmitter {
     this._listening = true;
 
     const options = this.options;
-    this.app.listen(options.server.port, options.server.host, callback);
+    this.app.listen(options.server.port + portOffset, options.server.host, (err) => {
+      if(err) {
+        return callback(err);
+      }
+
+      log(`Server is listening on port: ${this.app.httpServer.address().port}`);
+
+      this.notifyPM2Online();
+
+      callback(null, this);
+    });
 
     return this;
   }

@@ -3,8 +3,6 @@
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
-var portOffset = parseInt(process.env.NODE_APP_INSTANCE || 0, 10);
-
 exports['default'] = {
   root: null,
 
@@ -27,7 +25,7 @@ exports['default'] = {
   server: {
     build: 1,
     host: process.env.HOST || '127.0.0.1',
-    port: process.env.PORT ? parseInt(process.env.PORT, 10) + portOffset : 4000 + portOffset
+    port: process.env.PORT ? parseInt(process.env.PORT, 10) : 4000
   },
 
   request: {

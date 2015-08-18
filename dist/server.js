@@ -69,6 +69,7 @@ var _util = require('util');
 var _util2 = _interopRequireDefault(_util);
 
 var log = (0, _debug2['default'])('maglev:server');
+var portOffset = parseInt(process.env.NODE_APP_INSTANCE || 0, 10);
 
 var Server = (function (_EventEmitter) {
   _inherits(Server, _EventEmitter);
@@ -167,9 +168,6 @@ var Server = (function (_EventEmitter) {
             return callback(err2);
           }
 
-          log('Server is listening on port: ' + options.server.port);
-
-          _this3.notifyPM2Online();
           callback(null, _this3);
         });
       });
@@ -230,6 +228,8 @@ var Server = (function (_EventEmitter) {
   }, {
     key: 'listen',
     value: function listen(callback) {
+      var _this5 = this;
+
       if (!callback) {
         throw new Error('Callback is undefined');
       }
@@ -242,7 +242,17 @@ var Server = (function (_EventEmitter) {
       this._listening = true;
 
       var options = this.options;
-      this.app.listen(options.server.port, options.server.host, callback);
+      this.app.listen(options.server.port + portOffset, options.server.host, function (err) {
+        if (err) {
+          return callback(err);
+        }
+
+        log('Server is listening on port: ' + _this5.app.httpServer.address().port);
+
+        _this5.notifyPM2Online();
+
+        callback(null, _this5);
+      });
 
       return this;
     }

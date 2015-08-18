@@ -1,5 +1,3 @@
-const portOffset = parseInt(process.env.NODE_APP_INSTANCE || 0, 10);
-
 export default {
   root: null,
 
@@ -24,8 +22,8 @@ export default {
     build: 1,
     host: process.env.HOST || '127.0.0.1',
     port: process.env.PORT
-      ? parseInt(process.env.PORT, 10) + portOffset
-      : 4000 + portOffset
+      ? parseInt(process.env.PORT, 10)
+      : 4000
   },
 
   request: {
