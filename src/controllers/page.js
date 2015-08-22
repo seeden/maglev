@@ -17,13 +17,16 @@ export function error(err, req, res, next) {
 
   log(err);
 
+  err.req = req;
+  err.url = req.originalUrl;
+
   server.emit('err', err);
 
   const errorObj = {
     status: err.status || 500,
     message: err.message || 'Internal server error',
     stack: err.stack,
-    url: req.originalUrl || req.url,
+    url: req.originalUrl,
     errors: err.errors || []
   };
 
