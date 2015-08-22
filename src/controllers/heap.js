@@ -9,6 +9,11 @@ export function save(req, res, next) {
   }
 
   const file = path + '/' + process.pid + '-' + Date.now() + '.heapsnapshot';
+
+  if (typeof global.gc === 'function') {
+    global.gc();
+  }
+
   heapdump.writeSnapshot(file, ok(next, function() {
     res.status(204).jsonp({});
   }));

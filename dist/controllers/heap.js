@@ -23,6 +23,11 @@ function save(req, res, next) {
   }
 
   var file = path + '/' + process.pid + '-' + Date.now() + '.heapsnapshot';
+
+  if (typeof global.gc === 'function') {
+    global.gc();
+  }
+
   _heapdump2['default'].writeSnapshot(file, (0, _okay2['default'])(next, function () {
     res.status(204).jsonp({});
   }));
