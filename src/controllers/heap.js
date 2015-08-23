@@ -1,5 +1,8 @@
 import heapdump from 'heapdump';
 import ok from 'okay';
+import debug from 'debug';
+
+const log = debug('maglev:heapController');
 
 export function save(req, res, next) {
   const options = req.server.options;
@@ -11,6 +14,7 @@ export function save(req, res, next) {
   const file = path + '/' + process.pid + '-' + Date.now() + '.heapsnapshot';
 
   if (typeof global.gc === 'function') {
+    log('cleaning GC');
     global.gc();
   }
 

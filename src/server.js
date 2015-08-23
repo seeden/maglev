@@ -7,7 +7,6 @@ import App from './app';
 import Secure from './secure';
 import Models from './models';
 import debug from 'debug';
-import memwatch from 'memwatch-next';
 import heapdump from 'heapdump';
 import domain from 'domain';
 import { EventEmitter } from 'events';
@@ -114,6 +113,7 @@ export default class Server extends EventEmitter {
       return;
     }
 
+    const memwatch = require('memwatch-next');
     memwatch.on('leak', (info) => {
       log('Memory leak detected: ', info);
 
@@ -122,6 +122,10 @@ export default class Server extends EventEmitter {
       }
 
       if (options.memoryLeaks.path) {
+        if (typeof global.gc === 'function') {
+          global.gc();
+        }
+
         const file = options.memoryLeaks.path + '/' + process.pid + '-' + Date.now() + '.heapsnapshot';
         heapdump.writeSnapshot(file, function writeSnapshotCallback(err) {
           if (err) {

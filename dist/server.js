@@ -50,10 +50,6 @@ var _debug = require('debug');
 
 var _debug2 = _interopRequireDefault(_debug);
 
-var _memwatchNext = require('memwatch-next');
-
-var _memwatchNext2 = _interopRequireDefault(_memwatchNext);
-
 var _heapdump = require('heapdump');
 
 var _heapdump2 = _interopRequireDefault(_heapdump);
@@ -193,7 +189,8 @@ var Server = (function (_EventEmitter) {
         return;
       }
 
-      _memwatchNext2['default'].on('leak', function (info) {
+      var memwatch = require('memwatch-next');
+      memwatch.on('leak', function (info) {
         log('Memory leak detected: ', info);
 
         if (options.memoryLeaks.showHeap) {
@@ -202,6 +199,10 @@ var Server = (function (_EventEmitter) {
 
         if (options.memoryLeaks.path) {
           (function () {
+            if (typeof global.gc === 'function') {
+              global.gc();
+            }
+
             var file = options.memoryLeaks.path + '/' + process.pid + '-' + Date.now() + '.heapsnapshot';
             _heapdump2['default'].writeSnapshot(file, function writeSnapshotCallback(err) {
               if (err) {
@@ -218,7 +219,7 @@ var Server = (function (_EventEmitter) {
     key: 'showHeapDiff',
     value: function showHeapDiff() {
       if (!this.hd) {
-        this.hd = new _memwatchNext2['default'].HeapDiff();
+        this.hd = new memwatch.HeapDiff();
       } else {
         var diff = this.hd.end();
         log(_util2['default'].inspect(diff, true, null));

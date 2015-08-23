@@ -15,6 +15,12 @@ var _okay = require('okay');
 
 var _okay2 = _interopRequireDefault(_okay);
 
+var _debug = require('debug');
+
+var _debug2 = _interopRequireDefault(_debug);
+
+var log = (0, _debug2['default'])('maglev:heapController');
+
 function save(req, res, next) {
   var options = req.server.options;
   var path = options.memoryLeaks.path;
@@ -25,6 +31,7 @@ function save(req, res, next) {
   var file = path + '/' + process.pid + '-' + Date.now() + '.heapsnapshot';
 
   if (typeof global.gc === 'function') {
+    log('cleaning GC');
     global.gc();
   }
 

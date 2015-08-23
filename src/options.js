@@ -154,8 +154,8 @@ export default {
   },
 
   memoryLeaks: {
-    watch: true,
-    showHeap: true,
+    watch: false,
+    showHeap: false,
     path: null
   },
 
