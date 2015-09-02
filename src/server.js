@@ -11,9 +11,31 @@ import heapdump from 'heapdump';
 import domain from 'domain';
 import { EventEmitter } from 'events';
 import util from 'util';
+import ok from 'okay';
+import { each } from 'async';
 
 const log = debug('maglev:server');
 const portOffset = parseInt(process.env.NODE_APP_INSTANCE || 0, 10);
+
+function walk(path, fileCallback, callback) {
+  fs.readdir(path, ok(callback, function(files) {
+    each(files, function(file, cb) {
+      const newPath = path + '/' + file;
+      fs.stat(newPath, ok(cb, function(stat) {
+        if (stat.isFile()) {
+          if (/(.*)\.(js$|coffee$)/.test(file)) {
+            const model = require(newPath);
+            return fileCallback(model, newPath, file, cb);
+          }
+        } else if (stat.isDirectory()) {
+          return walk(newPath, fileCallback, cb);
+        }
+
+        cb();
+      }));
+    }, callback);
+  }));
+}
 
 export default class Server extends EventEmitter {
   constructor(options, callback) {
@@ -74,27 +96,19 @@ export default class Server extends EventEmitter {
       }
     });
 
-    this._rbac = new RBAC(options.rbac.options, err => {
-      if (err) {
-        return callback(err);
-      }
-
+    this._rbac = new RBAC(options.rbac.options, ok(callback, () => {
       this._router = new Router(options.router); // router is used in app
       this._models = new Models(this, options.models); // models is used in secure
       this._secure = new Secure(this);
 
       this._app = new App(this, options);
 
-      this._loadRoutes();
-
-      this._loadModels((err2) => {
-        if (err2) {
-          return callback(err2);
-        }
-
-        callback(null, this);
-      });
-    });
+      this._loadRoutes(ok(callback, () => {
+        this._loadModels(ok(callback, () => {
+          callback(null, this);
+        }));
+      }));
+    }));
   }
 
   notifyPM2Online() {
@@ -189,17 +203,13 @@ export default class Server extends EventEmitter {
     this._listening = true;
 
     const options = this.options;
-    this.app.listen(options.server.port + portOffset, options.server.host, (err) => {
-      if(err) {
-        return callback(err);
-      }
-
+    this.app.listen(options.server.port + portOffset, options.server.host, ok(callback, () => {
       log(`Server is listening on port: ${this.app.httpServer.address().port}`);
 
       this.notifyPM2Online();
 
       callback(null, this);
-    });
+    }));
 
     return this;
   }
@@ -259,52 +269,35 @@ export default class Server extends EventEmitter {
     const models = this._models;
     const path = this.options.root + '/models';
 
-    Server.walk(path, function processModel(model, modelPath) {
+    walk(path, function processModel(model, modelPath, file, cb) {
       try {
+        log(`Loading model: ${modelPath}`);
         models.register(model);
+        cb();
       } catch(e) {
-        log('Problem with model: ' + modelPath);
-        throw e;
+        log(`Problem with model: ${modelPath}`);
+        cb(e);
       }
-    });
-
-    // preload all models
-    models.preload(callback);
+    }, ok(callback, function() {
+      // preload all models
+      models.preload(callback);
+    }));
   }
 
-  _loadRoutes() {
+  _loadRoutes(callback) {
     const router = this.router;
     const path = this.options.root + '/routes';
 
-    Server.walk(path, function processPath(route, routePath) {
+    walk(path, function processPath(route, routePath, file, cb) {
       try {
+        log(`Loading route: ${routePath}`);
         route(router);
+        cb();
       } catch(e) {
-        log('Problem with route: ' + routePath);
-        throw e;
+        log(`Problem with route: ${routePath}`);
+        cb(e);
       }
-    });
-  }
-
-  static walk(path, callback) {
-    if (!fs.existsSync(path)) {
-      log('Path does not exists: ' + path);
-      return;
-    }
-
-    fs.readdirSync(path).forEach(function eachFile(file) {
-      const newPath = path + '/' + file;
-      const stat = fs.statSync(newPath);
-
-      if (stat.isFile()) {
-        if (/(.*)\.(js$|coffee$)/.test(file)) {
-          const model = require(newPath);
-          callback(model, newPath, file);
-        }
-      } else if (stat.isDirectory()) {
-        Server.walk(newPath, callback);
-      }
-    });
+    }, callback);
   }
 }
 

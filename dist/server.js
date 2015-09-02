@@ -64,8 +64,34 @@ var _util = require('util');
 
 var _util2 = _interopRequireDefault(_util);
 
+var _okay = require('okay');
+
+var _okay2 = _interopRequireDefault(_okay);
+
+var _async = require('async');
+
 var log = (0, _debug2['default'])('maglev:server');
 var portOffset = parseInt(process.env.NODE_APP_INSTANCE || 0, 10);
+
+function walk(path, fileCallback, callback) {
+  _fs2['default'].readdir(path, (0, _okay2['default'])(callback, function (files) {
+    (0, _async.each)(files, function (file, cb) {
+      var newPath = path + '/' + file;
+      _fs2['default'].stat(newPath, (0, _okay2['default'])(cb, function (stat) {
+        if (stat.isFile()) {
+          if (/(.*)\.(js$|coffee$)/.test(file)) {
+            var model = require(newPath);
+            return fileCallback(model, newPath, file, cb);
+          }
+        } else if (stat.isDirectory()) {
+          return walk(newPath, fileCallback, cb);
+        }
+
+        cb();
+      }));
+    }, callback);
+  }));
+}
 
 var Server = (function (_EventEmitter) {
   _inherits(Server, _EventEmitter);
@@ -146,27 +172,19 @@ var Server = (function (_EventEmitter) {
         }
       });
 
-      this._rbac = new _rbac2['default'](options.rbac.options, function (err) {
-        if (err) {
-          return callback(err);
-        }
-
+      this._rbac = new _rbac2['default'](options.rbac.options, (0, _okay2['default'])(callback, function () {
         _this3._router = new _router2['default'](options.router); // router is used in app
         _this3._models = new _models2['default'](_this3, options.models); // models is used in secure
         _this3._secure = new _secure2['default'](_this3);
 
         _this3._app = new _app2['default'](_this3, options);
 
-        _this3._loadRoutes();
-
-        _this3._loadModels(function (err2) {
-          if (err2) {
-            return callback(err2);
-          }
-
-          callback(null, _this3);
-        });
-      });
+        _this3._loadRoutes((0, _okay2['default'])(callback, function () {
+          _this3._loadModels((0, _okay2['default'])(callback, function () {
+            callback(null, _this3);
+          }));
+        }));
+      }));
     }
   }, {
     key: 'notifyPM2Online',
@@ -243,17 +261,13 @@ var Server = (function (_EventEmitter) {
       this._listening = true;
 
       var options = this.options;
-      this.app.listen(options.server.port + portOffset, options.server.host, function (err) {
-        if (err) {
-          return callback(err);
-        }
-
+      this.app.listen(options.server.port + portOffset, options.server.host, (0, _okay2['default'])(callback, function () {
         log('Server is listening on port: ' + _this5.app.httpServer.address().port);
 
         _this5.notifyPM2Online();
 
         callback(null, _this5);
-      });
+      }));
 
       return this;
     }
@@ -316,32 +330,36 @@ var Server = (function (_EventEmitter) {
       var models = this._models;
       var path = this.options.root + '/models';
 
-      Server.walk(path, function processModel(model, modelPath) {
+      walk(path, function processModel(model, modelPath, file, cb) {
         try {
+          log('Loading model: ' + modelPath);
           models.register(model);
+          cb();
         } catch (e) {
           log('Problem with model: ' + modelPath);
-          throw e;
+          cb(e);
         }
-      });
-
-      // preload all models
-      models.preload(callback);
+      }, (0, _okay2['default'])(callback, function () {
+        // preload all models
+        models.preload(callback);
+      }));
     }
   }, {
     key: '_loadRoutes',
-    value: function _loadRoutes() {
+    value: function _loadRoutes(callback) {
       var router = this.router;
       var path = this.options.root + '/routes';
 
-      Server.walk(path, function processPath(route, routePath) {
+      walk(path, function processPath(route, routePath, file, cb) {
         try {
+          log('Loading route: ' + routePath);
           route(router);
+          cb();
         } catch (e) {
           log('Problem with route: ' + routePath);
-          throw e;
+          cb(e);
         }
-      });
+      }, callback);
     }
   }, {
     key: 'options',
@@ -377,28 +395,6 @@ var Server = (function (_EventEmitter) {
     key: 'models',
     get: function get() {
       return this._models;
-    }
-  }], [{
-    key: 'walk',
-    value: function walk(path, callback) {
-      if (!_fs2['default'].existsSync(path)) {
-        log('Path does not exists: ' + path);
-        return;
-      }
-
-      _fs2['default'].readdirSync(path).forEach(function eachFile(file) {
-        var newPath = path + '/' + file;
-        var stat = _fs2['default'].statSync(newPath);
-
-        if (stat.isFile()) {
-          if (/(.*)\.(js$|coffee$)/.test(file)) {
-            var model = require(newPath);
-            callback(model, newPath, file);
-          }
-        } else if (stat.isDirectory()) {
-          Server.walk(newPath, callback);
-        }
-      });
     }
   }]);
 

@@ -1,9 +1,12 @@
+import path from 'path';
+
+const projectRoot = path.normalize(`${__dirname}/../../..`);
+
 export default {
-  root: null,
+  root: `${projectRoot}/app`,
 
   rbac: {
-    options: {
-    },
+    options: {},
     role: {
       guest: 'guest'
     }
@@ -132,7 +135,7 @@ export default {
 
   css: {
     path: '/public/css',
-    root: 'public/css',
+    root: `${projectRoot}/public/css`,
     options: {
       render: {
         ieCompat: false
@@ -142,15 +145,19 @@ export default {
 
   'static': {
     path: '/public',
-    root: 'public',
+    root: `${projectRoot}/public`,
     options: {
       index: ['index.html']
     }
   },
 
   favicon: {
-    root: 'public/favicon.ico',
+    root: `${projectRoot}/public/favicon.ico`,
     options: {}
+  },
+
+  robots: {
+    root: `${projectRoot}/public/robots.txt`
   },
 
   memoryLeaks: {

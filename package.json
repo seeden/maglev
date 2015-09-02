@@ -1,6 +1,6 @@
 {
   "name": "maglev",
-  "version": "4.4.15",
+  "version": "4.5.2",
   "description": "Preconfigured NodeJS framework",
   "author": {
     "name": "Zlatko Fedor",
@@ -36,8 +36,8 @@
     "eslint": "node ./node_modules/eslint/bin/eslint.js ./src || exit 0"
   },
   "dependencies": {
-    "async": "~1.4.0",
-    "bcrypt": "~0.8.4",
+    "async": "~1.4.2",
+    "bcrypt": "~0.8.5",
     "body-parser": "~1.13.3",
     "compression": "~1.5.2",
     "connect-flash": "~0.1.1",
@@ -53,9 +53,9 @@
     "fb": "~0.7.0",
     "gm": "~1.18.1",
     "heapdump": "~0.3.7",
-    "jsonwebtoken": "~5.0.4",
+    "jsonwebtoken": "~5.0.5",
     "less-middleware": "~2.0.1",
-    "memwatch-next": "~0.2.7",
+    "memwatch-next": "~0.2.9",
     "method-override": "~2.3.5",
     "methods": "~1.1.1",
     "mkdirp": "~0.5.1",
@@ -68,16 +68,17 @@
     "node-uuid": "~1.4.3",
     "node.extend": "~1.1.5",
     "okay": "~1.0.0",
-    "passport": "~0.2.2",
+    "passport": "~0.3.0",
     "passport-anonymous": "~1.0.1",
     "passport-facebook": "~2.0.0",
     "passport-facebook-canvas": "~0.0.3",
     "passport-http-bearer": "~1.0.1",
     "passport-local": "~1.0.0",
     "passport-twitter": "~1.0.3",
-    "prettyjson": "~1.1.2",
+    "prettyjson": "~1.1.3",
     "puid": "~1.0.5",
     "rbac": "~3.1.0",
+    "robots.txt": "~1.1.0",
     "response-time": "~2.3.1",
     "serve-favicon": "~2.3.0",
     "serve-static": "~1.10.0",
@@ -88,19 +89,19 @@
     "web-error": "~3.1.2"
   },
   "devDependencies": {
-    "babel": "~5.8.21",
-    "babel-eslint": "~4.0.5",
+    "babel": "~5.8.23",
+    "babel-eslint": "~4.1.1",
     "connect-mongo": "~0.8.2",
-    "eslint": "~1.1.0",
+    "eslint": "~1.3.1",
     "eslint-loader": "~1.0.0",
-    "eslint-plugin-react": "~3.2.0",
+    "eslint-plugin-react": "~3.3.1",
     "gulp": "~3.9.0",
-    "gulp-babel": "~5.2.0",
+    "gulp-babel": "~5.2.1",
     "gulp-mocha": "~2.1.3",
     "gulp-util": "~3.0.6",
-    "mongoose": "~4.1.1",
-    "should": "~7.0.2",
-    "supertest": "~1.0.1"
+    "mongoose": "~4.1.4",
+    "should": "~7.1.0",
+    "supertest": "~1.1.0"
   },
   "peerDependencies": {
     "express-session": "1.x"

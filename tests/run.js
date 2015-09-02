@@ -16,7 +16,8 @@ describe('Run server', function() {
       server: {
         port: 4433
       },
-      favicon: false
+      //favicon: false,
+      //robots: false
     }, function(err, server) {
       if (err) {
         throw err;

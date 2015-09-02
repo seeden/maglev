@@ -24,6 +24,14 @@ var _http = require('http');
 
 var _http2 = _interopRequireDefault(_http);
 
+var _underscore = require('underscore');
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
+var _fs = require('fs');
+
+var _fs2 = _interopRequireDefault(_fs);
+
 var _expressDomainMiddleware = require('express-domain-middleware');
 
 var _expressDomainMiddleware2 = _interopRequireDefault(_expressDomainMiddleware);
@@ -88,6 +96,10 @@ var _connectFlash = require('connect-flash');
 
 var _connectFlash2 = _interopRequireDefault(_connectFlash);
 
+var _robotsTxt = require('robots.txt');
+
+var _robotsTxt2 = _interopRequireDefault(_robotsTxt);
+
 var _controllersFile = require('./controllers/file');
 
 var fileController = _interopRequireWildcard(_controllersFile);
@@ -103,6 +115,12 @@ var App = (function () {
     var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     _classCallCheck(this, App);
+
+    if (!options.root) {
+      throw new Error('Root is undefined');
+    }
+
+    log('App root: ' + options.root);
 
     this._server = server;
     this._options = options;
@@ -124,6 +142,7 @@ var App = (function () {
     this._prepareVars();
     this._prepareSession();
     this._prepareSecure();
+    this._prepareCustomMiddleware();
     this._prepareRouter();
   }
 
@@ -148,7 +167,6 @@ var App = (function () {
         });
       });
 
-      log('App started on port ' + port + ' and host ' + host);
       return this;
     }
   }, {
@@ -360,15 +378,35 @@ var App = (function () {
         app.use((0, _connectFlash2['default'])());
       }
 
-      if (options.favicon) {
-        app.use((0, _serveFavicon2['default'])(options.favicon.root, options.favicon.options));
+      try {
+        if (options.favicon && _fs2['default'].accessSync(options.favicon.root, _fs2['default'].R_OK)) {
+          log('FavIcon root: ' + options.favicon.root);
+          app.use((0, _serveFavicon2['default'])(options.favicon.root, options.favicon.options));
+        }
+
+        if (options.robots && _fs2['default'].accessSync(options.robots.root, _fs2['default'].R_OK)) {
+          log('Robots root: ' + options.robots.root);
+          app.use((0, _robotsTxt2['default'])(options.robots.root));
+        }
+      } catch (e) {
+        if (e.code !== 'ENOENT') {
+          throw e;
+        }
+
+        log(e.message);
       }
 
       if (options.css) {
+        log('CSS root: ' + options.css.root);
         app.use(options.css.path, (0, _lessMiddleware2['default'])(options.css.root, options.css.options));
       }
 
       if (options['static']) {
+        if (!options['static'].path || !options['static'].root) {
+          throw new Error('Static path or root is undefined');
+        }
+
+        log('Static root: ' + options['static'].root);
         app.use(options['static'].path, (0, _serveStatic2['default'])(options['static'].root, options['static'].options));
       }
     }
@@ -389,6 +427,25 @@ var App = (function () {
       // at the end add 500 and 404
       app.use(options.page.notFound || pageController.notFound);
       app.use(options.page.error || pageController.error);
+    }
+  }, {
+    key: '_prepareCustomMiddleware',
+    value: function _prepareCustomMiddleware() {
+      var app = this.expressApp;
+      var options = this.options;
+      var middleware = options.middleware;
+
+      if (!middleware) {
+        return;
+      }
+
+      if (typeof middleware === 'function') {
+        app.use(middleware);
+      } else if (_underscore2['default'].isArray(middleware)) {
+        middleware.forEach(function (fn) {
+          app.use(fn);
+        });
+      }
     }
   }, {
     key: 'options',

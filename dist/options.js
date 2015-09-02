@@ -3,8 +3,17 @@
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _path = require('path');
+
+var _path2 = _interopRequireDefault(_path);
+
+var projectRoot = _path2['default'].normalize(__dirname + '/../../..');
+
 exports['default'] = {
-  root: null,
+  root: projectRoot + '/app',
 
   rbac: {
     options: {},
@@ -134,7 +143,7 @@ exports['default'] = {
 
   css: {
     path: '/public/css',
-    root: 'public/css',
+    root: projectRoot + '/public/css',
     options: {
       render: {
         ieCompat: false
@@ -144,15 +153,19 @@ exports['default'] = {
 
   'static': {
     path: '/public',
-    root: 'public',
+    root: projectRoot + '/public',
     options: {
       index: ['index.html']
     }
   },
 
   favicon: {
-    root: 'public/favicon.ico',
+    root: projectRoot + '/public/favicon.ico',
     options: {}
+  },
+
+  robots: {
+    root: projectRoot + '/public/robots.txt'
   },
 
   memoryLeaks: {

@@ -1,6 +1,8 @@
 import express from 'express';
 import debug from 'debug';
 import http from 'http';
+import _ from 'underscore';
+import fs from 'fs';
 
 import expressDomainMiddleware from 'express-domain-middleware';
 import compression from 'compression';
@@ -19,7 +21,7 @@ import lessMiddleware from 'less-middleware';
 import request from 'express/lib/request';
 import consolidate from 'consolidate';
 import flash from 'connect-flash';
-
+import robots from 'robots.txt';
 
 import * as fileController from './controllers/file';
 import * as pageController from './controllers/page';
@@ -28,6 +30,12 @@ const log = debug('maglev:app');
 
 export default class App {
   constructor(server, options = {}) {
+    if(!options.root) {
+      throw new Error('Root is undefined');
+    }
+
+    log(`App root: ${options.root}`);
+
     this._server = server;
     this._options = options;
     this._expressApp = express();
@@ -48,6 +56,7 @@ export default class App {
     this._prepareVars();
     this._prepareSession();
     this._prepareSecure();
+    this._prepareCustomMiddleware();
     this._prepareRouter();
   }
 
@@ -91,7 +100,6 @@ export default class App {
       });
     });
 
-    log('App started on port ' + port + ' and host ' + host);
     return this;
   }
 
@@ -290,15 +298,35 @@ export default class App {
       app.use(flash());
     }
 
-    if (options.favicon) {
-      app.use(serveFavicon(options.favicon.root, options.favicon.options));
+    try {
+      if (options.favicon && fs.accessSync(options.favicon.root, fs.R_OK)) {
+        log(`FavIcon root: ${options.favicon.root}`);
+        app.use(serveFavicon(options.favicon.root, options.favicon.options));
+      }
+
+      if (options.robots && fs.accessSync(options.robots.root, fs.R_OK)) {
+        log(`Robots root: ${options.robots.root}`);
+        app.use(robots(options.robots.root));
+      }
+    } catch(e) {
+      if (e.code !== 'ENOENT') {
+        throw e;
+      }
+
+      log(e.message);
     }
 
     if (options.css) {
+      log(`CSS root: ${options.css.root}`);
       app.use(options.css.path, lessMiddleware(options.css.root, options.css.options));
     }
 
     if (options.static) {
+      if (!options.static.path || !options.static.root) {
+        throw new Error('Static path or root is undefined');
+      }
+
+      log(`Static root: ${options.static.root}`);
       app.use(options.static.path, serveStatic(options.static.root, options.static.options));
     }
   }
@@ -318,6 +346,24 @@ export default class App {
     // at the end add 500 and 404
     app.use(options.page.notFound || pageController.notFound);
     app.use(options.page.error || pageController.error);
+  }
+
+  _prepareCustomMiddleware() {
+    const app = this.expressApp;
+    const options = this.options;
+    const middleware = options.middleware;
+
+    if (!middleware) {
+      return;
+    }
+
+    if(typeof middleware === 'function') {
+      app.use(middleware);
+    } else if (_.isArray(middleware)) {
+      middleware.forEach(function(fn) {
+        app.use(fn);
+      });
+    }
   }
 }
 
