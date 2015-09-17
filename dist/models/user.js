@@ -5,8 +5,6 @@ Object.defineProperty(exports, '__esModule', {
 });
 exports.createSchema = createSchema;
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 var _jsonwebtoken = require('jsonwebtoken');
@@ -18,8 +16,6 @@ var _bcrypt = require('bcrypt');
 var _bcrypt2 = _interopRequireDefault(_bcrypt);
 
 var _provider = require('./provider');
-
-var provider = _interopRequireWildcard(_provider);
 
 var _mongoosePermalink = require('mongoose-permalink');
 
@@ -33,7 +29,9 @@ var _mongooseJsonSchema = require('mongoose-json-schema');
 
 var _mongooseJsonSchema2 = _interopRequireDefault(_mongooseJsonSchema);
 
-var _async = require('async');
+var _okay = require('okay');
+
+var _okay2 = _interopRequireDefault(_okay);
 
 var name = 'User';
 
@@ -60,70 +58,64 @@ function getDisplayName() {
 /**
  * Create user by user profile from facebook
  * @param  {Object}   profile Profile from facebook
- * @param  {Function} cb      Callback with created user
+ * @param  {Function} callback      Callback with created user
  */
-function createByFacebook(profile, cb) {
+function createByFacebook(profile, callback) {
   var _this = this;
 
+  var Provider = this.model('Provider');
+
   if (!profile.id) {
-    return cb(new Error('Profile id is undefined'));
+    return callback(new Error('Profile id is undefined'));
   }
 
-  var data = {
-    username: profile.username || null,
-    firstName: profile.first_name,
-    lastName: profile.last_name,
-    name: profile.name,
-    email: profile.email,
-    providers: [{
-      name: 'facebook',
-      uid: profile.id,
-      nameUID: provider.genNameUID('facebook', profile.id),
-      data: profile
-    }]
-  };
-
-  (0, _async.waterfall)([function (callback) {
-    if (!profile.email) {
-      return callback(null);
+  this.findByFacebookID(profile.id, (0, _okay2['default'])(callback, function (user) {
+    if (user) {
+      return callback(null, user);
     }
 
-    _this.findOne({
+    _this.create({
+      username: profile.username || null,
+      firstName: profile.first_name,
+      lastName: profile.last_name,
+      name: profile.name,
       email: profile.email
-    }, function findOneCallback(err, user) {
-      if (err) {
-        return callback(err);
-      }
-
-      if (user) {
-        return callback(new Error('User with this email already exists'));
-      }
-
-      callback(null);
-    });
-  }, function (callback) {
-    return _this.create(data, callback);
-  }], cb);
+    }, (0, _okay2['default'])(callback, function (user) {
+      user.addProvider('facebook', profile.id, profile, (0, _okay2['default'])(callback, function (provider) {
+        callback(null, user);
+      }));
+    }));
+  }));
 }
 
 /**
  * Create user by user profile from twitter
  * @param  {Object}   profile Profile from twitter
- * @param  {Function} cb      Callback with created user
+ * @param  {Function} callback      Callback with created user
  */
-function createByTwitter(profile, cb) {
-  var data = {
-    username: profile.username || null,
-    name: profile.displayName,
-    providers: [{
-      name: 'twitter',
-      uid: profile.id,
-      nameUID: provider.genNameUID('twitter', profile.id),
-      data: profile
-    }]
-  };
+function createByTwitter(profile, callback) {
+  var _this2 = this;
 
-  return this.create(data, cb);
+  var Provider = this.model('Provider');
+
+  if (!profile.id) {
+    return callback(new Error('Profile id is undefined'));
+  }
+
+  this.findByTwitterID(profile.id, (0, _okay2['default'])(callback, function (user) {
+    if (user) {
+      return callback(null, user);
+    }
+
+    _this2.create({
+      username: profile.username || null,
+      name: profile.displayName
+    }, (0, _okay2['default'])(callback, function (user) {
+      user.addProvider('twitter', profile.id, profile, (0, _okay2['default'])(callback, function (provider) {
+        callback(null, user);
+      }));
+    }));
+  }));
 }
 
 /**
@@ -163,157 +155,149 @@ function isMe(user) {
   return user && this._id.toString() === user._id.toString();
 }
 
-function findByUsername(username, strict, cb) {
+function findByUsername(username, strict, callback) {
   if (typeof strict === 'function') {
-    cb = strict;
+    callback = strict;
     strict = true;
   }
 
   if (strict) {
-    return this.findOne({ username: username }, cb);
+    return this.findOne({ username: username }, callback);
   }
 
-  return this.findOne({ $or: [{ username: username }, { email: username }] }, cb);
+  return this.findOne({ $or: [{ username: username }, { email: username }] }, callback);
 }
 
 /**
  * Find user by his facebook ID
  * @param  {String}   id Facebook id of user assigned in database
- * @param  {Function} cb
+ * @param  {Function} callback
  */
-function findByFacebookID(uid, cb) {
-  return this.findByProviderUID('facebook', uid, cb);
+function findByFacebookID(uid, callback) {
+  return this.findByProviderUID('facebook', uid, callback);
 }
 
-function findByTwitterID(uid, cb) {
-  return this.findByProviderUID('twitter', uid, cb);
+function findByTwitterID(uid, callback) {
+  return this.findByProviderUID('twitter', uid, callback);
 }
 
-function findByProviderUID(providerName, uid, cb) {
-  return this.findOne({
-    'providers.nameUID': provider.genNameUID(providerName, uid)
-  }, cb);
+function findByProviderUID(providerName, uid, callback) {
+  var Provider = this.model('Provider');
+
+  return Provider.findOne({
+    nameUID: (0, _provider.genNameUID)(providerName, uid)
+  }).populate('user').exec((0, _okay2['default'])(callback, function (provider) {
+    if (!provider) {
+      return callback(null, provider);
+    }
+
+    return callback(null, provider.user);
+  }));
 }
 
 /**
  * Find user by his username/email and his password
  * @param  {String}   username  Username or email of user
  * @param  {String}   password Password of user
- * @param  {Function} cb
+ * @param  {Function} callback
  */
-function findByUsernamePassword(username, password, strict, cb) {
+function findByUsernamePassword(username, password, strict, callback) {
   if (typeof strict === 'function') {
-    cb = strict;
+    callback = strict;
     strict = true;
   }
 
-  return this.findByUsername(username, strict, function findByUsernameCallback(err, user) {
-    if (err) {
-      return cb(err);
-    }
-
+  return this.findByUsername(username, strict, (0, _okay2['default'])(callback, function findByUsernameCallback(user) {
     if (!user) {
-      return cb(null, null);
+      return callback(null, null);
     }
 
-    user.comparePassword(password, function compareCallback(err2, isMatch) {
-      if (err2) {
-        return cb(err2);
-      }
-
+    user.comparePassword(password, (0, _okay2['default'])(callback, function compareCallback(isMatch) {
       if (!isMatch) {
-        return cb(null, null);
+        return callback(null, null);
       }
 
-      cb(null, user);
-    });
-  });
+      callback(null, user);
+    }));
+  }));
 }
 
-function addProvider(providerName, uid, data, cb) {
-  if (!providerName || !uid) {
-    return cb(new Error('Provider name or uid is undefined'));
+function addProvider(providerName, providerUID, data, callback) {
+  var _this3 = this;
+
+  var Provider = this.model('Provider');
+
+  this.hasProvider(providerName, providerUID, (0, _okay2['default'])(callback, function (hasProvider) {
+    if (hasProvider) {
+      return callback(new Error('This provider is already associated to this user'));
+    }
+
+    Provider.create({
+      user: _this3._id,
+      name: providerName,
+      uid: providerUID,
+      nameUID: (0, _provider.genNameUID)(providerName, providerUID),
+      data: data
+    }, callback);
+  }));
+}
+
+function removeProvider(providerName, providerUID, callback) {
+  var Provider = this.model('Provider');
+
+  if (!providerName || !providerUID) {
+    return callback(new Error('Provider name or uid is undefined'));
   }
 
-  if (this.hasProvider(providerName, uid) !== false) {
-    return cb(new Error('This provider is already associated to this user'));
+  Provider.remove({
+    user: this._id,
+    nameUID: (0, _provider.genNameUID)(providerName, providerUID)
+  }, callback);
+}
+
+function getProvider(providerName, providerUID, callback) {
+  var Provider = this.model('Provider');
+
+  Provider.findOne({
+    user: this._id,
+    nameUID: (0, _provider.genNameUID)(providerName, providerUID)
+  }, callback);
+}
+
+function hasProvider(providerName, providerUID, callback) {
+  if (typeof providerUID === 'function') {
+    callback = providerUID;
+    providerUID = false;
   }
 
-  var providerData = {
-    name: providerName,
-    uid: uid,
-    nameUID: provider.genNameUID(providerName, uid),
-    data: data
+  var Provider = this.model('Provider');
+  var query = {
+    user: this._id
   };
 
-  this.providers.push(providerData);
-  return this.save(cb);
-}
-
-function removeProvider(providerName, uid, cb) {
-  var _this2 = this;
-
-  if (!providerName || !uid) {
-    return cb(new Error('Provider name or uid is undefined'));
+  if (!providerUID) {
+    query.name = providerName;
+  } else {
+    query.nameUID = (0, _provider.genNameUID)(providerName, providerUID);
   }
 
-  var removed = false;
-  var nameUID = provider.genNameUID(providerName, uid);
-
-  this.providers.forEach(function (p, index) {
-    if (p.nameUID !== nameUID) {
-      return;
-    }
-
-    _this2.providers.splice(index, 1);
-    removed = true;
-  });
-
-  if (!removed) {
-    return cb(new Error('This provider is not associated to this user'));
-  }
-
-  return this.save(cb);
-}
-
-function getProvider(providerName, providerUID) {
-  var providers = this.providers.filter(function filter(p) {
-    if (p.name !== providerName) {
-      return false;
-    }
-
-    if (providerUID && p.uid !== providerUID) {
-      return false;
-    }
-
-    return true;
-  });
-
-  return providers.length ? providers[0] : null;
-}
-
-function hasProvider(providerName, providerUID) {
-  return !!this.getProvider(providerName, providerUID);
-}
-
-function getProvidersNameUIDs() {
-  return this.providers.map(function eachProvider(p) {
-    return p.nameUID;
-  });
+  Provider.findOne(query, (0, _okay2['default'])(callback, function (provider) {
+    callback(null, !!provider);
+  }));
 }
 
 /**
  * Compare user entered password with stored user's password
  * @param  {String}   candidatePassword
- * @param  {Function} cb
+ * @param  {Function} callback
  */
-function comparePassword(candidatePassword, cb) {
+function comparePassword(candidatePassword, callback) {
   _bcrypt2['default'].compare(candidatePassword, this.password, function compareCallback(err, isMatch) {
     if (err) {
-      return cb(err);
+      return callback(err);
     }
 
-    cb(null, isMatch);
+    callback(null, isMatch);
   });
 }
 
@@ -321,37 +305,37 @@ function hasPassword() {
   return !!this.password;
 }
 
-function setPassword(password, cb) {
+function setPassword(password, callback) {
   this.password = password;
-  return this.save(cb);
+  return this.save(callback);
 }
 
 function hasEmail() {
   return !!this.email ? true : false;
 }
 
-function setEmail(email, cb) {
+function setEmail(email, callback) {
   this.email = email;
-  return this.save(cb);
+  return this.save(callback);
 }
 
 function hasUsername() {
   return !!this.username;
 }
 
-function setUsername(username, cb) {
+function setUsername(username, callback) {
   this.username = username;
-  return this.save(cb);
+  return this.save(callback);
 }
 
 /*
-function incLoginAttempts(cb) {
+function incLoginAttempts(callback) {
     // if we have a previous lock that has expired, restart at 1
     if (this.lockUntil && this.lockUntil < Date.now()) {
         return this.update({
             $set: { loginAttempts: 1 },
             $unset: { lockUntil: 1 }
-        }, cb);
+        }, callback);
     }
     // otherwise we're incrementing
     var updates = {
@@ -367,7 +351,7 @@ function incLoginAttempts(cb) {
         };
     }
 
-    return this.update(updates, cb);
+    return this.update(updates, callback);
 }*/
 
 /**
@@ -377,8 +361,6 @@ function incLoginAttempts(cb) {
  */
 
 function createSchema(Schema) {
-  var providerSchema = provider.createSchema(Schema);
-
   // add properties to schema
   var schema = new Schema({
     firstName: { type: String },
@@ -391,14 +373,12 @@ function createSchema(Schema) {
     password: { type: String },
 
     loginAttempts: { type: Number, required: true, 'default': 0 },
-    lockUntil: { type: Number },
-
-    providers: [providerSchema]
+    lockUntil: { type: Number }
   });
 
   // add indexes
-  schema.index({ 'providers.name': 1, 'providers.id': 1 });
-  schema.index({ 'providers.nameUID': 1 }, { unique: true, sparse: true });
+  //schema.index({'providers.name': 1, 'providers.id': 1});
+  //schema.index({'providers.nameUID': 1}, { unique: true, sparse: true });
 
   schema.virtual('isLocked').get(function isLocked() {
     // check for a future lockUntil timestamp
@@ -490,7 +470,6 @@ function createSchema(Schema) {
   schema.methods.removeProvider = removeProvider;
   schema.methods.getProvider = getProvider;
   schema.methods.hasProvider = hasProvider;
-  schema.methods.getProvidersNameUIDs = getProvidersNameUIDs;
 
   schema.methods.toPrivateJSON = toPrivateJSON;
   schema.methods.getDisplayName = getDisplayName;

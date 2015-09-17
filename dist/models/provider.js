@@ -22,11 +22,16 @@ function genNameUID(providerName, uid) {
 function createSchema(Schema) {
   // add properties to schema
   var schema = new Schema({
+    user: { type: Schema.Types.ObjectId, ref: 'User' },
     name: { type: String, required: true },
     uid: { type: String, required: true },
     nameUID: { type: String, required: true },
     data: {}
   });
+
+  // add indexes
+  schema.index({ user: 1, name: 1 });
+  schema.index({ nameUID: 1 }, { unique: true });
 
   // add preprocess validation
   schema.pre('save', function saveCallback(next) {

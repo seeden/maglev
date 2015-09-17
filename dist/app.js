@@ -28,10 +28,6 @@ var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _fs = require('fs');
-
-var _fs2 = _interopRequireDefault(_fs);
-
 var _expressDomainMiddleware = require('express-domain-middleware');
 
 var _expressDomainMiddleware2 = _interopRequireDefault(_expressDomainMiddleware);
@@ -162,7 +158,7 @@ var App = (function () {
         var key = conn.remoteAddress + ':' + conn.remotePort;
         activeConnections[key] = conn;
 
-        conn.on('close', function connCloseCallback() {
+        conn.once('close', function connCloseCallback() {
           delete activeConnections[key];
         });
       });
@@ -178,24 +174,38 @@ var App = (function () {
         return callback(new Error('You need to listen first'));
       }
 
+      log('Closing http server');
       this._httpServer.close(function (err) {
+        if (err) {
+          return callback(err);
+        }
+
         _this._httpServer = null;
-        callback(err);
+
+        var activeConnections = _this.activeConnections;
+        var options = _this.options;
+
+        log('There is no idle connections');
+        if (!Object.keys(activeConnections).length) {
+          return callback();
+        }
+
+        log('Starting idle connection timeout ' + options.socket.idleTimeout);
+        setTimeout(function () {
+          Object.keys(activeConnections).forEach(function destroyConnection(key) {
+            var conn = activeConnections[key];
+            if (!conn) {
+              return;
+            }
+
+            log('Destroying connection: ' + key);
+            conn.destroy();
+          });
+
+          log('All connections destroyed');
+          callback();
+        }, options.socket.idleTimeout);
       });
-
-      var activeConnections = this.activeConnections;
-      var options = this.options;
-
-      setTimeout(function () {
-        Object.keys(activeConnections).forEach(function destroyConnection(key) {
-          var conn = activeConnections[key];
-          if (!conn) {
-            return;
-          }
-
-          conn.destroy();
-        });
-      }, options.socket.idleTimeout);
 
       return this;
     }
@@ -379,12 +389,12 @@ var App = (function () {
       }
 
       try {
-        if (options.favicon && _fs2['default'].accessSync(options.favicon.root, _fs2['default'].R_OK)) {
+        if (options.favicon) {
           log('FavIcon root: ' + options.favicon.root);
           app.use((0, _serveFavicon2['default'])(options.favicon.root, options.favicon.options));
         }
 
-        if (options.robots && _fs2['default'].accessSync(options.robots.root, _fs2['default'].R_OK)) {
+        if (options.robots) {
           log('Robots root: ' + options.robots.root);
           app.use((0, _robotsTxt2['default'])(options.robots.root));
         }

@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import * as provider from './provider';
+import { genNameUID } from './provider';
 import permalink from 'mongoose-permalink';
 import mongooseHRBAC from 'mongoose-hrbac';
 import jsonSchemaPlugin from 'mongoose-json-schema';
-import { waterfall } from 'async';
+import ok from 'okay';
 
 export const name = 'User';
 
@@ -30,71 +30,61 @@ function getDisplayName() {
 /**
  * Create user by user profile from facebook
  * @param  {Object}   profile Profile from facebook
- * @param  {Function} cb      Callback with created user
+ * @param  {Function} callback      Callback with created user
  */
-function createByFacebook(profile, cb) {
+function createByFacebook(profile, callback) {
+  const Provider = this.model('Provider');
+
   if (!profile.id) {
-    return cb(new Error('Profile id is undefined'));
+    return callback(new Error('Profile id is undefined'));
   }
 
-  const data = {
-    username: profile.username || null,
-    firstName: profile.first_name,
-    lastName: profile.last_name,
-    name: profile.name,
-    email: profile.email,
-    providers: [{
-      name: 'facebook',
-      uid: profile.id,
-      nameUID: provider.genNameUID('facebook', profile.id),
-      data: profile
-    }]
-  };
+  this.findByFacebookID(profile.id, ok(callback, (user) => {
+    if (user) {
+      return callback(null, user);
+    }
 
-  waterfall([
-    callback => {
-      if (!profile.email) {
-        return callback(null);
-      }
-
-      this.findOne({
-        email: profile.email
-      }, function findOneCallback(err, user) {
-        if (err) {
-          return callback(err);
-        }
-
-        if (user) {
-          return callback(new Error('User with this email already exists'));
-        }
-
-        callback(null);
-      });
-    },
-    callback => this.create(data, callback)
-  ], cb);
+    this.create({
+      username: profile.username || null,
+      firstName: profile.first_name,
+      lastName: profile.last_name,
+      name: profile.name,
+      email: profile.email
+    }, ok(callback, function(user) {
+      user.addProvider('facebook', profile.id, profile, ok(callback, function(provider) {
+        callback(null, user);
+      }));
+    }));
+  }));
 }
 
 /**
  * Create user by user profile from twitter
  * @param  {Object}   profile Profile from twitter
- * @param  {Function} cb      Callback with created user
+ * @param  {Function} callback      Callback with created user
  */
-function createByTwitter(profile, cb) {
-  const data = {
-    username: profile.username || null,
-    name: profile.displayName,
-    providers: [{
-      name: 'twitter',
-      uid: profile.id,
-      nameUID: provider.genNameUID('twitter', profile.id),
-      data: profile
-    }]
-  };
+function createByTwitter(profile, callback) {
+  const Provider = this.model('Provider');
 
-  return this.create(data, cb);
+  if (!profile.id) {
+    return callback(new Error('Profile id is undefined'));
+  }
+
+  this.findByTwitterID(profile.id, ok(callback, (user) => {
+    if (user) {
+      return callback(null, user);
+    }
+
+    this.create({
+      username: profile.username || null,
+      name: profile.displayName,
+    }, ok(callback, function(user) {
+      user.addProvider('twitter', profile.id, profile, ok(callback, function(provider) {
+        callback(null, user);
+      }));
+    }));
+  }));
 }
-
 
 /**
  * Generate access token for actual user
@@ -130,158 +120,151 @@ function isMe(user) {
   return user && this._id.toString() === user._id.toString();
 }
 
-function findByUsername(username, strict, cb) {
+function findByUsername(username, strict, callback) {
   if (typeof strict === 'function') {
-    cb = strict;
+    callback = strict;
     strict = true;
   }
 
   if (strict) {
-    return this.findOne({ username }, cb);
+    return this.findOne({ username }, callback);
   }
 
   return this.findOne({ $or: [
     { username: username },
     { email: username }
-  ]}, cb);
+  ]}, callback);
 }
 
 /**
  * Find user by his facebook ID
  * @param  {String}   id Facebook id of user assigned in database
- * @param  {Function} cb
+ * @param  {Function} callback
  */
-function findByFacebookID(uid, cb) {
-  return this.findByProviderUID('facebook', uid, cb);
+function findByFacebookID(uid, callback) {
+  return this.findByProviderUID('facebook', uid, callback);
 }
 
-function findByTwitterID(uid, cb) {
-  return this.findByProviderUID('twitter', uid, cb);
+function findByTwitterID(uid, callback) {
+  return this.findByProviderUID('twitter', uid, callback);
 }
 
-function findByProviderUID(providerName, uid, cb) {
-  return this.findOne({
-    'providers.nameUID': provider.genNameUID(providerName, uid)
-  }, cb);
+function findByProviderUID(providerName, uid, callback) {
+  const Provider = this.model('Provider');
+
+  return Provider.findOne({
+    nameUID: genNameUID(providerName, uid)
+  }).populate('user').exec(ok(callback, function(provider) {
+    if (!provider) {
+      return callback(null, provider);
+    }
+
+    return callback(null, provider.user);
+  }));
 }
 
 /**
  * Find user by his username/email and his password
  * @param  {String}   username  Username or email of user
  * @param  {String}   password Password of user
- * @param  {Function} cb
+ * @param  {Function} callback
  */
-function findByUsernamePassword(username, password, strict, cb) {
+function findByUsernamePassword(username, password, strict, callback) {
   if (typeof strict === 'function') {
-    cb = strict;
+    callback = strict;
     strict = true;
   }
 
-  return this.findByUsername(username, strict, function findByUsernameCallback(err, user) {
-    if (err) {
-      return cb(err);
-    }
-
+  return this.findByUsername(username, strict, ok(callback, function findByUsernameCallback(user) {
     if (!user) {
-      return cb(null, null);
+      return callback(null, null);
     }
 
-    user.comparePassword(password, function compareCallback(err2, isMatch) {
-      if (err2) {
-        return cb(err2);
-      }
-
+    user.comparePassword(password, ok(callback, function compareCallback(isMatch) {
       if (!isMatch) {
-        return cb(null, null);
+        return callback(null, null);
       }
 
-      cb(null, user);
-    });
-  });
+      callback(null, user);
+    }));
+  }));
 }
 
-function addProvider(providerName, uid, data, cb) {
-  if (!providerName || !uid) {
-    return cb(new Error('Provider name or uid is undefined'));
+function addProvider(providerName, providerUID, data, callback) {
+  const Provider = this.model('Provider');
+
+  this.hasProvider(providerName, providerUID, ok(callback, (hasProvider) => {
+    if (hasProvider) {
+      return callback(new Error('This provider is already associated to this user'));
+    }
+
+    Provider.create({
+      user: this._id,
+      name: providerName,
+      uid: providerUID,
+      nameUID: genNameUID(providerName, providerUID),
+      data: data
+    }, callback);
+  }));
+}
+
+function removeProvider(providerName, providerUID, callback) {
+  const Provider = this.model('Provider');
+
+  if (!providerName || !providerUID) {
+    return callback(new Error('Provider name or uid is undefined'));
   }
 
-  if (this.hasProvider(providerName, uid) !== false) {
-    return cb(new Error('This provider is already associated to this user'));
+  Provider.remove({
+    user: this._id,
+    nameUID: genNameUID(providerName, providerUID)
+  }, callback);
+}
+
+function getProvider(providerName, providerUID, callback) {
+  const Provider = this.model('Provider');
+
+  Provider.findOne({
+    user: this._id,
+    nameUID: genNameUID(providerName, providerUID)
+  }, callback);
+}
+
+function hasProvider(providerName, providerUID, callback) {
+  if (typeof providerUID === 'function') {
+    callback = providerUID;
+    providerUID = false;
   }
 
-  const providerData = {
-    name: providerName,
-    uid: uid,
-    nameUID: provider.genNameUID(providerName, uid),
-    data: data
+  const Provider = this.model('Provider');
+  const query = {
+    user: this._id
   };
 
-  this.providers.push(providerData);
-  return this.save(cb);
-}
-
-function removeProvider(providerName, uid, cb) {
-  if (!providerName || !uid) {
-    return cb(new Error('Provider name or uid is undefined'));
+  if (!providerUID) {
+    query.name = providerName;
+  } else {
+    query.nameUID = genNameUID(providerName, providerUID);
   }
 
-  let removed = false;
-  const nameUID = provider.genNameUID(providerName, uid);
 
-  this.providers.forEach((p, index) => {
-    if (p.nameUID !== nameUID) {
-      return;
-    }
-
-    this.providers.splice(index, 1);
-    removed = true;
-  });
-
-  if (!removed) {
-    return cb(new Error('This provider is not associated to this user'));
-  }
-
-  return this.save(cb);
-}
-
-function getProvider(providerName, providerUID) {
-  const providers = this.providers.filter(function filter(p) {
-    if (p.name !== providerName) {
-      return false;
-    }
-
-    if (providerUID && p.uid !== providerUID) {
-      return false;
-    }
-
-    return true;
-  });
-
-  return providers.length ? providers[0] : null;
-}
-
-function hasProvider(providerName, providerUID) {
-  return !!this.getProvider(providerName, providerUID);
-}
-
-function getProvidersNameUIDs() {
-  return this.providers.map(function eachProvider(p) {
-    return p.nameUID;
-  });
+  Provider.findOne(query, ok(callback, function(provider) {
+    callback(null, !!provider);
+  }));
 }
 
 /**
  * Compare user entered password with stored user's password
  * @param  {String}   candidatePassword
- * @param  {Function} cb
+ * @param  {Function} callback
  */
-function comparePassword(candidatePassword, cb) {
+function comparePassword(candidatePassword, callback) {
   bcrypt.compare(candidatePassword, this.password, function compareCallback(err, isMatch) {
     if (err) {
-      return cb(err);
+      return callback(err);
     }
 
-    cb(null, isMatch);
+    callback(null, isMatch);
   });
 }
 
@@ -289,37 +272,37 @@ function hasPassword() {
   return !!this.password;
 }
 
-function setPassword(password, cb) {
+function setPassword(password, callback) {
   this.password = password;
-  return this.save(cb);
+  return this.save(callback);
 }
 
 function hasEmail() {
   return !!this.email ? true : false;
 }
 
-function setEmail(email, cb) {
+function setEmail(email, callback) {
   this.email = email;
-  return this.save(cb);
+  return this.save(callback);
 }
 
 function hasUsername() {
   return !!this.username;
 }
 
-function setUsername(username, cb) {
+function setUsername(username, callback) {
   this.username = username;
-  return this.save(cb);
+  return this.save(callback);
 }
 
 /*
-function incLoginAttempts(cb) {
+function incLoginAttempts(callback) {
     // if we have a previous lock that has expired, restart at 1
     if (this.lockUntil && this.lockUntil < Date.now()) {
         return this.update({
             $set: { loginAttempts: 1 },
             $unset: { lockUntil: 1 }
-        }, cb);
+        }, callback);
     }
     // otherwise we're incrementing
     var updates = {
@@ -335,7 +318,7 @@ function incLoginAttempts(cb) {
         };
     }
 
-    return this.update(updates, cb);
+    return this.update(updates, callback);
 }*/
 
 /**
@@ -344,8 +327,6 @@ function incLoginAttempts(cb) {
  * @return {mongoose.Schema} User Instance of user schema
  */
 export function createSchema(Schema) {
-  const providerSchema = provider.createSchema(Schema);
-
   // add properties to schema
   const schema = new Schema({
     firstName: { type: String },
@@ -358,14 +339,12 @@ export function createSchema(Schema) {
     password: { type: String },
 
     loginAttempts: { type: Number, required: true, 'default': 0 },
-    lockUntil: { type: Number },
-
-    providers: [providerSchema]
+    lockUntil: { type: Number }
   });
 
   // add indexes
-  schema.index({'providers.name': 1, 'providers.id': 1});
-  schema.index({'providers.nameUID': 1}, { unique: true, sparse: true });
+  //schema.index({'providers.name': 1, 'providers.id': 1});
+  //schema.index({'providers.nameUID': 1}, { unique: true, sparse: true });
 
   schema.virtual('isLocked').get(function isLocked() {
     // check for a future lockUntil timestamp
@@ -458,7 +437,6 @@ export function createSchema(Schema) {
   schema.methods.removeProvider = removeProvider;
   schema.methods.getProvider = getProvider;
   schema.methods.hasProvider = hasProvider;
-  schema.methods.getProvidersNameUIDs = getProvidersNameUIDs;
 
   schema.methods.toPrivateJSON = toPrivateJSON;
   schema.methods.getDisplayName = getDisplayName;

@@ -2,7 +2,6 @@ import express from 'express';
 import debug from 'debug';
 import http from 'http';
 import _ from 'underscore';
-import fs from 'fs';
 
 import expressDomainMiddleware from 'express-domain-middleware';
 import compression from 'compression';
@@ -95,7 +94,7 @@ export default class App {
       const key = `${conn.remoteAddress}:${conn.remotePort}`;
       activeConnections[key] = conn;
 
-      conn.on('close', function connCloseCallback() {
+      conn.once('close', function connCloseCallback() {
         delete activeConnections[key];
       });
     });
@@ -108,23 +107,37 @@ export default class App {
       return callback(new Error('You need to listen first'));
     }
 
+    log('Closing http server');
     this._httpServer.close((err) => {
+      if(err) {
+        return callback(err);
+      }
+
       this._httpServer = null;
-      callback(err);
+
+      const { activeConnections, options } = this;
+
+      log('There is no idle connections');
+      if (!Object.keys(activeConnections).length) {
+        return callback();
+      }
+
+      log(`Starting idle connection timeout ${options.socket.idleTimeout}`);
+      setTimeout(() => {
+        Object.keys(activeConnections).forEach(function destroyConnection(key) {
+          const conn = activeConnections[key];
+          if (!conn) {
+            return;
+          }
+
+          log(`Destroying connection: ${key}`);
+          conn.destroy();
+        });
+
+        log('All connections destroyed');
+        callback();
+      }, options.socket.idleTimeout);
     });
-
-    const { activeConnections, options } = this;
-
-    setTimeout(() => {
-      Object.keys(activeConnections).forEach(function destroyConnection(key) {
-        const conn = activeConnections[key];
-        if (!conn) {
-          return;
-        }
-
-        conn.destroy();
-      });
-    }, options.socket.idleTimeout);
 
     return this;
   }
@@ -299,12 +312,12 @@ export default class App {
     }
 
     try {
-      if (options.favicon && fs.accessSync(options.favicon.root, fs.R_OK)) {
+      if (options.favicon) {
         log(`FavIcon root: ${options.favicon.root}`);
         app.use(serveFavicon(options.favicon.root, options.favicon.options));
       }
 
-      if (options.robots && fs.accessSync(options.robots.root, fs.R_OK)) {
+      if (options.robots) {
         log(`Robots root: ${options.robots.root}`);
         app.use(robots(options.robots.root));
       }
