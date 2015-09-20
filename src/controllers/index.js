@@ -11,7 +11,24 @@ import * as token from './token';
 import * as user from './user';
 import * as userPermission from './userpermission';
 import * as heap from './heap';
+import * as redirect from './redirect';
+import * as domain from './domain';
 
 
-export { auth, facebook, file, heap, logic, page, password,
-  permission, rbac, role, token, user, userPermission };
+export {
+  auth,
+  domain,
+  facebook,
+  file,
+  heap,
+  logic,
+  page,
+  password,
+  permission,
+  redirect,
+  rbac,
+  role,
+  token,
+  user,
+  userPermission
+};
