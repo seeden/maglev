@@ -203,7 +203,7 @@ function addProvider(providerName, providerUID, data, callback) {
       name: providerName,
       uid: providerUID,
       nameUID: genNameUID(providerName, providerUID),
-      data: data
+      data: JSON.stringify(data)
     }, callback);
   }));
 }

@@ -116,8 +116,11 @@ describe('Run server', function() {
   it('should be able to add facebook provider', function(done) {
     userSaved.addProvider('facebook', 12345, {}, function(err, provider) {
       if (err) {
+        console.log(err);
         throw err;
       }
+
+      should.exist(provider);
 
       provider.user.toString().should.equal(userSaved._id.toString());
       provider.nameUID.should.equal('facebook_12345');
@@ -132,6 +135,8 @@ describe('Run server', function() {
       if (err) {
         throw err;
       }
+
+      should.exist(user);
 
       user.firstName.should.equal('Zlatko');
       user.lastName.should.equal('Fedor');

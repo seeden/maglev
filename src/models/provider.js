@@ -13,11 +13,11 @@ export function genNameUID(providerName, uid) {
 export function createSchema(Schema) {
   // add properties to schema
   const schema = new Schema({
-    user: { type: Schema.Types.ObjectId, ref: 'User' },
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     name: { type: String, required: true },
     uid: { type: String, required: true },
     nameUID: { type: String, required: true },
-    data: {}
+    data: { type: String }
   });
 
   // add indexes
