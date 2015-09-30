@@ -155,7 +155,8 @@ exports['default'] = {
     path: '/public',
     root: projectRoot + '/public',
     options: {
-      index: ['index.html']
+      index: ['index.html'],
+      maxAge: '31 days'
     }
   },
 
