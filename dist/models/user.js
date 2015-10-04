@@ -256,15 +256,6 @@ function removeProvider(providerName, providerUID, callback) {
 }
 
 function getProvider(providerName, providerUID, callback) {
-  var Provider = this.model('Provider');
-
-  Provider.findOne({
-    user: this._id,
-    nameUID: (0, _provider.genNameUID)(providerName, providerUID)
-  }, callback);
-}
-
-function hasProvider(providerName, providerUID, callback) {
   if (typeof providerUID === 'function') {
     callback = providerUID;
     providerUID = false;
@@ -281,7 +272,11 @@ function hasProvider(providerName, providerUID, callback) {
     query.nameUID = (0, _provider.genNameUID)(providerName, providerUID);
   }
 
-  Provider.findOne(query, (0, _okay2['default'])(callback, function (provider) {
+  return Provider.findOne(query, callback);
+}
+
+function hasProvider(providerName, providerUID, callback) {
+  this.getProvider(providerName, providerUID, (0, _okay2['default'])(callback, function (provider) {
     callback(null, !!provider);
   }));
 }

@@ -146,6 +146,19 @@ describe('Run server', function() {
     });
   });
 
+  it('should be able to get provider without uid', function(done) {
+    userSaved.getProvider('facebook', function(err, provider) {
+      if (err) {
+        throw err;
+      }
+
+      provider.user.toString().should.equal(userSaved._id.toString());
+      provider.nameUID.should.equal('facebook_12345');
+
+      done();
+    });
+  });
+
   it('should be able to get provider', function(done) {
     userSaved.getProvider('facebook', 12345, function(err, provider) {
       if (err) {
