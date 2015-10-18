@@ -276,6 +276,11 @@ function getProvider(providerName, providerUID, callback) {
 }
 
 function hasProvider(providerName, providerUID, callback) {
+  if (typeof providerUID === 'function') {
+    callback = providerUID;
+    providerUID = false;
+  }
+
   this.getProvider(providerName, providerUID, (0, _okay2['default'])(callback, function (provider) {
     callback(null, !!provider);
   }));
