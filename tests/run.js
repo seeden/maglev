@@ -266,18 +266,16 @@ describe('Run server', function() {
     });
   });
 
-   it('should be able to use function hasProvider', function(done) {
+  it('should be able to use function hasProvider', function(done) {
     userSaved.hasProvider('facebook', 44444, function(err, has) {
       if (err) {
         throw err;
       }
 
       has.should.equal(true);
-
       done();
     });
   });
-
 
   it('should be able to clean all', function(done) {
     const { User, Provider } = server.models;

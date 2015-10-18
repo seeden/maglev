@@ -367,6 +367,8 @@ function createSchema(Schema) {
 
     password: { type: String },
 
+    locale: { type: String },
+
     loginAttempts: { type: Number, required: true, 'default': 0 },
     lockUntil: { type: Number }
   });

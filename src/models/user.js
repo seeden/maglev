@@ -242,6 +242,11 @@ function getProvider(providerName, providerUID, callback) {
 }
 
 function hasProvider(providerName, providerUID, callback) {
+  if (typeof providerUID === 'function') {
+    callback = providerUID;
+    providerUID = false;
+  }
+
   this.getProvider(providerName, providerUID, ok(callback, function(provider) {
     callback(null, !!provider);
   }));
@@ -331,6 +336,8 @@ export function createSchema(Schema) {
     username: { type: String, unique: true, sparse: true },
 
     password: { type: String },
+
+    locale: { type: String },
 
     loginAttempts: { type: Number, required: true, 'default': 0 },
     lockUntil: { type: Number }
