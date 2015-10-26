@@ -85,7 +85,7 @@ export default class App {
 
   listen(port, host, callback) {
     if (this._httpServer) {
-      return callback(new Error('You need to close first'));
+      return callback(new Error('You need to close http server first'));
     }
 
     this._httpServer = http
@@ -158,13 +158,13 @@ export default class App {
       return callback(new Error('You need to listen first'));
     }
 
-    this._httpServer = null;
-
     log('Closing http server');
     httpServer.close((err) => {
       if(err) {
         return callback(err);
       }
+
+      this._httpServer = null;
 
       // check current state of the connections
       if (!Object.keys(activeConnections).length) {
@@ -173,7 +173,7 @@ export default class App {
       }
 
       log(`Starting idle connection timeout ${options.socket.idleTimeout}`);
-      setTimeout(() => {
+      setTimeout(function() {
         Object.keys(activeConnections).forEach(function destroyConnection(key) {
           const settings = activeConnections[key];
           if (!settings) {

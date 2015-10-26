@@ -150,7 +150,7 @@ var App = (function () {
     key: 'listen',
     value: function listen(port, host, callback) {
       if (this._httpServer) {
-        return callback(new Error('You need to close first'));
+        return callback(new Error('You need to close http server first'));
       }
 
       this._httpServer = _http2['default'].createServer(this.expressApp).listen(port, host, callback);
@@ -219,6 +219,8 @@ var App = (function () {
   }, {
     key: 'close',
     value: function close(callback) {
+      var _this = this;
+
       var activeConnections = this.activeConnections;
       var httpServer = this.httpServer;
       var options = this.options;
@@ -227,13 +229,13 @@ var App = (function () {
         return callback(new Error('You need to listen first'));
       }
 
-      this._httpServer = null;
-
       log('Closing http server');
       httpServer.close(function (err) {
         if (err) {
           return callback(err);
         }
+
+        _this._httpServer = null;
 
         // check current state of the connections
         if (!Object.keys(activeConnections).length) {
