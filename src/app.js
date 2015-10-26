@@ -118,49 +118,53 @@ export default class App {
     httpServer.on('request', function onRequestCallback(request, response) {
       const key = connectionToUnique(request.connection);
 
-      const status = activeConnections[key];
-      if (!status) {
+      const settings = activeConnections[key];
+      if (!settings) {
         return;
       }
 
-      status.requests++;
+      settings.requests++;
 
       response.once('finish', function onFinishCallback() {
-        const status = activeConnections[key];
-        if (!status) {
+        const settings = activeConnections[key];
+        if (!settings) {
           return;
         }
 
-        status.requests--;
+        settings.requests--;
       });
     });
   }
 
+  _destroyUnusedConnections() {
+    const { activeConnections } = this;
+
+    // remove unused connections
+    Object.keys(activeConnections).forEach(function destroyConnection(key) {
+      const settings = activeConnections[key];
+      if (settings.requests) {
+        return;
+      }
+
+      settings.connection.destroy();
+      delete activeConnections[key];
+    });
+  }
+
   close(callback) {
-    if (!this._httpServer) {
+    const { activeConnections, httpServer, options } = this;
+
+    if (!httpServer) {
       return callback(new Error('You need to listen first'));
     }
 
+    this._httpServer = null;
+
     log('Closing http server');
-    this._httpServer.close((err) => {
+    httpServer.close((err) => {
       if(err) {
         return callback(err);
       }
-
-      this._httpServer = null;
-
-      const { activeConnections, options } = this;
-
-      // remove unused connections
-      Object.keys(activeConnections).forEach(function destroyConnection(key) {
-        const settings = activeConnections[key];
-        if (settings.requests) {
-          return;
-        }
-
-        settings.connection.destroy();
-        delete activeConnections[key];
-      });
 
       // check current state of the connections
       if (!Object.keys(activeConnections).length) {
@@ -184,6 +188,9 @@ export default class App {
         callback();
       }, options.socket.idleTimeout);
     });
+
+    // destroy connections without requests
+    this._destroyUnusedConnections();
 
     return this;
   }

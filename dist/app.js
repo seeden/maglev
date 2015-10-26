@@ -183,53 +183,57 @@ var App = (function () {
       httpServer.on('request', function onRequestCallback(request, response) {
         var key = connectionToUnique(request.connection);
 
-        var status = activeConnections[key];
-        if (!status) {
+        var settings = activeConnections[key];
+        if (!settings) {
           return;
         }
 
-        status.requests++;
+        settings.requests++;
 
         response.once('finish', function onFinishCallback() {
-          var status = activeConnections[key];
-          if (!status) {
+          var settings = activeConnections[key];
+          if (!settings) {
             return;
           }
 
-          status.requests--;
+          settings.requests--;
         });
+      });
+    }
+  }, {
+    key: '_destroyUnusedConnections',
+    value: function _destroyUnusedConnections() {
+      var activeConnections = this.activeConnections;
+
+      // remove unused connections
+      Object.keys(activeConnections).forEach(function destroyConnection(key) {
+        var settings = activeConnections[key];
+        if (settings.requests) {
+          return;
+        }
+
+        settings.connection.destroy();
+        delete activeConnections[key];
       });
     }
   }, {
     key: 'close',
     value: function close(callback) {
-      var _this = this;
+      var activeConnections = this.activeConnections;
+      var httpServer = this.httpServer;
+      var options = this.options;
 
-      if (!this._httpServer) {
+      if (!httpServer) {
         return callback(new Error('You need to listen first'));
       }
 
+      this._httpServer = null;
+
       log('Closing http server');
-      this._httpServer.close(function (err) {
+      httpServer.close(function (err) {
         if (err) {
           return callback(err);
         }
-
-        _this._httpServer = null;
-
-        var activeConnections = _this.activeConnections;
-        var options = _this.options;
-
-        // remove unused connections
-        Object.keys(activeConnections).forEach(function destroyConnection(key) {
-          var settings = activeConnections[key];
-          if (settings.requests) {
-            return;
-          }
-
-          settings.connection.destroy();
-          delete activeConnections[key];
-        });
 
         // check current state of the connections
         if (!Object.keys(activeConnections).length) {
@@ -253,6 +257,9 @@ var App = (function () {
           callback();
         }, options.socket.idleTimeout);
       });
+
+      // destroy connections without requests
+      this._destroyUnusedConnections();
 
       return this;
     }
