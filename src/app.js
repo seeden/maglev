@@ -27,6 +27,10 @@ import * as pageController from './controllers/page';
 
 const log = debug('maglev:app');
 
+function connectionToUnique(conn) {
+  return `${conn.remoteAddress}:${conn.remotePort}`;
+}
+
 export default class App {
   constructor(server, options = {}) {
     if(!options.root) {
@@ -88,18 +92,48 @@ export default class App {
       .createServer(this.expressApp)
       .listen(port, host, callback);
 
+    this.handleConnectionEvents();
+
+    return this;
+  }
+
+  handleConnectionEvents() {
+    // TODO UNHANDLE
     const { activeConnections, httpServer } = this;
 
-    httpServer.on('connection', (conn) => {
-      const key = `${conn.remoteAddress}:${conn.remotePort}`;
-      activeConnections[key] = conn;
+    httpServer.on('connection', function onConnectionCallback(connection) {
+      const key = connectionToUnique(connection);
+      activeConnections[key] = {
+        connection,
+        requests: 0
+      };
 
-      conn.once('close', function connCloseCallback() {
-        delete activeConnections[key];
+      connection.once('close', function onCloseCallback() {
+        if (activeConnections[key]) {
+          delete activeConnections[key];
+        }
       });
     });
 
-    return this;
+    httpServer.on('request', function onRequestCallback(request, response) {
+      const key = connectionToUnique(request.connection);
+
+      const status = activeConnections[key];
+      if (!status) {
+        return;
+      }
+
+      status.requests++;
+
+      response.once('finish', function onFinishCallback() {
+        const status = activeConnections[key];
+        if (!status) {
+          return;
+        }
+
+        status.requests--;
+      });
+    });
   }
 
   close(callback) {
@@ -117,21 +151,33 @@ export default class App {
 
       const { activeConnections, options } = this;
 
-      log('There is no idle connections');
+      // remove unused connections
+      Object.keys(activeConnections).forEach(function destroyConnection(key) {
+        const settings = activeConnections[key];
+        if (settings.requests) {
+          return;
+        }
+
+        settings.connection.destroy();
+        delete activeConnections[key];
+      });
+
+      // check current state of the connections
       if (!Object.keys(activeConnections).length) {
+        log('There is no idle connections');
         return callback();
       }
 
       log(`Starting idle connection timeout ${options.socket.idleTimeout}`);
       setTimeout(() => {
         Object.keys(activeConnections).forEach(function destroyConnection(key) {
-          const conn = activeConnections[key];
-          if (!conn) {
+          const settings = activeConnections[key];
+          if (!settings) {
             return;
           }
 
           log(`Destroying connection: ${key}`);
-          conn.destroy();
+          settings.connection.destroy();
         });
 
         log('All connections destroyed');

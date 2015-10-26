@@ -106,6 +106,10 @@ var pageController = _interopRequireWildcard(_controllersPage);
 
 var log = (0, _debug2['default'])('maglev:app');
 
+function connectionToUnique(conn) {
+  return conn.remoteAddress + ':' + conn.remotePort;
+}
+
 var App = (function () {
   function App(server) {
     var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
@@ -151,19 +155,50 @@ var App = (function () {
 
       this._httpServer = _http2['default'].createServer(this.expressApp).listen(port, host, callback);
 
+      this.handleConnectionEvents();
+
+      return this;
+    }
+  }, {
+    key: 'handleConnectionEvents',
+    value: function handleConnectionEvents() {
+      // TODO UNHANDLE
       var activeConnections = this.activeConnections;
       var httpServer = this.httpServer;
 
-      httpServer.on('connection', function (conn) {
-        var key = conn.remoteAddress + ':' + conn.remotePort;
-        activeConnections[key] = conn;
+      httpServer.on('connection', function onConnectionCallback(connection) {
+        var key = connectionToUnique(connection);
+        activeConnections[key] = {
+          connection: connection,
+          requests: 0
+        };
 
-        conn.once('close', function connCloseCallback() {
-          delete activeConnections[key];
+        connection.once('close', function onCloseCallback() {
+          if (activeConnections[key]) {
+            delete activeConnections[key];
+          }
         });
       });
 
-      return this;
+      httpServer.on('request', function onRequestCallback(request, response) {
+        var key = connectionToUnique(request.connection);
+
+        var status = activeConnections[key];
+        if (!status) {
+          return;
+        }
+
+        status.requests++;
+
+        response.once('finish', function onFinishCallback() {
+          var status = activeConnections[key];
+          if (!status) {
+            return;
+          }
+
+          status.requests--;
+        });
+      });
     }
   }, {
     key: 'close',
@@ -185,21 +220,33 @@ var App = (function () {
         var activeConnections = _this.activeConnections;
         var options = _this.options;
 
-        log('There is no idle connections');
+        // remove unused connections
+        Object.keys(activeConnections).forEach(function destroyConnection(key) {
+          var settings = activeConnections[key];
+          if (settings.requests) {
+            return;
+          }
+
+          settings.connection.destroy();
+          delete activeConnections[key];
+        });
+
+        // check current state of the connections
         if (!Object.keys(activeConnections).length) {
+          log('There is no idle connections');
           return callback();
         }
 
         log('Starting idle connection timeout ' + options.socket.idleTimeout);
         setTimeout(function () {
           Object.keys(activeConnections).forEach(function destroyConnection(key) {
-            var conn = activeConnections[key];
-            if (!conn) {
+            var settings = activeConnections[key];
+            if (!settings) {
               return;
             }
 
             log('Destroying connection: ' + key);
-            conn.destroy();
+            settings.connection.destroy();
           });
 
           log('All connections destroyed');
