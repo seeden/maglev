@@ -54,10 +54,6 @@ var _userpermission = require('./userpermission');
 
 var userPermission = _interopRequireWildcard(_userpermission);
 
-var _heap = require('./heap');
-
-var heap = _interopRequireWildcard(_heap);
-
 var _redirect = require('./redirect');
 
 var redirect = _interopRequireWildcard(_redirect);
@@ -70,7 +66,6 @@ exports.auth = auth;
 exports.domain = domain;
 exports.facebook = facebook;
 exports.file = file;
-exports.heap = heap;
 exports.logic = logic;
 exports.page = page;
 exports.password = password;

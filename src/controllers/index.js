@@ -10,7 +10,6 @@ import * as role from './role';
 import * as token from './token';
 import * as user from './user';
 import * as userPermission from './userpermission';
-import * as heap from './heap';
 import * as redirect from './redirect';
 import * as domain from './domain';
 
@@ -20,7 +19,6 @@ export {
   domain,
   facebook,
   file,
-  heap,
   logic,
   page,
   password,
