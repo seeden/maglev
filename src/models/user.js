@@ -5,6 +5,7 @@ import permalink from 'mongoose-permalink';
 import mongooseHRBAC from 'mongoose-hrbac';
 import jsonSchemaPlugin from 'mongoose-json-schema';
 import ok from 'okay';
+import { series } from 'async';
 
 export const name = 'User';
 
@@ -27,6 +28,66 @@ function getDisplayName() {
   return this.name || this.username;
 }
 
+function updateUserByFacebookProfile(user, profile, callback) {
+  let changed = false;
+
+  if (!user.firstName && profile.first_name) {
+    user.firstName = profile.first_name;
+    changed = true;
+  }
+
+  if (!user.lastName && profile.last_name) {
+    user.lastName = profile.last_name;
+    changed = true;
+  }
+
+  if (!user.name && profile.name) {
+    user.name = profile.name;
+    changed = true;
+  }
+
+  if (!user.locale && profile.locale) {
+    user.locale = profile.locale;
+    changed = true;
+  }
+
+  series([
+    // try to setup email
+    (cb) => {
+      const User = user.models('User');
+
+      if (!user.email && profile.email) {
+        User.findOne({
+          email: profile.email,
+        }, (err, foundedUser) => {
+          if (err) {
+            return cb(err);
+          }
+
+          if (!foundedUser) {
+            user.email = profile.email;
+            changed = true;
+          }
+
+          cb(null);
+        });
+      } else {
+        cb(null);
+      }
+    },
+    // save user
+    (cb) => {
+      if (!changed) {
+        return cb(null);
+      }
+
+      user.save(cb);
+    },
+  ], (err) => {
+    callback(err, user);
+  });
+}
+
 /**
  * Create user by user profile from facebook
  * @param  {Object}   profile Profile from facebook
@@ -39,7 +100,7 @@ function createByFacebook(profile, callback) {
 
   this.findByFacebookID(profile.id, ok(callback, (user) => {
     if (user) {
-      return callback(null, user);
+      return updateUserByFacebookProfile(user, profile, callback);
     }
 
     this.create({
@@ -48,6 +109,7 @@ function createByFacebook(profile, callback) {
       lastName: profile.last_name,
       name: profile.name,
       email: profile.email,
+      locale: profile.locale,
     }, ok(callback, (newUser) => {
       newUser.addProvider('facebook', profile.id, profile, ok(callback, () => {
         callback(null, newUser);

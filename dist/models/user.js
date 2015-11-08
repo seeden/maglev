@@ -33,6 +33,8 @@ var _okay = require('okay');
 
 var _okay2 = _interopRequireDefault(_okay);
 
+var _async = require('async');
+
 var name = 'User';
 
 exports.name = name;
@@ -55,6 +57,65 @@ function getDisplayName() {
   return this.name || this.username;
 }
 
+function updateUserByFacebookProfile(user, profile, callback) {
+  var changed = false;
+
+  if (!user.firstName && profile.first_name) {
+    user.firstName = profile.first_name;
+    changed = true;
+  }
+
+  if (!user.lastName && profile.last_name) {
+    user.lastName = profile.last_name;
+    changed = true;
+  }
+
+  if (!user.name && profile.name) {
+    user.name = profile.name;
+    changed = true;
+  }
+
+  if (!user.locale && profile.locale) {
+    user.locale = profile.locale;
+    changed = true;
+  }
+
+  (0, _async.series)([
+  // try to setup email
+  function (cb) {
+    var User = user.models('User');
+
+    if (!user.email && profile.email) {
+      User.findOne({
+        email: profile.email
+      }, function (err, foundedUser) {
+        if (err) {
+          return cb(err);
+        }
+
+        if (!foundedUser) {
+          user.email = profile.email;
+          changed = true;
+        }
+
+        cb(null);
+      });
+    } else {
+      cb(null);
+    }
+  },
+  // save user
+  function (cb) {
+    if (!changed) {
+      return cb(null);
+    }
+
+    user.save(cb);
+  }], function (err) {
+    callback(err, user);
+  });
+}
+
 /**
  * Create user by user profile from facebook
  * @param  {Object}   profile Profile from facebook
@@ -69,7 +130,7 @@ function createByFacebook(profile, callback) {
 
   this.findByFacebookID(profile.id, (0, _okay2['default'])(callback, function (user) {
     if (user) {
-      return callback(null, user);
+      return updateUserByFacebookProfile(user, profile, callback);
     }
 
     _this.create({
@@ -77,7 +138,8 @@ function createByFacebook(profile, callback) {
       firstName: profile.first_name,
       lastName: profile.last_name,
       name: profile.name,
-      email: profile.email
+      email: profile.email,
+      locale: profile.locale
     }, (0, _okay2['default'])(callback, function (newUser) {
       newUser.addProvider('facebook', profile.id, profile, (0, _okay2['default'])(callback, function () {
         callback(null, newUser);
