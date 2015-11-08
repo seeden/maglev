@@ -11,7 +11,7 @@ export function generateForCurrent(req, res, next) {
 
   res.jsonp({
     token: user.generateBearerToken(options.token.secret, options.token.expiration),
-    user: user.toPrivateJSON()
+    user: user.toPrivateJSON(),
   });
 }
 
@@ -23,14 +23,14 @@ export function generate(req, res, next) {
     return next(new WebError(400, 'One of parameter missing'));
   }
 
-  User.findByUsernamePassword(req.body.username, req.body.password, false, ok(next, function(user) {
+  User.findByUsernamePassword(req.body.username, req.body.password, false, ok(next, (user) => {
     if (!user) {
       return next(new WebError(404, 'Invalid username or password'));
     }
 
     res.jsonp({
       token: user.generateBearerToken(options.token.secret, options.token.expiration),
-      user: user.toPrivateJSON()
+      user: user.toPrivateJSON(),
     });
   }));
 }
@@ -46,7 +46,7 @@ export function invalidate(req, res, next) {
 
 export function ensure(req, res, next) {
   req.server.secure.authenticate('bearer', {
-    session: false
+    session: false,
   })(req, res, next);
 }
 
@@ -56,12 +56,12 @@ export function ensureWithSession(req, res, next) {
   }
 
   req.server.secure.authenticate('bearer', {
-    session: false
+    session: false,
   })(req, res, next);
 }
 
 export function tryEnsure(req, res, next) {
   req.server.secure.authenticate(['bearer', 'anonymous'], {
-    session: false
+    session: false,
   })(req, res, next);
 }

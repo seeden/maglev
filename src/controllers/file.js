@@ -7,15 +7,15 @@ import tmp from 'temporary';
 import ok from 'okay';
 
 function deleteFiles(files, callback) {
-  map(files, function(file, cb) {
-    fs.unlink(file.path, function(err) {
+  map(files, (file, cb) => {
+    fs.unlink(file.path, (err) => {
       if (err && err.message.indexOf('ENOENT') === -1) {
         return cb(err);
       }
 
       cb(null, file);
     });
-  }, ok(callback, function(removedFiles) {
+  }, ok(callback, (removedFiles) => {
     callback(null, removedFiles);
   }));
 }
@@ -26,24 +26,24 @@ export function upload(req, res, next) {
 
   const options = {
     maxFieldsSize: serverOptions.upload.maxFieldsSize,
-    maxFields: serverOptions.upload.maxFields
+    maxFields: serverOptions.upload.maxFields,
   };
 
   const form = new multiparty.Form(options);
 
-  form.on('error', function(err) {
+  form.on('error', (err) => {
     next(err);
   });
 
-  form.on('field', function(field, value) {
+  form.on('field', (field, value) => {
     req.body[field] = value;
   });
 
-  form.on('file', function(name, file) {
+  form.on('file', (name, file) => {
     files.push(file);
   });
 
-  form.on('close', function() {
+  form.on('close', () => {
     next();
   });
 
@@ -55,7 +55,7 @@ export function clear(req, res, next) {
     return next();
   }
 
-  deleteFiles(req.objects.files, ok(next, function(removedFiles) {
+  deleteFiles(req.objects.files, ok(next, (removedFiles) => {
     req.objects.files = [];
     req.objects.removedFiles = removedFiles;
     next();
@@ -63,7 +63,7 @@ export function clear(req, res, next) {
 }
 
 export function clearAfterError(err, req, res, next) {
-  clear(req, res, ok(next, function() {
+  clear(req, res, ok(next, () => {
     next(err);
   }));
 }
@@ -75,7 +75,7 @@ export function get(req, res, next) {
   }
 
   res.jsonp({
-    file: file.toPrivateJSON()
+    file: file.toPrivateJSON(),
   });
 }
 
@@ -87,7 +87,7 @@ export function download(req, res, next) {
   }
 
   const downloadInstance = new Download().get(req.body.url);
-  downloadInstance.run(ok(next, function(downloadedFiles) {
+  downloadInstance.run(ok(next, (downloadedFiles) => {
     if (!downloadedFiles.length) {
       return next(new WebError(401));
     }
@@ -98,10 +98,10 @@ export function download(req, res, next) {
       fieldName: 'file',
       originalFilename: downloadedFiles[0].path,
       path: tmpFile.path,
-      size: downloadedFiles[0].contents.length
+      size: downloadedFiles[0].contents.length,
     };
 
-    tmpFile.writeFile(downloadedFiles[0].contents, ok(next, function() {
+    tmpFile.writeFile(downloadedFiles[0].contents, ok(next, () => {
       files.push(file);
       next();
     }));

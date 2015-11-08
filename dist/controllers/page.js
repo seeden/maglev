@@ -56,7 +56,7 @@ function error(err, req, res, next) {
 
   res.status(errorObj.status).format({
     'text/plain': function sendTextPlain() {
-      res.send(errorObj.message);
+      res.send(errorObj.message + '\n' + errorObj.stack);
     },
 
     'text/html': function sendTextHtml() {

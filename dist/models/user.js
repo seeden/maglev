@@ -63,8 +63,6 @@ function getDisplayName() {
 function createByFacebook(profile, callback) {
   var _this = this;
 
-  var Provider = this.model('Provider');
-
   if (!profile.id) {
     return callback(new Error('Profile id is undefined'));
   }
@@ -80,9 +78,9 @@ function createByFacebook(profile, callback) {
       lastName: profile.last_name,
       name: profile.name,
       email: profile.email
-    }, (0, _okay2['default'])(callback, function (user) {
-      user.addProvider('facebook', profile.id, profile, (0, _okay2['default'])(callback, function (provider) {
-        callback(null, user);
+    }, (0, _okay2['default'])(callback, function (newUser) {
+      newUser.addProvider('facebook', profile.id, profile, (0, _okay2['default'])(callback, function () {
+        callback(null, newUser);
       }));
     }));
   }));
@@ -96,8 +94,6 @@ function createByFacebook(profile, callback) {
 function createByTwitter(profile, callback) {
   var _this2 = this;
 
-  var Provider = this.model('Provider');
-
   if (!profile.id) {
     return callback(new Error('Profile id is undefined'));
   }
@@ -110,9 +106,9 @@ function createByTwitter(profile, callback) {
     _this2.create({
       username: profile.username || null,
       name: profile.displayName
-    }, (0, _okay2['default'])(callback, function (user) {
-      user.addProvider('twitter', profile.id, profile, (0, _okay2['default'])(callback, function (provider) {
-        callback(null, user);
+    }, (0, _okay2['default'])(callback, function (newUser) {
+      newUser.addProvider('twitter', profile.id, profile, (0, _okay2['default'])(callback, function () {
+        callback(null, newUser);
       }));
     }));
   }));
@@ -207,12 +203,12 @@ function findByUsernamePassword(username, password, strict, callback) {
     strict = true;
   }
 
-  return this.findByUsername(username, strict, (0, _okay2['default'])(callback, function findByUsernameCallback(user) {
+  return this.findByUsername(username, strict, (0, _okay2['default'])(callback, function (user) {
     if (!user) {
       return callback(null, null);
     }
 
-    user.comparePassword(password, (0, _okay2['default'])(callback, function compareCallback(isMatch) {
+    user.comparePassword(password, (0, _okay2['default'])(callback, function (isMatch) {
       if (!isMatch) {
         return callback(null, null);
       }
@@ -227,8 +223,8 @@ function addProvider(providerName, providerUID, data, callback) {
 
   var Provider = this.model('Provider');
 
-  this.hasProvider(providerName, providerUID, (0, _okay2['default'])(callback, function (hasProvider) {
-    if (hasProvider) {
+  this.hasProvider(providerName, providerUID, (0, _okay2['default'])(callback, function (has) {
+    if (has) {
       return callback(new Error('This provider is already associated to this user'));
     }
 
@@ -292,7 +288,7 @@ function hasProvider(providerName, providerUID, callback) {
  * @param  {Function} callback
  */
 function comparePassword(candidatePassword, callback) {
-  _bcrypt2['default'].compare(candidatePassword, this.password, function compareCallback(err, isMatch) {
+  _bcrypt2['default'].compare(candidatePassword, this.password, function (err, isMatch) {
     if (err) {
       return callback(err);
     }
@@ -378,10 +374,6 @@ function createSchema(Schema) {
     lockUntil: { type: Number }
   });
 
-  // add indexes
-  //schema.index({'providers.name': 1, 'providers.id': 1});
-  //schema.index({'providers.nameUID': 1}, { unique: true, sparse: true });
-
   schema.virtual('isLocked').get(function isLocked() {
     // check for a future lockUntil timestamp
     return !!(this.lockUntil && this.lockUntil > Date.now());
@@ -412,7 +404,7 @@ function createSchema(Schema) {
     }
 
     // hash the password using our new salt
-    _bcrypt2['default'].hash(user.password, SALT_WORK_FACTOR, function hashCallback(err, hash) {
+    _bcrypt2['default'].hash(user.password, SALT_WORK_FACTOR, function (err, hash) {
       if (err) {
         return next(err);
       }

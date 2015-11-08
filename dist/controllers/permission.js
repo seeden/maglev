@@ -3,7 +3,7 @@
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
-exports.permission = permission;
+exports.loadPermission = loadPermission;
 exports.create = create;
 exports.remove = remove;
 exports.exists = exists;
@@ -19,7 +19,7 @@ var _okay = require('okay');
 
 var _okay2 = _interopRequireDefault(_okay);
 
-function permission(req, res, next, name) {
+function loadPermission(req, res, next, name) {
   var rbac = req.server.rbac;
 
   if (!name) {
@@ -108,13 +108,13 @@ function get(req, res, next) {
     return next(new _webError2['default'](404));
   }
 
-  var p = req.objects.permission;
+  var perm = req.objects.permission;
 
   return res.jsonp({
     permission: {
-      action: p.action,
-      resource: p.resource,
-      name: p.name
+      action: perm.action,
+      resource: perm.resource,
+      name: perm.name
     }
   });
 }

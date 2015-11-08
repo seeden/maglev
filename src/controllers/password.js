@@ -11,12 +11,12 @@ export function tokenToUser(req, res, next, id) {
     return next(new WebError(400, 'Token is undefined'));
   }
 
-  jwt.verify(id, options.mail.token.secret, ok(next, function(data) {
+  jwt.verify(id, options.mail.token.secret, ok(next, (data) => {
     if (!data.user) {
       return next(new WebError(400, 'Unknown user'));
     }
 
-    User.findById(id, ok(next, function(user) {
+    User.findById(id, ok(next, (user) => {
       if (!user) {
         return next(new WebError(404));
       }
@@ -43,21 +43,21 @@ export function change(req, res, next) {
   }
 
   if (!user.hasPassword()) {
-    user.setPassword(req.body.password, ok(next, function() {
-      return res.status(204).end();
+    user.setPassword(req.body.password, ok(next, () => {
+      res.status(204).end();
     }));
   } else {
     if (!req.body.password_old) {
       return next(new WebError(400, 'Parameter password_old is missing'));
     }
 
-    user.comparePassword(req.body.password_old, ok(next, function(isMatch) {
+    user.comparePassword(req.body.password_old, ok(next, (isMatch) => {
       if (!isMatch) {
         return next(new WebError(400, 'Password is not match with actual password'));
       }
 
-      user.setPassword(req.body.password, ok(next, function() {
-        return res.status(204).end();
+      user.setPassword(req.body.password, ok(next, () => {
+        res.status(204).end();
       }));
     }));
   }
@@ -69,7 +69,7 @@ export function generateForgotToken(user, tokenSecret, expiresInMinutes = 60 * 2
   }
 
   const data = {
-    user: user._id
+    user: user._id,
   };
 
   return jwt.sign(data, tokenSecret, { expiresInMinutes });
@@ -85,7 +85,7 @@ export function forgot(req, res, next) {
     return next(new WebError(400, 'Parameter username is missing'));
   }
 
-  User.findByUsername(req.body.username, false, ok(next, function(user) {
+  User.findByUsername(req.body.username, false, ok(next, (user) => {
     if (!user) {
       return next(new WebError(404));
     }
@@ -99,30 +99,30 @@ export function forgot(req, res, next) {
 
     // render mails
     const data = {
-      user: user,
+      user,
       from: options.mail.default.from,
       to: user.email,
       subject: 'Password Assistance',
-      token: token
+      token,
     };
 
     async.series({
-      html: function(callback) {
+      html: (callback) => {
         res.render('mail/forgot', data, callback);
       },
-      text: function(callback) {
+      text: (callback) => {
         res.render('mail/forgot_plain', data, callback);
-      }
-    }, ok(next, function(result) {
+      },
+    }, ok(next, (result) => {
       const mailOptions = {
         from: options.mail.default.from,
         to: user.email,
         subject: 'Password Assistance',
         html: result.html,
-        text: result.text
+        text: result.text,
       };
 
-      mail.sendMail(mailOptions, ok(next, function() {
+      mail.sendMail(mailOptions, ok(next, () => {
         return res.status(204).end();
       }));
     }));

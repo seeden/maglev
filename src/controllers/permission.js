@@ -1,14 +1,14 @@
 import WebError from 'web-error';
 import ok from 'okay';
 
-export function permission(req, res, next, name) {
+export function loadPermission(req, res, next, name) {
   const rbac = req.server.rbac;
 
   if (!name) {
     return next(new WebError(400));
   }
 
-  rbac.getPermissionByName(name, ok(next, function(permission) {
+  rbac.getPermissionByName(name, ok(next, (permission) => {
     if (!permission) {
       return next(new WebError(404));
     }
@@ -28,7 +28,7 @@ export function create(req, res, next) {
     return next(new WebError(400, 'Permission action or resource is undefined'));
   }
 
-  rbac.createPermission(req.body.action, req.body.resource, ok(next, function(permission) {
+  rbac.createPermission(req.body.action, req.body.resource, ok(next, (permission) => {
     if (!permission) {
       return next(new WebError(400));
     }
@@ -37,8 +37,8 @@ export function create(req, res, next) {
       permission: {
         action: permission.action,
         resource: permission.resource,
-        name: permission.name
-      }
+        name: permission.name,
+      },
     });
   }));
 }
@@ -56,8 +56,8 @@ export function remove(req, res, next) {
   const permission = req.objects.permission;
 
   // unassign permission from all users
-  User.removePermissionFromCollection(permission.name, ok(next, function() {
-    permission.remove(ok(next, function(isDeleted) {
+  User.removePermissionFromCollection(permission.name, ok(next, () => {
+    permission.remove(ok(next, (isDeleted) => {
       if (!isDeleted) {
         return next(new WebError(400));
       }
@@ -86,13 +86,13 @@ export function get(req, res, next) {
     return next(new WebError(404));
   }
 
-  const p = req.objects.permission;
+  const perm = req.objects.permission;
 
   return res.jsonp({
     permission: {
-      action: p.action,
-      resource: p.resource,
-      name: p.name
-    }
+      action: perm.action,
+      resource: perm.resource,
+      name: perm.name,
+    },
   });
 }

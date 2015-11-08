@@ -17,26 +17,26 @@ export function local(options, models) {
   // Use local strategy TODO find by object
   return new LocalStrategy({
     usernameField: 'username',
-    passwordField: 'password'
-  }, function(email, password, done) {
+    passwordField: 'password',
+  }, (email, password, done) => {
     const User = models.User;
 
     User.findOne({
-      email: email
-    }, function(err, user) {
+      email,
+    }, (err, user) => {
       if (err) {
         return done(err);
       }
 
       if (!user) {
         return done(null, false, {
-          message: 'Unknown user'
+          message: 'Unknown user',
         });
       }
 
       if (!user.authenticate(password)) {
         return done(null, false, {
-          message: 'Invalid password'
+          message: 'Invalid password',
         });
       }
 
@@ -46,14 +46,14 @@ export function local(options, models) {
 }
 
 export function bearer(options, models) {
-  return new BearerStrategy(function(token, done) {
+  return new BearerStrategy((token, done) => {
     const User = models.User;
 
     if (!token) {
       return done(new WebError(401, 'Invalid token'));
     }
 
-    jwt.verify(token, options.token.secret, function(err, data) {
+    jwt.verify(token, options.token.secret, (err, data) => {
       if (err) {
         return done(new WebError(401, err.message));
       }
@@ -62,7 +62,7 @@ export function bearer(options, models) {
         return done(new WebError(404, 'Unknown user'));
       }
 
-      User.findById(data.user, function(err2, user) {
+      User.findById(data.user, (err2, user) => {
         if (err2) {
           return done(err2);
         }
@@ -80,8 +80,8 @@ export function bearer(options, models) {
 export function facebook(options, models) {
   return new FacebookStrategy({
     clientID: options.facebook.appID,
-    clientSecret: options.facebook.appSecret
-  }, function(accessToken, refreshToken, profile, done) {
+    clientSecret: options.facebook.appSecret,
+  }, (accessToken, refreshToken, profile, done) => {
     const User = models.User;
 
     if (!profile.id) {
@@ -92,14 +92,14 @@ export function facebook(options, models) {
       return done(new Error('Missing Facebook appID or appSecret'));
     }
 
-    User.findByFacebookID(profile.id, function(err, user) {
+    User.findByFacebookID(profile.id, (err, user) => {
       if (err || user) {
         return done(err, user);
       }
 
       if (!options.registration.simple) {
         return done(null, false, {
-          message: 'Unknown user'
+          message: 'Unknown user',
         });
       }
 
@@ -111,8 +111,8 @@ export function facebook(options, models) {
 export function twitter(options, models) {
   return new TwitterStrategy({
     consumerKey: options.twitter.consumerKey,
-    consumerSecret: options.twitter.consumerSecret
-  }, function(token, tokenSecret, profile, done) {
+    consumerSecret: options.twitter.consumerSecret,
+  }, (token, tokenSecret, profile, done) => {
     const User = models.User;
 
     if (!profile.id) {
@@ -123,14 +123,14 @@ export function twitter(options, models) {
       return done(new Error('Missing Twitter consumerKey or consumerSecret'));
     }
 
-    User.findByTwitterID(profile.id, function(err, user) {
+    User.findByTwitterID(profile.id, (err, user) => {
       if (err || user) {
         return done(err, user);
       }
 
       if (!options.registration.simple) {
         return done(null, false, {
-          message: 'Unknown user'
+          message: 'Unknown user',
         });
       }
 
@@ -142,8 +142,8 @@ export function twitter(options, models) {
 export function facebookCanvas(options, models) {
   return new FacebookCanvasStrategy({
     clientID: options.facebook.appID,
-    clientSecret: options.facebook.appSecret
-  }, function(accessToken, refreshToken, profile, done) {
+    clientSecret: options.facebook.appSecret,
+  }, (accessToken, refreshToken, profile, done) => {
     const User = models.User;
 
     if (!profile.id) {
@@ -154,14 +154,14 @@ export function facebookCanvas(options, models) {
       return done(new Error('Missing Facebook appID or appSecret'));
     }
 
-    User.findByFacebookID(profile.id, function(err, user) {
+    User.findByFacebookID(profile.id, (err, user) => {
       if (err || user) {
         return done(err, user);
       }
 
       if (!options.registration.simple) {
         return done(null, false, {
-          message: 'Unknown user'
+          message: 'Unknown user',
         });
       }
 

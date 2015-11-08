@@ -67,7 +67,7 @@ function hasRole(name, redirect) {
   var redirectStatus = arguments.length <= 2 || arguments[2] === undefined ? 302 : arguments[2];
 
   return function (req, res, next) {
-    var server = this.server;
+    var server = req.server;
     var rbac = server.rbac;
 
     if (!req.user) {

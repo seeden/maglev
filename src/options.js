@@ -8,8 +8,8 @@ export default {
   rbac: {
     options: {},
     role: {
-      guest: 'guest'
-    }
+      guest: 'guest',
+    },
   },
 
   log: true,
@@ -18,7 +18,7 @@ export default {
     format: process.env.NODE_ENV === 'development' ? 'dev' : 'tiny',
     options: {
       // stream: process.stdout
-    }
+    },
   },
 
   server: {
@@ -26,17 +26,17 @@ export default {
     host: process.env.HOST || '127.0.0.1',
     port: process.env.PORT
       ? parseInt(process.env.PORT, 10)
-      : 4000
+      : 4000,
   },
 
   request: {
-    timeout: 1000 * 60 * 5
+    timeout: 1000 * 60 * 5,
   },
 
   compression: {},
 
   powered: {
-    value: 'Maglev'
+    value: 'Maglev',
   },
 
   responseTime: {},
@@ -45,90 +45,90 @@ export default {
     // https://github.com/expressjs/method-override
     enabled: true,
     getter: 'X-HTTP-Method-Override',
-    options: {}
+    options: {},
   },
 
   bodyParser: [{
     parse: 'urlencoded',
     options: {
-      extended: true
-    }
+      extended: true,
+    },
   }, {
     parse: 'json',
-    options: {}
+    options: {},
   }, {
     parse: 'json',
     options: {
-      type: 'application/vnd.api+json'
-    }
+      type: 'application/vnd.api+json',
+    },
   }],
 
   cookieParser: {
     secret: null,
-    options: {}
+    options: {},
   },
 
   token: {
     secret: null,
-    expiration: 60 * 24 * 14
+    expiration: 60 * 24 * 14,
   },
 
   session: {
     secret: null,
     cookie: {
-      maxAge: 14 * 24 * 60 * 60 * 1000 // 2 weeks
+      maxAge: 14 * 24 * 60 * 60 * 1000, // 2 weeks
     },
     resave: true,
-    saveUninitialized: true
+    saveUninitialized: true,
   },
 
   sessionRecovery: {
-    tries: 3
+    tries: 3,
   },
 
   view: {
-    engine: 'swig'
+    engine: 'swig',
   },
 
   router: {
     api: {
-      path: '/api'
-    }
+      path: '/api',
+    },
   },
 
   locale: {
     'default': 'en',
     available: ['en'],
-    inUrl: false
+    inUrl: false,
   },
 
   country: {
     'default': null,
     available: [],
-    inUrl: false
+    inUrl: false,
   },
 
   registration: {
-    simple: true
+    simple: true,
   },
 
   facebook: {
     appID: null,
     appSecret: null,
-    namespace: null
+    namespace: null,
   },
 
   upload: {
     maxFieldsSize: 1024 * 1024 * 20,
     maxFields: 1000,
-    path: null
+    path: null,
   },
 
   cors: {},
 
   page: {
     error: null,
-    notFound: null
+    notFound: null,
   },
 
   strategies: [],
@@ -138,9 +138,9 @@ export default {
     root: `${projectRoot}/public/css`,
     options: {
       render: {
-        ieCompat: false
-      }
-    }
+        ieCompat: false,
+      },
+    },
   },
 
   'static': {
@@ -148,34 +148,34 @@ export default {
     root: `${projectRoot}/public`,
     options: {
       index: ['index.html'],
-      maxAge: '31 days'
-    }
+      maxAge: '31 days',
+    },
   },
 
   favicon: {
     root: `${projectRoot}/public/favicon.ico`,
-    options: {}
+    options: {},
   },
 
   robots: {
-    root: `${projectRoot}/public/robots.txt`
+    root: `${projectRoot}/public/robots.txt`,
   },
 
   memoryLeaks: {
     watch: false,
     showHeap: false,
-    path: null
+    path: null,
   },
 
   socket: {
-    idleTimeout: 10 * 1000
+    idleTimeout: 10 * 1000,
   },
 
   shutdown: {
-    timeout: 30 * 1000
+    timeout: 30 * 1000,
   },
 
   sourceMap: {
-    root: 'public/dist'
-  }
+    root: 'public/dist',
+  },
 };

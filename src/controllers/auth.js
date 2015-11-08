@@ -8,9 +8,9 @@ export function login(req, res, next) {
  * @return {Function} Controller function
  */
 export function loginOrRedirect(failureRedirect) {
-  return function(req, res, next) {
+  return (req, res, next) => {
     req.server.secure.authenticate('local', {
-      failureRedirect: failureRedirect
+      failureRedirect,
     })(req, res, next);
   };
 }
@@ -21,17 +21,17 @@ export function ensure(req, res, next) {
   }
 
   return res.status(401).format({
-    'text/plain': function() {
+    'text/plain': () => {
       res.send('User is not authorized');
     },
-    'text/html': function() {
+    'text/html': () => {
       res.send('User is not authorized');
     },
-    'application/json': function() {
+    'application/json': () => {
       res.jsonp({
-        error: 'User is not authorized'
+        error: 'User is not authorized',
       });
-    }
+    },
   });
 }
 

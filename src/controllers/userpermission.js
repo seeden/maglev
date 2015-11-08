@@ -8,10 +8,8 @@ export function getScope(req, res, next) {
     return next(new WebError(401));
   }
 
-  user.getScope(rbac, ok(next, function(scope) {
-    res.jsonp({
-      scope: scope
-    });
+  user.getScope(rbac, ok(next, (scope) => {
+    res.jsonp({ scope });
   }));
 }
 
@@ -28,9 +26,9 @@ export function can(req, res, next) {
     return next(new WebError(400));
   }
 
-  user.can(rbac, action, resource, ok(next, function(userCan) {
+  user.can(rbac, action, resource, ok(next, (userCan) => {
     res.jsonp({
-      can: userCan
+      can: userCan,
     });
   }));
 }
@@ -48,7 +46,7 @@ export function addPermission(req, res, next) {
     return next(new WebError(400));
   }
 
-  user.addPermission(rbac, action, resource, ok(next, function() {
+  user.addPermission(rbac, action, resource, ok(next, () => {
     res.status(204).end();
   }));
 }
@@ -65,7 +63,7 @@ export function removePermission(req, res, next) {
     return next(new WebError(400));
   }
 
-  user.removePermission(rbac, permissionName, ok(next, function() {
+  user.removePermission(rbac, permissionName, ok(next, () => {
     res.status(204).end();
   }));
 }
@@ -82,10 +80,8 @@ export function hasRole(req, res, next) {
     return next(new WebError(400));
   }
 
-  user.hasRole(rbac, role, ok(next, function(has) {
-    res.jsonp({
-      has: has
-    });
+  user.hasRole(rbac, role, ok(next, (has) => {
+    res.jsonp({ has });
   }));
 }
 
@@ -101,7 +97,7 @@ export function setRole(req, res, next) {
     return next(new WebError(400));
   }
 
-  user.setRole(rbac, role, ok(next, function() {
+  user.setRole(rbac, role, ok(next, () => {
     res.status(204).end();
   }));
 }
@@ -112,7 +108,7 @@ export function removeRole(req, res, next) {
     return next(new WebError(401));
   }
 
-  user.removeRole(ok(next, function() {
+  user.removeRole(ok(next, () => {
     res.status(204).end();
   }));
 }

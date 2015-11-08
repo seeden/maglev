@@ -3,7 +3,7 @@
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
-exports.role = role;
+exports.loadRole = loadRole;
 exports.create = create;
 exports.remove = remove;
 exports.exists = exists;
@@ -21,7 +21,7 @@ var _okay = require('okay');
 
 var _okay2 = _interopRequireDefault(_okay);
 
-function role(req, res, next, name) {
+function loadRole(req, res, next, name) {
   var rbac = req.server.rbac;
 
   if (!name) {

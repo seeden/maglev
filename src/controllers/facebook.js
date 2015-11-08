@@ -13,7 +13,7 @@ export function ensure(req, res, next) {
   req.server.secure.authenticate('facebook', {
     scope: fbScope,
     failureRedirect: fbFailureRedirect,
-    callbackURL: req.protocolHost + fbCallbackUrl
+    callbackURL: req.protocolHost + fbCallbackUrl,
   })(req, res, next);
 }
 
@@ -21,7 +21,7 @@ export function ensureCallback(req, res, next) {
   req.server.secure.authenticate('facebook', {
     successRedirect: fbSuccessRedirect,
     failureRedirect: fbFailureRedirect,
-    callbackURL: req.protocolHost + fbCallbackUrl
+    callbackURL: req.protocolHost + fbCallbackUrl,
   })(req, res, next);
 }
 
@@ -30,7 +30,7 @@ export function ensureCanvas(req, res, next) {
     scope: fbScope,
     successRedirect: fbSuccessRedirect,
     failureRedirect: fbCanvasRedirectUrl,
-    callbackURL: req.protocolHost + fbCallbackUrl
+    callbackURL: req.protocolHost + fbCallbackUrl,
   })(req, res, next);
 }
 
@@ -57,7 +57,7 @@ export function channel(req, res) {
   res.set({
     Pragma: 'public',
     'Cache-Control': `max-age=${oneYear}`,
-    Expires: new Date(Date.now() + oneYear * 1000).toUTCString()
+    Expires: new Date(Date.now() + oneYear * 1000).toUTCString(),
   });
 
   res.send('<script src="//connect.facebook.net/en_US/all.js"></script>');
@@ -89,7 +89,7 @@ export function ensureBySignedRequest(req, res, next) {
   }
 
   // search user in database
-  User.findByFacebookID(signedRequest.user_id, ok(next, function(user) {
+  User.findByFacebookID(signedRequest.user_id, ok(next, (user) => {
     if (user) {
       return req.logIn(user, { session }, next);
     }
@@ -102,7 +102,7 @@ export function ensureBySignedRequest(req, res, next) {
       return next(new WebError(400, 'Profile.id is different from signedRequest.user_id'));
     }
 
-    User.createByFacebook(profile, ok(next, function(createdUser) {
+    User.createByFacebook(profile, ok(next, (createdUser) => {
       req.logIn(createdUser, { session }, next);
     }));
   }));

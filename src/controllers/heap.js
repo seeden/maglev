@@ -18,7 +18,7 @@ export function save(req, res, next) {
     global.gc();
   }
 
-  heapdump.writeSnapshot(file, ok(next, function() {
+  heapdump.writeSnapshot(file, ok(next, () => {
     res.status(204).jsonp({});
   }));
 }

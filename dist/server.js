@@ -6,7 +6,7 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -50,19 +50,11 @@ var _debug = require('debug');
 
 var _debug2 = _interopRequireDefault(_debug);
 
-var _heapdump = require('heapdump');
-
-var _heapdump2 = _interopRequireDefault(_heapdump);
-
 var _domain = require('domain');
 
 var _domain2 = _interopRequireDefault(_domain);
 
 var _events = require('events');
-
-var _util = require('util');
-
-var _util2 = _interopRequireDefault(_util);
 
 var _okay = require('okay');
 
@@ -123,10 +115,10 @@ var Server = (function (_EventEmitter) {
 
   _createClass(Server, [{
     key: 'handleError',
-    value: function handleError(e) {
-      log(e);
+    value: function handleError(err) {
+      log(err);
 
-      this.emit('err', e);
+      this.emit('err', err);
 
       this.closeGracefully();
     }
@@ -135,18 +127,18 @@ var Server = (function (_EventEmitter) {
     value: function catchErrors(callback) {
       var _this2 = this;
 
-      var d = _domain2['default'].create();
+      var dom = _domain2['default'].create();
 
-      d.id = 'ServerDomain';
-      d.on('error', function (e) {
-        return _this2.handleError(e);
+      dom.id = 'ServerDomain';
+      dom.on('error', function (err) {
+        return _this2.handleError(err);
       });
 
       try {
-        d.run(callback);
-      } catch (e) {
+        dom.run(callback);
+      } catch (err) {
         process.nextTick(function () {
-          return _this2.handleError(e);
+          return _this2.handleError(err);
         });
       }
     }
@@ -154,8 +146,6 @@ var Server = (function (_EventEmitter) {
     key: 'init',
     value: function init(options, callback) {
       var _this3 = this;
-
-      this.watchMemoryLeaks(options);
 
       // catch system termination
       var signals = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
@@ -199,55 +189,9 @@ var Server = (function (_EventEmitter) {
       });
     }
   }, {
-    key: 'watchMemoryLeaks',
-    value: function watchMemoryLeaks(options) {
-      var _this4 = this;
-
-      if (!options.memoryLeaks.watch) {
-        return;
-      }
-
-      var memwatch = require('memwatch-next');
-      memwatch.on('leak', function (info) {
-        log('Memory leak detected: ', info);
-
-        if (options.memoryLeaks.showHeap) {
-          _this4.showHeapDiff();
-        }
-
-        if (options.memoryLeaks.path) {
-          (function () {
-            if (typeof global.gc === 'function') {
-              global.gc();
-            }
-
-            var file = options.memoryLeaks.path + '/' + process.pid + '-' + Date.now() + '.heapsnapshot';
-            _heapdump2['default'].writeSnapshot(file, function writeSnapshotCallback(err) {
-              if (err) {
-                log(err);
-              } else {
-                log('Wrote snapshot: ' + file);
-              }
-            });
-          })();
-        }
-      });
-    }
-  }, {
-    key: 'showHeapDiff',
-    value: function showHeapDiff() {
-      if (!this.hd) {
-        this.hd = new memwatch.HeapDiff();
-      } else {
-        var diff = this.hd.end();
-        log(_util2['default'].inspect(diff, true, null));
-        this.hd = null;
-      }
-    }
-  }, {
     key: 'listen',
     value: function listen(callback) {
-      var _this5 = this;
+      var _this4 = this;
 
       if (!callback) {
         throw new Error('Callback is undefined');
@@ -262,11 +206,11 @@ var Server = (function (_EventEmitter) {
 
       var options = this.options;
       this.app.listen(options.server.port + portOffset, options.server.host, (0, _okay2['default'])(callback, function () {
-        log('Server is listening on port: ' + _this5.app.httpServer.address().port);
+        log('Server is listening on port: ' + _this4.app.httpServer.address().port);
 
-        _this5.notifyPM2Online();
+        _this4.notifyPM2Online();
 
-        callback(null, _this5);
+        callback(null, _this4);
       }));
 
       return this;
@@ -330,14 +274,14 @@ var Server = (function (_EventEmitter) {
       var models = this._models;
       var path = this.options.root + '/models';
 
-      walk(path, function processModel(model, modelPath, file, cb) {
+      walk(path, function (model, modelPath, file, cb) {
         try {
           log('Loading model: ' + modelPath);
           models.register(model);
           cb();
-        } catch (e) {
+        } catch (err) {
           log('Problem with model: ' + modelPath);
-          cb(e);
+          cb(err);
         }
       }, (0, _okay2['default'])(callback, function () {
         // preload all models
@@ -350,14 +294,14 @@ var Server = (function (_EventEmitter) {
       var router = this.router;
       var path = this.options.root + '/routes';
 
-      walk(path, function processPath(route, routePath, file, cb) {
+      walk(path, function (route, routePath, file, cb) {
         try {
           log('Loading route: ' + routePath);
           route(router);
           cb();
-        } catch (e) {
+        } catch (err) {
           log('Problem with route: ' + routePath);
-          cb(e);
+          cb(err);
         }
       }, callback);
     }

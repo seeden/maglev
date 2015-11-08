@@ -25,7 +25,7 @@ export default class Models {
     const modelFactory = this._modelFactories.get(name);
     const config = {
       model: null,
-      callbacks: []
+      callbacks: [],
     };
 
     if (typeof modelFactory !== 'function') {
@@ -80,7 +80,7 @@ export default class Models {
     Object.defineProperty(this, name, {
       get: function getProperty() {
         return this.model(name);
-      }
+      },
     });
   }
 

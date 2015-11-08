@@ -24,9 +24,9 @@ var _http = require('http');
 
 var _http2 = _interopRequireDefault(_http);
 
-var _underscore = require('underscore');
+var _lodashLangIsArray = require('lodash/lang/isArray');
 
-var _underscore2 = _interopRequireDefault(_underscore);
+var _lodashLangIsArray2 = _interopRequireDefault(_lodashLangIsArray);
 
 var _expressDomainMiddleware = require('express-domain-middleware');
 
@@ -245,7 +245,7 @@ var App = (function () {
 
         log('Starting idle connection timeout ' + options.socket.idleTimeout);
         setTimeout(function () {
-          Object.keys(activeConnections).forEach(function destroyConnection(key) {
+          Object.keys(activeConnections).forEach(function (key) {
             var settings = activeConnections[key];
             if (!settings) {
               return;
@@ -343,8 +343,8 @@ var App = (function () {
       }
 
       if (options.bodyParser) {
-        for (var i = 0; i < options.bodyParser.length; i++) {
-          var bp = options.bodyParser[i];
+        for (var index = 0; index < options.bodyParser.length; index++) {
+          var bp = options.bodyParser[index];
           app.use(_bodyParser2['default'][bp.parse](bp.options));
         }
       }
@@ -454,12 +454,12 @@ var App = (function () {
           log('Robots root: ' + options.robots.root);
           app.use((0, _robotsTxt2['default'])(options.robots.root));
         }
-      } catch (e) {
-        if (e.code !== 'ENOENT') {
-          throw e;
+      } catch (err) {
+        if (err.code !== 'ENOENT') {
+          throw err;
         }
 
-        log(e.message);
+        log(err.message);
       }
 
       if (options.css) {
@@ -507,7 +507,7 @@ var App = (function () {
 
       if (typeof middleware === 'function') {
         app.use(middleware);
-      } else if (_underscore2['default'].isArray(middleware)) {
+      } else if ((0, _lodashLangIsArray2['default'])(middleware)) {
         middleware.forEach(function (fn) {
           app.use(fn);
         });

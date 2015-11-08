@@ -17,7 +17,7 @@ export function createSchema(Schema) {
     name: { type: String, required: true },
     uid: { type: String, required: true },
     nameUID: { type: String, required: true },
-    data: { type: String }
+    data: { type: String },
   });
 
   // add indexes

@@ -1,14 +1,14 @@
 import WebError from 'web-error';
 import ok from 'okay';
 
-export function role(req, res, next, name) {
+export function loadRole(req, res, next, name) {
   const rbac = req.server.rbac;
 
   if (!name) {
     return next(new WebError(400));
   }
 
-  rbac.getRole(name, ok(next, function(role) {
+  rbac.getRole(name, ok(next, (role) => {
     if (!role) {
       return next(new WebError(404));
     }
@@ -28,15 +28,15 @@ export function create(req, res, next) {
     return next(new WebError(400, 'Role name is undefined'));
   }
 
-  rbac.createRole(req.body.name, ok(next, function(role) {
+  rbac.createRole(req.body.name, ok(next, (role) => {
     if (!role) {
       return next(new WebError(400));
     }
 
     return res.jsonp({
       role: {
-        name: role.name
-      }
+        name: role.name,
+      },
     });
   }));
 }
@@ -54,9 +54,9 @@ export function remove(req, res, next) {
   const role = req.objects.role;
 
   // unassign role from all users
-  User.removeRoleFromCollection(role.name, ok(next, function() {
+  User.removeRoleFromCollection(role.name, ok(next, () => {
     // remove role from rbac
-    role.remove(ok(next, function(isDeleted) {
+    role.remove(ok(next, (isDeleted) => {
       if (!isDeleted) {
         return next(new WebError(400));
       }
@@ -89,8 +89,8 @@ export function get(req, res, next) {
 
   return res.jsonp({
     role: {
-      name: role.name
-    }
+      name: role.name,
+    },
   });
 }
 
@@ -106,7 +106,7 @@ export function grant(req, res, next) {
 
   const role = req.objects.role;
 
-  rbac.grantByName(role.name, req.body.name, ok(next, function(isGranted) {
+  rbac.grantByName(role.name, req.body.name, ok(next, (isGranted) => {
     if (!isGranted) {
       return next(new WebError(400));
     }
@@ -127,7 +127,7 @@ export function revoke(req, res, next) {
 
   const role = req.objects.role;
 
-  rbac.revokeByName(role.name, req.body.name, ok(next, function(isRevoked) {
+  rbac.revokeByName(role.name, req.body.name, ok(next, (isRevoked) => {
     if (!isRevoked) {
       return next(new WebError(400));
     }

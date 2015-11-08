@@ -4,8 +4,8 @@ Object.defineProperty(exports, '__esModule', {
   value: true
 });
 exports.isOwner = isOwner;
-exports.user = user;
-exports.permalink = permalink;
+exports.loadByID = loadByID;
+exports.loadByPermalink = loadByPermalink;
 exports.create = create;
 exports.remove = remove;
 exports.current = current;
@@ -36,7 +36,7 @@ function isOwner(req, res, next) {
   next();
 }
 
-function user(req, res, next, id) {
+function loadByID(req, res, next, id) {
   var User = req.models.User;
 
   if (!id) {
@@ -53,7 +53,7 @@ function user(req, res, next, id) {
   }));
 }
 
-function permalink(req, res, next, permalink) {
+function loadByPermalink(req, res, next, permalink) {
   var User = req.models.User;
 
   if (!permalink) {

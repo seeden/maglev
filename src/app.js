@@ -1,7 +1,7 @@
 import express from 'express';
 import debug from 'debug';
 import http from 'http';
-import _ from 'underscore';
+import isArray from 'lodash/lang/isArray';
 
 import expressDomainMiddleware from 'express-domain-middleware';
 import compression from 'compression';
@@ -33,7 +33,7 @@ function connectionToUnique(conn) {
 
 export default class App {
   constructor(server, options = {}) {
-    if(!options.root) {
+    if (!options.root) {
       throw new Error('Root is undefined');
     }
 
@@ -105,7 +105,7 @@ export default class App {
       const key = connectionToUnique(connection);
       activeConnections[key] = {
         connection,
-        requests: 0
+        requests: 0,
       };
 
       connection.once('close', function onCloseCallback() {
@@ -160,7 +160,7 @@ export default class App {
 
     log('Closing http server');
     httpServer.close((err) => {
-      if(err) {
+      if (err) {
         return callback(err);
       }
 
@@ -173,8 +173,8 @@ export default class App {
       }
 
       log(`Starting idle connection timeout ${options.socket.idleTimeout}`);
-      setTimeout(function() {
-        Object.keys(activeConnections).forEach(function destroyConnection(key) {
+      setTimeout(() => {
+        Object.keys(activeConnections).forEach((key) => {
           const settings = activeConnections[key];
           if (!settings) {
             return;
@@ -267,8 +267,8 @@ export default class App {
     }
 
     if (options.bodyParser) {
-      for (let i = 0; i < options.bodyParser.length; i++) {
-        const bp = options.bodyParser[i];
+      for (let index = 0; index < options.bodyParser.length; index++) {
+        const bp = options.bodyParser[index];
         app.use(bodyParser[bp.parse](bp.options));
       }
     }
@@ -374,12 +374,12 @@ export default class App {
         log(`Robots root: ${options.robots.root}`);
         app.use(robots(options.robots.root));
       }
-    } catch(e) {
-      if (e.code !== 'ENOENT') {
-        throw e;
+    } catch (err) {
+      if (err.code !== 'ENOENT') {
+        throw err;
       }
 
-      log(e.message);
+      log(err.message);
     }
 
     if (options.css) {
@@ -423,10 +423,10 @@ export default class App {
       return;
     }
 
-    if(typeof middleware === 'function') {
+    if (typeof middleware === 'function') {
       app.use(middleware);
-    } else if (_.isArray(middleware)) {
-      middleware.forEach(function(fn) {
+    } else if (isArray(middleware)) {
+      middleware.forEach((fn) => {
         app.use(fn);
       });
     }

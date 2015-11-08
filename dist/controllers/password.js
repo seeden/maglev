@@ -67,7 +67,7 @@ function change(req, res, next) {
 
   if (!user.hasPassword()) {
     user.setPassword(req.body.password, (0, _okay2['default'])(next, function () {
-      return res.status(204).end();
+      res.status(204).end();
     }));
   } else {
     if (!req.body.password_old) {
@@ -80,7 +80,7 @@ function change(req, res, next) {
       }
 
       user.setPassword(req.body.password, (0, _okay2['default'])(next, function () {
-        return res.status(204).end();
+        res.status(204).end();
       }));
     }));
   }

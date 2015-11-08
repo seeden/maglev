@@ -30,5 +30,5 @@ export {
   role,
   token,
   user,
-  userPermission
+  userPermission,
 };

@@ -10,13 +10,13 @@ import ok from 'okay';
  * @return {Function}          Middleware function
  */
 export function can(action, resource, redirect, redirectStatus = 302) {
-  return function(req, res, next) {
+  return (req, res, next) => {
     const server = req.server;
     const options = server.options;
     const rbac = server.rbac;
     const user = req.user;
 
-    const callback = ok(next, function(canDoIt) {
+    const callback = ok(next, (canDoIt) => {
       if (!canDoIt) {
         if (redirect) {
           return res.redirect(redirectStatus, redirect);
@@ -44,15 +44,15 @@ export function can(action, resource, redirect, redirectStatus = 302) {
  * @return {Function}       Middleware function
  */
 export function hasRole(name, redirect, redirectStatus = 302) {
-  return function(req, res, next) {
-    const server = this.server;
+  return (req, res, next) => {
+    const server = req.server;
     const rbac = server.rbac;
 
     if (!req.user) {
       return next(new WebError(401));
     }
 
-    req.user.hasRole(rbac, name, ok(next, function(has) {
+    req.user.hasRole(rbac, name, ok(next, (has) => {
       if (!has) {
         if (redirect) {
           return res.redirect(redirectStatus, redirect);
@@ -72,7 +72,7 @@ export function hasRole(name, redirect, redirectStatus = 302) {
  * @return {Function} Middleware function
  */
 export function isGuest(redirect, redirectStatus = 302) {
-  return function(req, res, next) {
+  return (req, res, next) => {
     if (!req.user) {
       return next();
     }

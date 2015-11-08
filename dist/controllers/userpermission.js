@@ -29,9 +29,7 @@ function getScope(req, res, next) {
   }
 
   user.getScope(rbac, (0, _okay2['default'])(next, function (scope) {
-    res.jsonp({
-      scope: scope
-    });
+    res.jsonp({ scope: scope });
   }));
 }
 
@@ -103,9 +101,7 @@ function hasRole(req, res, next) {
   }
 
   user.hasRole(rbac, role, (0, _okay2['default'])(next, function (has) {
-    res.jsonp({
-      has: has
-    });
+    res.jsonp({ has: has });
   }));
 }
 

@@ -33,8 +33,6 @@ function getDisplayName() {
  * @param  {Function} callback      Callback with created user
  */
 function createByFacebook(profile, callback) {
-  const Provider = this.model('Provider');
-
   if (!profile.id) {
     return callback(new Error('Profile id is undefined'));
   }
@@ -49,10 +47,10 @@ function createByFacebook(profile, callback) {
       firstName: profile.first_name,
       lastName: profile.last_name,
       name: profile.name,
-      email: profile.email
-    }, ok(callback, function(user) {
-      user.addProvider('facebook', profile.id, profile, ok(callback, function(provider) {
-        callback(null, user);
+      email: profile.email,
+    }, ok(callback, (newUser) => {
+      newUser.addProvider('facebook', profile.id, profile, ok(callback, () => {
+        callback(null, newUser);
       }));
     }));
   }));
@@ -64,8 +62,6 @@ function createByFacebook(profile, callback) {
  * @param  {Function} callback      Callback with created user
  */
 function createByTwitter(profile, callback) {
-  const Provider = this.model('Provider');
-
   if (!profile.id) {
     return callback(new Error('Profile id is undefined'));
   }
@@ -78,9 +74,9 @@ function createByTwitter(profile, callback) {
     this.create({
       username: profile.username || null,
       name: profile.displayName,
-    }, ok(callback, function(user) {
-      user.addProvider('twitter', profile.id, profile, ok(callback, function(provider) {
-        callback(null, user);
+    }, ok(callback, (newUser) => {
+      newUser.addProvider('twitter', profile.id, profile, ok(callback, () => {
+        callback(null, newUser);
       }));
     }));
   }));
@@ -99,7 +95,7 @@ function generateBearerToken(tokenSecret, expiresInMinutes = 60 * 24 * 14, scope
   }
 
   const data = {
-    user: this._id.toString()
+    user: this._id.toString(),
   };
 
   if (scope.length) {
@@ -107,12 +103,12 @@ function generateBearerToken(tokenSecret, expiresInMinutes = 60 * 24 * 14, scope
   }
 
   const token = jwt.sign(data, tokenSecret, {
-    expiresInMinutes: expiresInMinutes
+    expiresInMinutes,
   });
 
   return {
     type: 'Bearer',
-    value: token
+    value: token,
   };
 }
 
@@ -131,8 +127,8 @@ function findByUsername(username, strict, callback) {
   }
 
   return this.findOne({ $or: [
-    { username: username },
-    { email: username }
+    { username },
+    { email: username },
   ]}, callback);
 }
 
@@ -153,8 +149,8 @@ function findByProviderUID(providerName, uid, callback) {
   const Provider = this.model('Provider');
 
   return Provider.findOne({
-    nameUID: genNameUID(providerName, uid)
-  }).populate('user').exec(ok(callback, function(provider) {
+    nameUID: genNameUID(providerName, uid),
+  }).populate('user').exec(ok(callback, (provider) => {
     if (!provider) {
       return callback(null, provider);
     }
@@ -175,12 +171,12 @@ function findByUsernamePassword(username, password, strict, callback) {
     strict = true;
   }
 
-  return this.findByUsername(username, strict, ok(callback, function findByUsernameCallback(user) {
+  return this.findByUsername(username, strict, ok(callback, (user) => {
     if (!user) {
       return callback(null, null);
     }
 
-    user.comparePassword(password, ok(callback, function compareCallback(isMatch) {
+    user.comparePassword(password, ok(callback, (isMatch) => {
       if (!isMatch) {
         return callback(null, null);
       }
@@ -193,8 +189,8 @@ function findByUsernamePassword(username, password, strict, callback) {
 function addProvider(providerName, providerUID, data, callback) {
   const Provider = this.model('Provider');
 
-  this.hasProvider(providerName, providerUID, ok(callback, (hasProvider) => {
-    if (hasProvider) {
+  this.hasProvider(providerName, providerUID, ok(callback, (has) => {
+    if (has) {
       return callback(new Error('This provider is already associated to this user'));
     }
 
@@ -203,7 +199,7 @@ function addProvider(providerName, providerUID, data, callback) {
       name: providerName,
       uid: providerUID,
       nameUID: genNameUID(providerName, providerUID),
-      data: JSON.stringify(data)
+      data: JSON.stringify(data),
     }, callback);
   }));
 }
@@ -217,7 +213,7 @@ function removeProvider(providerName, providerUID, callback) {
 
   Provider.remove({
     user: this._id,
-    nameUID: genNameUID(providerName, providerUID)
+    nameUID: genNameUID(providerName, providerUID),
   }, callback);
 }
 
@@ -229,7 +225,7 @@ function getProvider(providerName, providerUID, callback) {
 
   const Provider = this.model('Provider');
   const query = {
-    user: this._id
+    user: this._id,
   };
 
   if (!providerUID) {
@@ -247,7 +243,7 @@ function hasProvider(providerName, providerUID, callback) {
     providerUID = false;
   }
 
-  this.getProvider(providerName, providerUID, ok(callback, function(provider) {
+  this.getProvider(providerName, providerUID, ok(callback, (provider) => {
     callback(null, !!provider);
   }));
 }
@@ -258,7 +254,7 @@ function hasProvider(providerName, providerUID, callback) {
  * @param  {Function} callback
  */
 function comparePassword(candidatePassword, callback) {
-  bcrypt.compare(candidatePassword, this.password, function compareCallback(err, isMatch) {
+  bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
     if (err) {
       return callback(err);
     }
@@ -340,12 +336,8 @@ export function createSchema(Schema) {
     locale: { type: String },
 
     loginAttempts: { type: Number, required: true, 'default': 0 },
-    lockUntil: { type: Number }
+    lockUntil: { type: Number },
   });
-
-  // add indexes
-  //schema.index({'providers.name': 1, 'providers.id': 1});
-  //schema.index({'providers.nameUID': 1}, { unique: true, sparse: true });
 
   schema.virtual('isLocked').get(function isLocked() {
     // check for a future lockUntil timestamp
@@ -377,7 +369,7 @@ export function createSchema(Schema) {
     }
 
     // hash the password using our new salt
-    bcrypt.hash(user.password, SALT_WORK_FACTOR, function hashCallback(err, hash) {
+    bcrypt.hash(user.password, SALT_WORK_FACTOR, (err, hash) => {
       if (err) {
         return next(err);
       }
@@ -395,8 +387,8 @@ export function createSchema(Schema) {
   schema.plugin(permalink, {
     sources: ['name', 'firstName', 'lastName', 'username'],
     pathOptions: {
-      restExclude: true
-    }
+      restExclude: true,
+    },
   });
 
   schema.plugin(jsonSchemaPlugin, {});

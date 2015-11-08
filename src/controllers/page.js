@@ -27,7 +27,7 @@ export function error(err, req, res, next) {
     message: err.message || 'Internal server error',
     stack: err.stack,
     url: req.originalUrl,
-    errors: err.errors || []
+    errors: err.errors || [],
   };
 
   if (errorObj.status >= 500 && options.log && options.morgan.options.stream) {
@@ -37,7 +37,7 @@ export function error(err, req, res, next) {
 
   res.status(errorObj.status).format({
     'text/plain': function sendTextPlain() {
-      res.send(errorObj.message);
+      res.send(errorObj.message + '\n' + errorObj.stack);
     },
 
     'text/html': function sendTextHtml() {
@@ -47,7 +47,7 @@ export function error(err, req, res, next) {
 
     'application/json': function sendJSON() {
       res.jsonp(errorObj);
-    }
+    },
   });
 }
 

@@ -14,14 +14,14 @@ export function isOwner(req, res, next) {
   next();
 }
 
-export function user(req, res, next, id) {
+export function loadByID(req, res, next, id) {
   const User = req.models.User;
 
   if (!id) {
     return next(new WebError(400));
   }
 
-  User.findById(id, ok(next, function(user) {
+  User.findById(id, ok(next, (user) => {
     if (!user) {
       return next(new WebError(404));
     }
@@ -31,7 +31,7 @@ export function user(req, res, next, id) {
   }));
 }
 
-export function permalink(req, res, next, permalink) {
+export function loadByPermalink(req, res, next, permalink) {
   const User = req.models.User;
 
   if (!permalink) {
@@ -39,8 +39,8 @@ export function permalink(req, res, next, permalink) {
   }
 
   User.findOne({
-    permalink: permalink
-  }, ok(next, function(user) {
+    permalink,
+  }, ok(next, (user) => {
     if (!user) {
       return next(new WebError(404));
     }
@@ -63,14 +63,14 @@ export function create(req, res, next) {
     return next(new WebError(400, 'Validation errors', result.errors));
   }
 
-  User.create(req.body, ok(next, function(user) {
+  User.create(req.body, ok(next, (user) => {
     if (!user) {
       return next(new Error('User is undefined'));
     }
 
     res.jsonp({
       token: user.generateBearerToken(options.token.secret, options.token.expiration),
-      user: user.toPrivateJSON()
+      user: user.toPrivateJSON(),
     });
   }));
 }
@@ -81,7 +81,7 @@ export function remove(req, res, next) {
     return next(new WebError(404));
   }
 
-  user.remove(ok(next, function() {
+  user.remove(ok(next, () => {
     res.status(204).end();
   }));
 }
@@ -93,6 +93,6 @@ export function current(req, res, next) {
   }
 
   res.jsonp({
-    user: user.toPrivateJSON()
+    user: user.toPrivateJSON(),
   });
 }

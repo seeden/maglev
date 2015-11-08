@@ -84,8 +84,8 @@ exports['default'] = {
   session: {
     secret: null,
     cookie: {
-      maxAge: 14 * 24 * 60 * 60 * 1000 // 2 weeks
-    },
+      maxAge: 14 * 24 * 60 * 60 * 1000 },
+    // 2 weeks
     resave: true,
     saveUninitialized: true
   },

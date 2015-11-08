@@ -7,10 +7,8 @@ import App from './app';
 import Secure from './secure';
 import Models from './models';
 import debug from 'debug';
-import heapdump from 'heapdump';
 import domain from 'domain';
 import { EventEmitter } from 'events';
-import util from 'util';
 import ok from 'okay';
 import { each } from 'async';
 
@@ -18,10 +16,10 @@ const log = debug('maglev:server');
 const portOffset = parseInt(process.env.NODE_APP_INSTANCE || 0, 10);
 
 function walk(path, fileCallback, callback) {
-  fs.readdir(path, ok(callback, function(files) {
-    each(files, function(file, cb) {
+  fs.readdir(path, ok(callback, (files) => {
+    each(files, (file, cb) => {
       const newPath = path + '/' + file;
-      fs.stat(newPath, ok(cb, function(stat) {
+      fs.stat(newPath, ok(cb, (stat) => {
         if (stat.isFile()) {
           if (/(.*)\.(js$|coffee$)/.test(file)) {
             const model = require(newPath);
@@ -59,30 +57,28 @@ export default class Server extends EventEmitter {
     });
   }
 
-  handleError(e) {
-    log(e);
+  handleError(err) {
+    log(err);
 
-    this.emit('err', e);
+    this.emit('err', err);
 
     this.closeGracefully();
   }
 
   catchErrors(callback) {
-    const d = domain.create();
+    const dom = domain.create();
 
-    d.id = 'ServerDomain';
-    d.on('error', (e) => this.handleError(e));
+    dom.id = 'ServerDomain';
+    dom.on('error', (err) => this.handleError(err));
 
     try {
-      d.run(callback);
-    } catch(e) {
-      process.nextTick(() => this.handleError(e));
+      dom.run(callback);
+    } catch (err) {
+      process.nextTick(() => this.handleError(err));
     }
   }
 
   init(options, callback) {
-    this.watchMemoryLeaks(options);
-
     // catch system termination
     const signals = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
     signals.forEach((signal) => {
@@ -120,46 +116,6 @@ export default class Server extends EventEmitter {
     process.nextTick(function notify() {
       process.send('online');
     });
-  }
-
-  watchMemoryLeaks(options) {
-    if (!options.memoryLeaks.watch) {
-      return;
-    }
-
-    const memwatch = require('memwatch-next');
-    memwatch.on('leak', (info) => {
-      log('Memory leak detected: ', info);
-
-      if (options.memoryLeaks.showHeap) {
-        this.showHeapDiff();
-      }
-
-      if (options.memoryLeaks.path) {
-        if (typeof global.gc === 'function') {
-          global.gc();
-        }
-
-        const file = options.memoryLeaks.path + '/' + process.pid + '-' + Date.now() + '.heapsnapshot';
-        heapdump.writeSnapshot(file, function writeSnapshotCallback(err) {
-          if (err) {
-            log(err);
-          } else {
-            log('Wrote snapshot: ' + file);
-          }
-        });
-      }
-    });
-  }
-
-  showHeapDiff() {
-    if (!this.hd) {
-      this.hd = new memwatch.HeapDiff();
-    } else {
-      const diff = this.hd.end();
-      log(util.inspect(diff, true, null));
-      this.hd = null;
-    }
   }
 
   get options() {
@@ -269,16 +225,16 @@ export default class Server extends EventEmitter {
     const models = this._models;
     const path = this.options.root + '/models';
 
-    walk(path, function processModel(model, modelPath, file, cb) {
+    walk(path, (model, modelPath, file, cb) => {
       try {
         log(`Loading model: ${modelPath}`);
         models.register(model);
         cb();
-      } catch(e) {
+      } catch (err) {
         log(`Problem with model: ${modelPath}`);
-        cb(e);
+        cb(err);
       }
-    }, ok(callback, function() {
+    }, ok(callback, () => {
       // preload all models
       models.preload(callback);
     }));
@@ -288,14 +244,14 @@ export default class Server extends EventEmitter {
     const router = this.router;
     const path = this.options.root + '/routes';
 
-    walk(path, function processPath(route, routePath, file, cb) {
+    walk(path, (route, routePath, file, cb) => {
       try {
         log(`Loading route: ${routePath}`);
         route(router);
         cb();
-      } catch(e) {
+      } catch (err) {
         log(`Problem with route: ${routePath}`);
-        cb(e);
+        cb(err);
       }
     }, callback);
   }
