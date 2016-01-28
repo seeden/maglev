@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "async": "^1.5.0",
-    "bcrypt": "^0.8.5",
+    "bcryptjs": "^2.3.0",
     "body-parser": "^1.14.1",
     "compression": "^1.6.0",
     "connect-flash": "^0.1.1",
@@ -97,7 +97,8 @@
     "gulp-util": "^3.0.7",
     "mongoose": "^4.2.4",
     "should": "^7.1.1",
-    "supertest": "^1.1.0"
+    "supertest": "^1.1.0",
+    "express-session": "^1.13.0"
   },
   "peerDependencies": {
     "express-session": "1.x"
