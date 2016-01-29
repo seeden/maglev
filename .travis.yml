@@ -10,6 +10,5 @@ notifications:
             - zlatkofedor@cherrysro.com
         on_success: change
         on_failure: always
-
 services:
   - mongodb
