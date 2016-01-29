@@ -18,7 +18,8 @@
     "MVC",
     "mongoose",
     "swig",
-    "rbac"
+    "rbac",
+    "mean"
   ],
   "private": false,
   "license": "MIT",
