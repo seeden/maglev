@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { genNameUID } from './provider';
 import permalink from 'mongoose-permalink';
 import mongooseHRBAC from 'mongoose-hrbac';

@@ -247,7 +247,8 @@ export default class Server extends EventEmitter {
     walk(path, (route, routePath, file, cb) => {
       try {
         log(`Loading route: ${routePath}`);
-        route(router);
+        const routeFn = route.default ? route.default : route;
+        routeFn(router);
         cb();
       } catch (err) {
         log(`Problem with route: ${routePath}`);
@@ -256,4 +257,3 @@ export default class Server extends EventEmitter {
     }, callback);
   }
 }
-
