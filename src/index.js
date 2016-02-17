@@ -1,6 +1,6 @@
 import Server from './server';
 import MiddlewareType from './constants/MiddlewareType';
-import controllers from './controllers';
+import * as controllers from './controllers';
 
-export { Server, MiddlewareType, controllers };
+export { MiddlewareType, controllers };
 export default Server;

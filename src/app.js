@@ -1,7 +1,7 @@
 import express from 'express';
 import debug from 'debug';
 import http from 'http';
-import isArray from 'lodash/lang/isArray';
+import isArray from 'lodash/isArray';
 
 import expressDomainMiddleware from 'express-domain-middleware';
 import compression from 'compression';
@@ -21,6 +21,7 @@ import request from 'express/lib/request';
 import consolidate from 'consolidate';
 import flash from 'connect-flash';
 import robots from 'robots.txt';
+import MiddlewareType from './constants/MiddlewareType';
 
 import * as fileController from './controllers/file';
 import * as pageController from './controllers/page';
@@ -30,6 +31,7 @@ const log = debug('maglev:app');
 function connectionToUnique(conn) {
   return `${conn.remoteAddress}:${conn.remotePort}`;
 }
+
 
 export default class App {
   constructor(server, options = {}) {
@@ -52,6 +54,8 @@ export default class App {
     this._prepareEngine();
     this._prepareHtml();
 
+    this._prepareMiddleware(MiddlewareType.BEFORE_STATIC);
+
     // prepare static
     this._prepareStatic();
 
@@ -59,8 +63,9 @@ export default class App {
     this._prepareVars();
     this._prepareSession();
     this._prepareSecure();
-    this._prepareCustomMiddleware();
+    this._prepareMiddleware(MiddlewareType.BEFORE_ROUTER);
     this._prepareRouter();
+    this._prepareMiddleware(MiddlewareType.AFTER_ROUTER);
   }
 
   get options() {
@@ -414,14 +419,16 @@ export default class App {
     app.use(options.page.error || pageController.error);
   }
 
-  _prepareCustomMiddleware() {
+  _prepareMiddleware(type) {
     const app = this.expressApp;
     const options = this.options;
-    const middleware = options.middleware;
+    const middlewares = options.middleware;
 
-    if (!middleware) {
+    if (!middlewares || !middlewares[type]) {
       return;
     }
+
+    const middleware = middlewares[type];
 
     if (typeof middleware === 'function') {
       app.use(middleware);
