@@ -51,6 +51,7 @@
     "fb": "^1.0.2",
     "gm": "^1.21.1",
     "jsonwebtoken": "^5.7.0",
+    "keymirror": "^0.1.1",
     "less-middleware": "^2.0.1",
     "lodash": "^4.5.0",
     "method-override": "^2.3.5",
