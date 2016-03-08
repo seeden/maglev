@@ -6,7 +6,7 @@ export function generateForCurrent(req, res, next) {
   const options = req.server.options;
 
   if (!user) {
-    return next(new WebError(401));
+    return next(new WebError(401, 'User is undefined'));
   }
 
   res.jsonp({

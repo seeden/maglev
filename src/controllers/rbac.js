@@ -22,7 +22,7 @@ export function can(action, resource, redirect, redirectStatus = 302) {
           return res.redirect(redirectStatus, redirect);
         }
 
-        return next(new WebError(401));
+        return next(new WebError(401, `You have no access: ${action}_${resource}`));
       }
 
       next();
