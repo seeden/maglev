@@ -443,7 +443,9 @@ export function createSchema(Schema) {
   });
 
   // add RBAC permissions
-  schema.plugin(mongooseHRBAC, {});
+  schema.plugin(mongooseHRBAC, {
+    defaultRole: 'user',
+  });
 
   // add permalink
   schema.plugin(permalink, {
