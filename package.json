@@ -1,6 +1,6 @@
 {
   "name": "maglev",
-  "version": "5.0.10",
+  "version": "5.0.11",
   "description": "Preconfigured NodeJS framework",
   "author": {
     "name": "Zlatko Fedor",
@@ -57,7 +57,7 @@
     "method-override": "^2.3.5",
     "methods": "^1.1.2",
     "mkdirp": "^0.5.1",
-    "mongoose-hrbac": "^3.0.0",
+    "mongoose-hrbac": "^4.0.1",
     "mongoose-json-schema": "^0.0.7",
     "mongoose-permalink": "^2.0.0",
     "morgan": "^1.7.0",
