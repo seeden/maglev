@@ -1,5 +1,6 @@
 import methods from 'methods';
 import express from 'express';
+import vhost from 'vhost';
 
 export default class Router {
   constructor(options = {}, parent = null) {
@@ -18,6 +19,16 @@ export default class Router {
 
   end() {
     return this.parent;
+  }
+
+  vhost(host) {
+    if (this._parent) {
+      throw new Error('Vhost must be first fn');
+    }
+
+    const router = new Router(this._options, this);
+    this.expressRouter.use(vhost(host, router.expressRouter));
+    return router;
   }
 
   route(prefix) {

@@ -1,11 +1,11 @@
-export default function(route) {
+export default function (route) {
   route
     .api()
     .route('/test')
-      .get('/', function(req, res, next) {
+      .get('/', (req, res) => {
         res.status(204).jsonp({});
       })
-      .get('/error', function(req, res, next) {
+      .get('/error', () => {
         throw new Error('I am error');
       });
 }

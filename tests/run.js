@@ -74,6 +74,47 @@ describe('Run server', function() {
       });
   });
 
+  it('should be able to get correct value from vhost1', (done) => {
+    const uri = '/api/test1';
+
+    request('http://local.zabavnetesty.sk:4433')
+      .get(uri)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .end((err, res) => {
+        const { host } = res.body;
+        host.should.equal('local.zabavnetesty.sk');
+        done();
+      });
+  });
+
+  it('should be able to get correct value from vhost2', (done) => {
+    const uri = '/api/test2';
+
+    request('http://local.meetbus.com:4433')
+      .get(uri)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .end((err, res) => {
+        const { host } = res.body;
+        host.should.equal('local.meetbus.com');
+        done();
+      });
+  });
+
+  it('should not be able to get correct value from vhost2', (done) => {
+    const uri = '/api/test1';
+
+    request('http://local.meetbus.com:4433')
+      .get(uri)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(404)
+      .end(() => {
+        done();
+      });
+  });
+
   it('should be able to close server', function(done) {
     server.close(function(err) {
       if (err) {
