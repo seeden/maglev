@@ -52,7 +52,7 @@
     "gm": "^1.22.0",
     "jsonwebtoken": "^5.7.0",
     "keymirror": "^0.1.1",
-    "less-middleware": "^2.1.0",
+    "less-middleware": "^3.0.0",
     "lodash": "^4.11.1",
     "method-override": "^2.3.5",
     "methods": "^1.1.2",
