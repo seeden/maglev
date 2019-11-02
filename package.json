@@ -105,7 +105,7 @@
     "gulp-babel": "^6.1.2",
     "gulp-mocha": "^2.2.0",
     "gulp-util": "^3.0.7",
-    "mongoose": "^4.4.12",
+    "mongoose": "^5.7.7",
     "should": "^8.3.1",
     "supertest": "^1.2.0",
     "express-session": "^1.13.0",
