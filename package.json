@@ -45,7 +45,7 @@
     "cors": "^2.7.1",
     "csurf": "^1.8.3",
     "debug": "^2.2.0",
-    "download": "^4.4.3",
+    "download": "^5.0.0",
     "express": "^4.13.4",
     "express-domain-middleware": "^0.1.0",
     "fb": "^1.0.2",
